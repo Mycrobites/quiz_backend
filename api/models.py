@@ -7,10 +7,15 @@ import jsonfield
 
 class Quiz(models.Model):
     title = models.CharField(max_length=50)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
     desc = models.TextField()
     endtime = models.DateTimeField()
+
+    def __str__(self):
+        return self.title
+
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -18,10 +23,31 @@ class Question(models.Model):
     question = models.TextField()
     correct_marks = models.SmallIntegerField()
     negative_marks = models.SmallIntegerField()
-    answer = models.PositiveSmallIntegerField()
-    option = jsonfield.JSONField()
-    text = models.TextField()
+    option = jsonfield.JSONField(blank=True, default="")
+    answer = models.PositiveSmallIntegerField(null=True, blank=True)
+    text = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.quiz} - {self.question}"
+
 
 class QuizAssign(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    response = jsonfield.JSONField(blank=True)
+    marks = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user} - {self.quiz}"
+
+
+class Role(models.Model):
+    role_choices = (
+        ("Student", "Student"),
+        ("Teacher", "Teacher")
+    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=50, choices=role_choices)
+
+    def __str__(self):
+        return f"{self.user} - {self.role}"

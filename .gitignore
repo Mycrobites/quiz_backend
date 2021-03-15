@@ -1,0 +1,7 @@
+.vscode/
+*.log
+*pycache*
+*.sqlite3
+.env
+venv/
+*.exe

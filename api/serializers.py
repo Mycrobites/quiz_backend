@@ -20,3 +20,10 @@ class QuestionSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = "__all__"
+
+
+class QuizAssignSerializer(ModelSerializer):
+
+    class Meta:
+        model = QuizAssign
+        fields = "__all__"

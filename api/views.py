@@ -32,7 +32,18 @@ class QuizCreateView(GenericAPIView):
         return Response(serializer.data)
 
 
-class QuizResponseView(GenericAPIView):
+class QuizCreateResponseView(GenericAPIView):
+    serializer_class = QuizAssignSerializer
+
+    def post(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class QuizGetResponseView(GenericAPIView):
     serializer_class = QuizAssignSerializer
 
     def get(self, request, quiz_id, user_id):

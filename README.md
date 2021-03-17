@@ -68,6 +68,111 @@ Documentation of our API endpoints starts here
             }
         ]
     }
+    
+## To edit a quiz
+
+### Request
+
+`PUT http://127.0.0.1:8000/api/edit-quiz/<slug:quiz_id>`
+
+    {
+        "title": "Quiz 4 for testing",
+        "creator": 1,
+        "desc": "This is for testing",
+        "endtime": "2021-03-18T00:00:00Z"
+    }
+
+### Response
+
+    {
+        "id": "e9e34d7c-28a0-4e5f-a320-89d69322d311",
+        "title": "Quiz 4 for testing",
+        "time": "2021-03-17T09:16:48.033800Z",
+        "desc": "This is for testing",
+        "endtime": "2021-03-18T00:00:00Z",
+        "creator": 1
+    }
+    
+## To delete a quiz
+
+### Request
+
+`DELETE http://127.0.0.1:8000/api/edit-quiz/<slug:quiz_id>`
+
+### Response
+
+    {
+        "message": "Quiz deleted successfully"
+    }
+
+## To create a question
+
+### Request
+
+`POST http://127.0.0.1:8000/api/create-question`
+
+    {
+        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311",
+        "question": "CORS Full Form?",
+        "option": "",
+        "correct_marks": "2",
+        "negative_marks": "-1",
+        "text": "Cross-Origin Resource Sharing"
+    }
+    
+### Response
+
+    {
+        "id": "b43d3a4d-67a8-450d-85e4-d713bd11679b",
+        "question": "CORS Full Form?",
+        "correct_marks": 2,
+        "negative_marks": -1,
+        "option": "",
+        "answer": null,
+        "text": "Cross-Origin Resource Sharing",
+        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311"
+    }
+
+## To edit a quesion
+
+### Request
+
+`PUT http://127.0.0.1:8000/api/edit-question/<slug:question_id>`
+
+    {
+        "question": "What is CORS Full Form?",
+        "correct_marks": 2,
+        "negative_marks": -1,
+        "option": "",
+        "answer": null,
+        "text": "Cross-Origin Resource Sharing",
+        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311"
+    }
+  
+### Response
+
+    {
+        "id": "5796aa80-328e-4159-af70-9126276e7ebe",
+        "question": "What is CORS Full Form?",
+        "correct_marks": 2,
+        "negative_marks": -1,
+        "option": "",
+        "answer": null,
+        "text": "Cross-Origin Resource Sharing",
+        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311"
+    }
+
+## To delete a question
+
+### Request
+
+`DELETE http://127.0.0.1:8000/api/edit-question/<slug:question_id>`
+
+### Response
+
+    {
+        "message": "Question deleted successfully"
+    }
 
 ## To get student response
 

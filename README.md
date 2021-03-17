@@ -8,7 +8,7 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/createQuiz`
+`POST http://127.0.0.1:8000/api/create-quiz`
 
     {
       "title": "Quiz 3",
@@ -32,7 +32,7 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`GET http://127.0.0.1:8000/api/getQuiz/<slug:quiz_id>`
+`GET http://127.0.0.1:8000/api/get-quiz/<slug:quiz_id>`
 
 ### Response
 
@@ -73,7 +73,7 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`GET http://127.0.0.1:8000/api/getResponse/<slug:quiz_id>/<int:user_id>`
+`GET http://127.0.0.1:8000/api/get-response/<slug:quiz_id>/<int:user_id>`
 
 ### Response
 
@@ -89,7 +89,7 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/createResponse`
+`POST http://127.0.0.1:8000/api/create-response`
 
     {
         "quiz": "24b3e35f-a0e2-45bb-9578-2e582e4ab0ce",
@@ -111,7 +111,7 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`GET http://127.0.0.1:8000/api/getQuizMarks/<slug:quiz_id>/<int:user_id>`
+`GET http://127.0.0.1:8000/api/get-quiz-marks/<slug:quiz_id>/<int:user_id>`
 
 ### Response
 

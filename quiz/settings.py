@@ -25,7 +25,7 @@ SECRET_KEY = 'ijo21y0uk#)xgepf)$3^j(s*#d&by2z0=-gx+%8g73dj&fkuh1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -76,12 +76,16 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    "default": {
+        "ENGINE": "djongo",
+        'CLIENT': {'name': 'quiz',
+                   'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+                   'username': 'admin',
+                   'password': 'mapple1205',
+                   'authMechanism': 'SCRAM-SHA-1'
+                   },
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -112,7 +116,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_L10N = True
-
 USE_TZ = True
 
 
@@ -120,3 +123,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR,"static")

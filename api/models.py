@@ -23,7 +23,7 @@ class Question(models.Model):
     question = models.TextField()
     correct_marks = models.SmallIntegerField()
     negative_marks = models.SmallIntegerField()
-    option = jsonfield.JSONField(blank=True, default="")
+    option = jsonfield.JSONField(blank=True, null= True)
     answer = models.PositiveSmallIntegerField(null=True, blank=True)
     text = models.TextField(blank=True)
 

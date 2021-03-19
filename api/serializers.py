@@ -34,4 +34,3 @@ class AssignQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssignQuiz
         fields = "__all__"
-

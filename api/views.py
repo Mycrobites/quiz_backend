@@ -12,8 +12,23 @@ import json
 class QuizCollection(GenericAPIView):
     serializer_class = QuizSerializer
     
-    def get(self):
-        pass
+    def get(self,request,userid):
+        #try:
+            userobj = User.objects.get(id=userid)
+            if(userobj.role.role=="Teacher"):
+                obj = Quiz.objects.filter(creator=userobj)
+                serializer = self.serializer_class(obj,many=True)
+                return Response(serializer.data)
+            else:
+                resp = []
+                assignobj = AssignQuiz.objects.filter(user=userobj)
+                for i in assignobj:
+                    obj = Quiz.objects.filter(id=i.quiz_id)
+                    serializer = self.serializer_class(obj,many=True)
+                    resp.append(serializer.data)
+                return Response(resp)
+        # except:
+        #     return Response({"message":"User does not exist"},status=status.HTTP_404_NOT_FOUND)
 
 
 class QuizView(GenericAPIView):
@@ -172,14 +187,14 @@ class QuizMarksView(GenericAPIView):
             raise ValidationError({"message": "Quiz not found with the given id"})
 
 
-class AssignQuiz(GenericAPIView):
+class AssignStudent(GenericAPIView):
     serializer_class = AssignQuizSerializer
 
     def post(self,request):
         try:
             data = request.data
             try:
-                AssignQuiz(quiz_id=data["quiz"],user_id=data["user"])
+                AssignQuiz.objects.get(quiz_id=data["quiz"],user_id=data["user"])
                 return Response({"Student already added"})
             except:
                 serializer = self.serializer_class(data=data)

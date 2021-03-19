@@ -1,1 +1,1 @@
-web: gunicorn ccube.wsgi
+web: gunicorn quiz.wsgi

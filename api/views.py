@@ -1,38 +1,19 @@
-from .serializers import *
+from .serializers import QuizSerializer, QuestionSerializer, QuizResponseSerializer
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from .models import *
-from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework import status
+from .models import Quiz, Question, AssignQuiz, QuizResponse
+from authentication.models import User
+from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 import json
 # Create your views here.
 
-class QuizCollection(GenericAPIView):
-    serializer_class = QuizSerializer
-    
-    def get(self,request,userid):
-        #try:
-            userobj = User.objects.get(id=userid)
-            if(userobj.role.role=="Teacher"):
-                obj = Quiz.objects.filter(creator=userobj)
-                serializer = self.serializer_class(obj,many=True)
-                return Response(serializer.data)
-            else:
-                resp = []
-                assignobj = AssignQuiz.objects.filter(user=userobj)
-                for i in assignobj:
-                    obj = Quiz.objects.filter(id=i.quiz_id)
-                    serializer = self.serializer_class(obj,many=True)
-                    resp.append(serializer.data)
-                return Response(resp)
-        # except:
-        #     return Response({"message":"User does not exist"},status=status.HTTP_404_NOT_FOUND)
-
 
 class QuizView(GenericAPIView):
     serializer_class = QuizSerializer
+    permission_classes = [AllowAny]
 
     def get(self, request, quiz_id):
         result = {}
@@ -50,6 +31,7 @@ class QuizView(GenericAPIView):
 
 class QuizCreateView(GenericAPIView):
     serializer_class = QuizSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
         data = request.data
@@ -61,6 +43,7 @@ class QuizCreateView(GenericAPIView):
 
 class QuizEditView(GenericAPIView):
     serializer_class = QuizSerializer
+    permission_classes = [AllowAny]
 
     def put(self, request, quiz_id):
         try:
@@ -84,6 +67,7 @@ class QuizEditView(GenericAPIView):
 
 class QuizQuestionCreateView(GenericAPIView):
     serializer_class = QuestionSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
         data = request.data
@@ -95,6 +79,7 @@ class QuizQuestionCreateView(GenericAPIView):
 
 class QuizQuestionEditView(GenericAPIView):
     serializer_class = QuestionSerializer
+    permission_classes = [AllowAny]
 
     def put(self, request, question_id):
         try:
@@ -118,6 +103,7 @@ class QuizQuestionEditView(GenericAPIView):
 
 class QuizCreateResponseView(GenericAPIView):
     serializer_class = QuizResponseSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
         data = request.data
@@ -129,6 +115,7 @@ class QuizCreateResponseView(GenericAPIView):
 
 class QuizGetResponseView(GenericAPIView):
     serializer_class = QuizResponseSerializer
+    permission_classes = [AllowAny]
 
     def get(self, request, quiz_id, user_id):
         try:
@@ -149,6 +136,7 @@ class QuizGetResponseView(GenericAPIView):
 
 class QuizMarksView(GenericAPIView):
     serializer_class = QuizResponseSerializer
+    permission_classes = [AllowAny]
 
     def get(self, request, quiz_id, user_id):
         try:
@@ -188,20 +176,38 @@ class QuizMarksView(GenericAPIView):
 
 
 class AssignStudent(GenericAPIView):
-    serializer_class = AssignQuizSerializer
+    serializer_class = QuizResponseSerializer
 
-    def post(self,request):
+    def post(self, request):
         try:
             data = request.data
             try:
-                AssignQuiz.objects.get(quiz_id=data["quiz"],user_id=data["user"])
+                AssignQuiz.objects.get(quiz_id=data["quiz"], user_id=data["user"])
                 return Response({"Student already added"})
-            except:
+            except ObjectDoesNotExist:
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                return Response({"message":"Student has been added to the quiz"},status=status.HTTP_200_OK)
-        except:
-            return Response({"message":"Some error occured"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class QuizCollection(GenericAPIView):
+    serializer_class = QuizSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, userid):
+        user = User.objects.get(id=userid)
+        if user.role == "Teacher":
+            obj = Quiz.objects.filter(creator=user)
+            serializer = self.serializer_class(obj, many=True)
+            return Response(serializer.data)
+        else:
+            resp = []
+            assign_obj = AssignQuiz.objects.filter(user=user)
+            for i in assign_obj:
+                obj = Quiz.objects.filter(id=i.quiz_id)
+                serializer = self.serializer_class(obj, many=True)
+                resp.append(serializer.data)
+            return Response(resp)

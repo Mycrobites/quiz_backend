@@ -4,6 +4,5 @@ from .models import *
 
 admin.site.register(Quiz)
 admin.site.register(Question)
-admin.site.register(QuizResponse)
-admin.site.register(Role)
 admin.site.register(AssignQuiz)
+admin.site.register(QuizResponse)

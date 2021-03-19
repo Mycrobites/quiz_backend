@@ -1,8 +1,8 @@
-from .models import Quiz, Question, QuizAssign
-from rest_framework.serializers import ModelSerializer
+from .models import Quiz, Question, AssignQuiz, QuizResponse
+from rest_framework import serializers
 
 
-class QuizSerializer(ModelSerializer):
+class QuizSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Quiz
@@ -15,15 +15,23 @@ class QuizSerializer(ModelSerializer):
         return Quiz.objects.create(**validated_data)
 
 
-class QuestionSerializer(ModelSerializer):
+class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
         fields = "__all__"
 
 
-class QuizAssignSerializer(ModelSerializer):
+class QuizResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = QuizAssign
+        model = QuizResponse
         fields = "__all__"
+
+
+class AssignQuizSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AssignQuiz
+        fields = "__all__"
+

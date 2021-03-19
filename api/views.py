@@ -177,6 +177,7 @@ class QuizMarksView(GenericAPIView):
 
 class AssignStudent(GenericAPIView):
     serializer_class = QuizResponseSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
         try:

@@ -198,16 +198,19 @@ class QuizCollection(GenericAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, userid):
-        user = User.objects.get(id=userid)
-        if user.role == "Teacher":
-            obj = Quiz.objects.filter(creator=user)
-            serializer = self.serializer_class(obj, many=True)
-            return Response(serializer.data)
-        else:
-            resp = []
-            assign_obj = AssignQuiz.objects.filter(user=user)
-            for i in assign_obj:
-                obj = Quiz.objects.filter(id=i.quiz_id)
+        try:
+            user = User.objects.get(id=userid)
+            if user.role == "Teacher":
+                obj = Quiz.objects.filter(creator=user)
                 serializer = self.serializer_class(obj, many=True)
-                resp.append(serializer.data)
-            return Response(resp)
+                return Response(serializer.data)
+            else:
+                resp = []
+                assign_obj = AssignQuiz.objects.filter(user=user)
+                for i in assign_obj:
+                    obj = Quiz.objects.filter(id=i.quiz_id)
+                    serializer = self.serializer_class(obj, many=True)
+                    resp.append(serializer.data)
+                return Response(resp)
+        except:
+            return Response({"message":"User does not exist"},status=status.HTTP_404_NOT_FOUND)

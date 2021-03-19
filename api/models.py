@@ -11,6 +11,8 @@ class Quiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
     desc = models.TextField()
+    starttime = models.DateTimeField(null=True,blank=True)
+    duration = models.TimeField(null=True,blank=True)
     endtime = models.DateTimeField()
 
     def __str__(self):
@@ -30,8 +32,12 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.quiz} - {self.question}"
 
+class AssignQuiz(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-class QuizAssign(models.Model):
+class QuizResponse(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,4 +1,4 @@
-from .models import Quiz, Question, QuizAssign
+from .models import *
 from rest_framework.serializers import ModelSerializer
 
 
@@ -22,8 +22,14 @@ class QuestionSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class QuizAssignSerializer(ModelSerializer):
+class QuizResponseSerializer(ModelSerializer):
 
     class Meta:
-        model = QuizAssign
+        model = QuizResponse
+        fields = "__all__"
+
+class AssignQuizSerializer(ModelSerializer):
+
+    class Meta:
+        model = AssignQuiz
         fields = "__all__"

@@ -315,15 +315,37 @@ class QuizCollection(GenericAPIView):
         try:
             user = User.objects.get(id=userid)
             if user.role == "Teacher":
-                obj = Quiz.objects.filter(creator=user)
-                serializer = self.serializer_class(obj, many=True)
+                self.queryset = Quiz.objects.filter(creator=user)
+                serializer = self.serializer_class(self.queryset, many=True)
                 return Response(serializer.data)
             else:
                 resp = []
-                assign_obj = AssignQuiz.objects.filter(user=user)
-                for i in assign_obj:
+                self.queryset = AssignQuiz.objects.filter(user=user)
+                for i in self.queryset:
                     obj = Quiz.objects.filter(id=i.quiz_id)
                     serializer = self.serializer_class(obj, many=True)
+                    resp.append(serializer.data)
+                return Response(resp)
+        except ObjectDoesNotExist:
+            return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+class QuizCollection(GenericAPIView):
+    serializer_class = QuizSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, userid):
+        try:
+            user = User.objects.get(id=userid)
+            if user.role == "Teacher":
+                self.queryset = Quiz.objects.filter(creator=user)
+                serializer = self.serializer_class(self.queryset, many=True)
+                return Response(serializer.data)
+            else:
+                resp = []
+                self.queryset = AssignQuiz.objects.filter(user=user)
+                for i in self.queryset:
+                    self.queryset = Quiz.objects.filter(id=i.quiz_id)
+                    serializer = self.serializer_class(self.queryset, many=True)
                     resp.append(serializer.data)
                 return Response(resp)
         except ObjectDoesNotExist:

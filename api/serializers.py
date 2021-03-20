@@ -1,5 +1,6 @@
 from .models import Quiz, Question, AssignQuiz, QuizResponse
 from rest_framework import serializers
+import jsonfield
 
 
 class QuizSerializer(serializers.ModelSerializer):

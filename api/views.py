@@ -22,6 +22,14 @@ class QuizView(GenericAPIView):
             serializer = self.serializer_class(quiz)
             questions = Question.objects.filter(quiz=quiz)
             ques_serializer = QuestionSerializer(questions, many=True)
+            questions = ques_serializer.data
+            for i in range(len(questions)):
+                try:
+                    options = questions[i]['option'].replace("'", '"')
+                    questions[i]['option'] = json.loads(options)
+                except:
+                    if questions[i]['option'] == "":
+                        questions[i]['option'] = {}
             result['quiz_details'] = serializer.data
             result['quiz_questions'] = ques_serializer.data
             return Response(result)

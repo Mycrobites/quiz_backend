@@ -18,7 +18,7 @@ class Quiz(models.Model):
     endtime = models.DateTimeField()
 
     def __str__(self):
-        return self.title
+        return str(self.id)
 
 
 class Question(models.Model):

@@ -8,6 +8,7 @@ from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 import json
+import uuid
 # Create your views here.
 
 
@@ -35,10 +36,15 @@ class QuizCreateView(GenericAPIView):
 
     def post(self, request):
         data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        user = User.objects.get(id=data['creator'])
+        print(user.role)
+        if user.role == 'Teacher':
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({"message": "You dont have permission"})
 
 
 class QuizEditView(GenericAPIView):
@@ -49,10 +55,13 @@ class QuizEditView(GenericAPIView):
         try:
             quiz = Quiz.objects.get(id=quiz_id)
             data = request.data
-            serializer = self.serializer_class(quiz, data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+            if quiz.creator == data['creator']:
+                serializer = self.serializer_class(quiz, data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response({"message": "You dont have permission"})
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Quiz not found with the given id"})
 
@@ -70,12 +79,19 @@ class QuizQuestionCreateView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
+        data = request.data.copy()
+        try:
+            quiz = Quiz.objects.get(id=data['quiz'])
+            if quiz.creator.id == data['creator']:
+                del data['creator']
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response({"message": "You dont have permission"})
+        except ObjectDoesNotExist:
+            raise ValidationError({"message": "Quiz not found with the given id"})
 
 class QuizQuestionEditView(GenericAPIView):
     serializer_class = QuestionSerializer
@@ -84,11 +100,17 @@ class QuizQuestionEditView(GenericAPIView):
     def put(self, request, question_id):
         try:
             question = Question.objects.get(id=question_id)
-            data = request.data
-            serializer = self.serializer_class(question, data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+            data = request.data.copy()
+            x = uuid.UUID(str(question.quiz)).hex
+            quiz = Quiz.objects.get(id=x)
+            if quiz.creator.id == data['creator']:
+                del data['creator']
+                serializer = self.serializer_class(question, data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response({"message": "You dont have permission"})
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Question not found with the given id"})
 
@@ -106,11 +128,19 @@ class QuizCreateResponseView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        try:
+            data = request.data
+            user = User.objects.get(id = data['user'])
+            print(user.role)
+            if user.role == "Student":
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response({"message":"yu dont have permission"})
+        except ObjectDoesNotExist:
+            raise ValidationError({"message": "user not found with given id"})
 
 
 class QuizGetResponseView(GenericAPIView):
@@ -121,13 +151,16 @@ class QuizGetResponseView(GenericAPIView):
         try:
             Quiz.objects.get(id=quiz_id)
             try:
-                User.objects.get(id=user_id)
-                try:
-                    quiz_assign = QuizResponse.objects.get(quiz=quiz_id, user=user_id)
-                    serializer = self.serializer_class(quiz_assign)
-                    return Response(serializer.data)
-                except ObjectDoesNotExist:
-                    raise ValidationError({"message": "Quiz was not attempted by the student with given user id"})
+                use = User.objects.get(id=user_id)
+                if use.role == 'Student':
+                    try:
+                        quiz_assign = QuizResponse.objects.get(quiz=quiz_id, user=user_id)
+                        serializer = self.serializer_class(quiz_assign)
+                        return Response(serializer.data)
+                    except ObjectDoesNotExist:
+                        raise ValidationError({"message": "Quiz was not attempted by the student with given user id"})
+                else:
+                    return Response({"message":"this is only for student"})
             except ObjectDoesNotExist:
                 raise ValidationError({"message": "User not found with the given id"})
         except ObjectDoesNotExist:
@@ -182,14 +215,18 @@ class AssignStudent(GenericAPIView):
     def post(self, request):
         try:
             data = request.data
-            try:
-                AssignQuiz.objects.get(quiz_id=data["quiz"], user_id=data["user"])
-                return Response({"Student already added"})
-            except ObjectDoesNotExist:
-                serializer = self.serializer_class(data=data)
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
+            user = User.objects.get(id=data["user"])
+            if user.role == 'Student':
+                try:
+                    AssignQuiz.objects.get(quiz_id=data["quiz"], user_id=data["user"])
+                    return Response({"Student already added"})
+                except ObjectDoesNotExist:
+                    serializer = self.serializer_class(data=data)
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
+                    return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "quiz can be assigned only to students"})
         except ObjectDoesNotExist:
             return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

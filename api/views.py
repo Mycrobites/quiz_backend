@@ -29,7 +29,7 @@ class QuizView(GenericAPIView):
                     questions[i]['option'] = json.loads(options)
                     options = []
                     for j in range(len(questions[i]['option'])):
-                        options.append({str(j+1): questions[i]['option'][str(j+1)]})
+                        options.append({'key': j+1, 'option': questions[i]['option'][str(j+1)]})
                     questions[i]['option'] = options
                 except:
                     if questions[i]['option'] == "":

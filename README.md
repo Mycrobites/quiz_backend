@@ -117,7 +117,8 @@ Documentation of our API endpoints starts here
         "option": "",
         "correct_marks": "2",
         "negative_marks": "-1",
-        "text": "Cross-Origin Resource Sharing"
+        "text": "Cross-Origin Resource Sharing",
+        "creator":1
     }
     
 ### Response
@@ -146,7 +147,8 @@ Documentation of our API endpoints starts here
         "option": "",
         "answer": null,
         "text": "Cross-Origin Resource Sharing",
-        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311"
+        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311",
+        "creator":1
     }
   
 ### Response

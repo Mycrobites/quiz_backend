@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 import json
 import uuid
+
 # Create your views here.
 
 
@@ -23,6 +24,18 @@ class QuizView(GenericAPIView):
             serializer = self.serializer_class(quiz)
             questions = Question.objects.filter(quiz=quiz)
             ques_serializer = QuestionSerializer(questions, many=True)
+            questions = ques_serializer.data
+            for i in range(len(questions)):
+                try:
+                    options = questions[i]['option'].replace("'", '"')
+                    questions[i]['option'] = json.loads(options)
+                    options = []
+                    for j in range(len(questions[i]['option'])):
+                        options.append({'key': j + 1, 'option': questions[i]['option'][str(j + 1)]})
+                    questions[i]['option'] = options
+                except:
+                    if questions[i]['option'] == "":
+                        questions[i]['option'] = []
             result['quiz_details'] = serializer.data
             result['quiz_questions'] = ques_serializer.data
             return Response(result)
@@ -80,6 +93,11 @@ class QuizQuestionCreateView(GenericAPIView):
 
     def post(self, request):
         data = request.data.copy()
+        options = data['option']
+        option = {}
+        for i in range(len(options)):
+            option[str(options[i]['key'])] = options[i]['option']
+        data['option'] = str(option)
         try:
             quiz = Quiz.objects.get(id=data['quiz'])
             if quiz.creator.id == data['creator']:
@@ -87,11 +105,24 @@ class QuizQuestionCreateView(GenericAPIView):
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                return Response(serializer.data)
+                question = serializer.data
+                for i in range(len(question['option'])):
+                    try:
+                        options = question['option'].replace("'", '"')
+                        question['option'] = json.loads(options)
+                        options = []
+                        for j in range(len(question['option'])):
+                            options.append({'key': j + 1, 'option': question['option'][str(j + 1)]})
+                        question['option'] = options
+                    except:
+                        if question['option'] == "":
+                            question['option'] = []
+                return Response(question)
             else:
                 return Response({"message": "You dont have permission"})
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Quiz not found with the given id"})
+
 
 class QuizQuestionEditView(GenericAPIView):
     serializer_class = QuestionSerializer
@@ -101,6 +132,11 @@ class QuizQuestionEditView(GenericAPIView):
         try:
             question = Question.objects.get(id=question_id)
             data = request.data.copy()
+            options = data['option']
+            option = {}
+            for i in range(len(options)):
+                option[str(options[i]['key'])] = options[i]['option']
+            data['option'] = str(option)
             x = uuid.UUID(str(question.quiz)).hex
             quiz = Quiz.objects.get(id=x)
             if quiz.creator.id == data['creator']:
@@ -108,9 +144,21 @@ class QuizQuestionEditView(GenericAPIView):
                 serializer = self.serializer_class(question, data=data)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                return Response(serializer.data)
+                question = serializer.data
+                for i in range(len(question['option'])):
+                    try:
+                        options = question['option'].replace("'", '"')
+                        question['option'] = json.loads(options)
+                        options = []
+                        for j in range(len(question['option'])):
+                            options.append({'key': j + 1, 'option': question['option'][str(j + 1)]})
+                        question['option'] = options
+                    except:
+                        if question['option'] == "":
+                            question['option'] = []
+                return Response(question)
             else:
-                return Response({"message": "You dont have permission"})
+                return Response({"message": "You don't have permission to edit this question"})
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Question not found with the given id"})
 
@@ -130,17 +178,33 @@ class QuizCreateResponseView(GenericAPIView):
     def post(self, request):
         try:
             data = request.data
+            response = data['response']
+            resp = {}
+            for i in range(len(response)):
+                resp[response[i]['key']] = response[i]['answer']
+            data['response'] = str(resp)
             user = User.objects.get(id = data['user'])
-            print(user.role)
             if user.role == "Student":
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                return Response(serializer.data)
+                response = serializer.data
+                for i in range(len(response['response'])):
+                    try:
+                        responses = response['response'].replace("'", '"')
+                        response['response'] = json.loads(responses)
+                        responses = []
+                        for res in response['response']:
+                            responses.append({'key': res, 'answer': response['response'][res]})
+                        response['response'] = responses
+                    except:
+                        if response['response'] == "":
+                            response['response'] = []
+                return Response(response)
             else:
-                return Response({"message":"yu dont have permission"})
+                return Response({"message":"Teacher can't attempt the quiz"})
         except ObjectDoesNotExist:
-            raise ValidationError({"message": "user not found with given id"})
+            raise ValidationError({"message": "User not found with given id"})
 
 
 class QuizGetResponseView(GenericAPIView):
@@ -156,11 +220,23 @@ class QuizGetResponseView(GenericAPIView):
                     try:
                         quiz_assign = QuizResponse.objects.get(quiz=quiz_id, user=user_id)
                         serializer = self.serializer_class(quiz_assign)
-                        return Response(serializer.data)
+                        response = serializer.data
+                        for i in range(len(response['response'])):
+                            try:
+                                responses = response['response'].replace("'", '"')
+                                response['response'] = json.loads(responses)
+                                responses = []
+                                for res in response['response']:
+                                    responses.append({'key': res, 'answer': response['response'][res]})
+                                response['response'] = responses
+                            except:
+                                if response['response'] == "":
+                                    response['response'] = []
+                        return Response(response)
                     except ObjectDoesNotExist:
                         raise ValidationError({"message": "Quiz was not attempted by the student with given user id"})
                 else:
-                    return Response({"message":"this is only for student"})
+                    return Response({"message":"This is only for student"})
             except ObjectDoesNotExist:
                 raise ValidationError({"message": "User not found with the given id"})
         except ObjectDoesNotExist:
@@ -250,5 +326,5 @@ class QuizCollection(GenericAPIView):
                     serializer = self.serializer_class(obj, many=True)
                     resp.append(serializer.data)
                 return Response(resp)
-        except:
-            return Response({"message":"User does not exist"},status=status.HTTP_404_NOT_FOUND)
+        except ObjectDoesNotExist:
+            return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)

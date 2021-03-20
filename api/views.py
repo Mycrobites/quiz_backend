@@ -27,9 +27,13 @@ class QuizView(GenericAPIView):
                 try:
                     options = questions[i]['option'].replace("'", '"')
                     questions[i]['option'] = json.loads(options)
+                    options = []
+                    for j in range(len(questions[i]['option'])):
+                        options.append({str(j+1): questions[i]['option'][str(j+1)]})
+                    questions[i]['option'] = options
                 except:
                     if questions[i]['option'] == "":
-                        questions[i]['option'] = {}
+                        questions[i]['option'] = []
             result['quiz_details'] = serializer.data
             result['quiz_questions'] = ques_serializer.data
             return Response(result)

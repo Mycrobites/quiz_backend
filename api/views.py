@@ -8,6 +8,8 @@ from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 import json
+
+
 # Create your views here.
 
 
@@ -29,7 +31,7 @@ class QuizView(GenericAPIView):
                     questions[i]['option'] = json.loads(options)
                     options = []
                     for j in range(len(questions[i]['option'])):
-                        options.append({'key': j+1, 'option': questions[i]['option'][str(j+1)]})
+                        options.append({'key': j + 1, 'option': questions[i]['option'][str(j + 1)]})
                     questions[i]['option'] = options
                 except:
                     if questions[i]['option'] == "":
@@ -83,10 +85,27 @@ class QuizQuestionCreateView(GenericAPIView):
 
     def post(self, request):
         data = request.data
+        options = data['option']
+        option = {}
+        for i in range(len(options)):
+            option[str(options[i]['key'])] = options[i]['option']
+        data['option'] = str(option)
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        question = serializer.data
+        for i in range(len(question['option'])):
+            try:
+                options = question['option'].replace("'", '"')
+                question['option'] = json.loads(options)
+                options = []
+                for j in range(len(question['option'])):
+                    options.append({'key': j + 1, 'option': question['option'][str(j + 1)]})
+                question['option'] = options
+            except:
+                if question['option'] == "":
+                    question['option'] = []
+        return Response(question)
 
 
 class QuizQuestionEditView(GenericAPIView):
@@ -97,10 +116,26 @@ class QuizQuestionEditView(GenericAPIView):
         try:
             question = Question.objects.get(id=question_id)
             data = request.data
+            options = data['option']
+            option = {}
+            for i in range(len(options)):
+                option[str(options[i]['key'])] = options[i]['option']
+            data['option'] = str(option)
             serializer = self.serializer_class(question, data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+            question = serializer.data
+            for i in range(len(question['option'])):
+                try:
+                    options = question['option'].replace("'", '"')
+                    question['option'] = json.loads(options)
+                    options = []
+                    for j in range(len(question['option'])):
+                        options.append({'key': j + 1, 'option': question['option'][str(j + 1)]})
+                    question['option'] = options
+                except:
+                    if question['option'] == "":
+                        question['option'] = []
+            return Response(question)
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Question not found with the given id"})
 
@@ -119,10 +154,27 @@ class QuizCreateResponseView(GenericAPIView):
 
     def post(self, request):
         data = request.data
+        response = data['response']
+        resp = {}
+        for i in range(len(response)):
+            resp[response[i]['key']] = response[i]['answer']
+        data['response'] = str(resp)
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        response = serializer.data
+        for i in range(len(response['response'])):
+            try:
+                responses = response['response'].replace("'", '"')
+                response['response'] = json.loads(responses)
+                responses = []
+                for res in response['response']:
+                    responses.append({'key': res, 'answer': response['response'][res]})
+                response['response'] = responses
+            except:
+                if response['response'] == "":
+                    response['response'] = []
+        return Response(response)
 
 
 class QuizGetResponseView(GenericAPIView):
@@ -137,7 +189,19 @@ class QuizGetResponseView(GenericAPIView):
                 try:
                     quiz_assign = QuizResponse.objects.get(quiz=quiz_id, user=user_id)
                     serializer = self.serializer_class(quiz_assign)
-                    return Response(serializer.data)
+                    response = serializer.data
+                    for i in range(len(response['response'])):
+                        try:
+                            responses = response['response'].replace("'", '"')
+                            response['response'] = json.loads(responses)
+                            responses = []
+                            for res in response['response']:
+                                responses.append({'key': res, 'answer': response['response'][res]})
+                            response['response'] = responses
+                        except:
+                            if response['response'] == "":
+                                response['response'] = []
+                    return Response(response)
                 except ObjectDoesNotExist:
                     raise ValidationError({"message": "Quiz was not attempted by the student with given user id"})
             except ObjectDoesNotExist:
@@ -225,5 +289,5 @@ class QuizCollection(GenericAPIView):
                     serializer = self.serializer_class(obj, many=True)
                     resp.append(serializer.data)
                 return Response(resp)
-        except:
-            return Response({"message":"User does not exist"},status=status.HTTP_404_NOT_FOUND)
+        except ObjectDoesNotExist:
+            return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)

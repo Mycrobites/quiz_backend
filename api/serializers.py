@@ -1,4 +1,4 @@
-from .models import Quiz, Question, AssignQuiz, QuizResponse
+from .models import *
 from rest_framework import serializers
 import jsonfield
 
@@ -34,4 +34,9 @@ class AssignQuizSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AssignQuiz
+        fields = "__all__"
+
+class FeedBackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedBack
         fields = "__all__"

@@ -53,3 +53,11 @@ class QuizResponse(models.Model):
 
     def __str__(self):
         return f"{self.user}'s response on {self.quiz}"
+
+class FeedBack(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz_question = models.PositiveSmallIntegerField()
+    interface = models.PositiveSmallIntegerField()
+    difficulty = models.PositiveSmallIntegerField()
+

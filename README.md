@@ -227,3 +227,28 @@ Documentation of our API endpoints starts here
         "user": 2,
         "marks": 1
     }
+
+
+
+## To post Feedback
+
+### Request
+
+`POST http://127.0.0.1:8000/api/postFeedback/`
+
+        {
+            "quiz_question": 3,
+            "interface": 4,
+            "difficulty": 3,
+            "user": 7
+        }
+
+### Response
+
+    {
+        "id": "99e1ed89-e7e2-4be1-ac81-54e04c159543",
+        "quiz_question": 3,
+        "interface": 4,
+        "difficulty": 3,
+        "user": 7
+    }

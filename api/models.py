@@ -18,8 +18,7 @@ class Quiz(models.Model):
     endtime = models.DateTimeField()
 
     def __str__(self):
-        return str(self.id)
-
+        return str(self.title)+" "+str(self.creator.username)
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -38,10 +37,10 @@ class Question(models.Model):
 class AssignQuiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ManyToManyField(User,)
 
     def __str__(self):
-        return f"{self.user} - {self.quiz}"
+        return str(self.quiz)
 
 
 class QuizResponse(models.Model):

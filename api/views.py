@@ -325,3 +325,12 @@ class PostFeedback(GenericAPIView):
                 return Response(ser.errors)
         else:
             return Response({"message":"all response must be less than or equal to 5"})
+
+
+# def rajat():
+#     userobj = User.objects.get(username="abhinay")
+#     obj = AssignQuiz.objects.filter(user=userobj)
+#     for i in obj:
+#         print(i.quiz.title)
+
+# rajat()

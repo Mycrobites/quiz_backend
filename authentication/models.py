@@ -56,12 +56,12 @@ class UserAccountManager(BaseUserManager):
             username=username,
             password=password,
             first_name=first_name,
-            last_name=last_name,
-            role="Student",
+            last_name=last_name
         )
 
         user.is_admin = True
         user.is_staff = True
+        user.role = "Student"
         user.save(using=self._db)
         return user
 

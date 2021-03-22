@@ -1,7 +1,34 @@
 from djongo import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from datetime import datetime
+from django.contrib.auth.hashers import make_password
+import pandas as pd
+import numpy as np
+from datetime import datetime
 
+
+# Create your models here.
+def checkmail(email):
+    try:
+        obj = User.objects.get(email=email)
+        return True
+    except:
+        return False
+
+def genUsername(email):
+    username, domain = email.split("@")
+    i = 1
+    while (1):
+        if (i == 5):
+            username = username + genPass()
+            break
+        try:
+            obj = User.objects.get(username=username)
+            username = username + str(i)
+            i += 1
+        except:
+            break
+    return username
 # Create your models here.
 
 
@@ -30,6 +57,7 @@ class UserAccountManager(BaseUserManager):
             password=password,
             first_name=first_name,
             last_name=last_name,
+            role="Student",
         )
 
         user.is_admin = True
@@ -68,3 +96,28 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+class userFromFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    userdata = models.FileField(upload_to="userdata", max_length=1000)
+
+    def save(self, *args, **kwargs):
+        data = pd.read_csv(self.userdata)
+        data.fillna("NA", inplace=True)
+        for i in range(data.shape[0]):
+            email = data.iloc[i]["Email"]
+            if(checkmail(email)):
+                data.loc[i, 'Username'] = "The email is already in use"
+            else:
+                username = genUsername(data.iloc[i]["Email"])
+                first_name = data.iloc[i]["First Name"]
+                last_name = data.iloc[i]["Last Name"]
+                password = make_password(username)
+                print(email,username,first_name,last_name,password)
+                obj = User.objects.create(email=email, username=username, first_name=first_name, last_name=last_name,
+                                        password=password,role="Student")
+                obj.save()
+                data.loc[i, 'Username'] = username
+                data.loc[i, 'Password'] = username
+        data.to_csv("media/output.csv")
+        super(userFromFile, self).save(*args, **kwargs)

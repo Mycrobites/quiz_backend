@@ -13,4 +13,5 @@ urlpatterns = [
     path("get-quiz-marks/<slug:quiz_id>/<int:user_id>", QuizMarksView.as_view(), name="get-quiz-marks"),
     path("add-student", AssignStudent.as_view(), name="assign-quiz"),
     path("get-all-quizzes/<slug:userid>", QuizCollection.as_view(), name="all-quizzes"),
+    path("postFeedback/", PostFeedback.as_view(), name="postfeedback"),
 ]

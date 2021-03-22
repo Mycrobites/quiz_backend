@@ -1,9 +1,9 @@
-from .serializers import QuizSerializer, QuestionSerializer, QuizResponseSerializer
+from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from .models import Quiz, Question, AssignQuiz, QuizResponse
+from .models import *
 from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
@@ -308,3 +308,20 @@ class QuizCollection(GenericAPIView):
                 return Response(quizzes)
         except ObjectDoesNotExist:
             return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class PostFeedback(GenericAPIView):
+
+    serializer_class = FeedBackSerializer
+    permission_classes = [AllowAny]
+    def post(self, request):
+        data = request.data
+        if int(data['quiz_question']) <= 5 and int(data['interface']) <= 5 and int(data['difficulty']) <= 5:
+            ser = self.serializer_class(data = data)
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data)
+            else:
+                return Response(ser.errors)
+        else:
+            return Response({"message":"all response must be less than or equal to 5"})

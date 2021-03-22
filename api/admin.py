@@ -4,7 +4,9 @@ from .models import *
 
 admin.site.register(Quiz)
 
-admin.site.register(Question)
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_filter = ["quiz"]
 
 
 
@@ -13,6 +15,9 @@ class AssignAdmin(admin.ModelAdmin):
     list_filter = ["quiz"]
 
 
-admin.site.register(QuizResponse)
+@admin.register(QuizResponse)
+class registerAdmin(admin.ModelAdmin):
+    list_display = ["quiz","user","marks"]
+    list_filter = ["user","quiz"]
 
 admin.site.register(FeedBack)

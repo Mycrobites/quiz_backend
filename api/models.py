@@ -61,12 +61,48 @@ class QuizResponse(models.Model):
         return f"{self.user}'s response on {self.quiz}"
 
 
-class FeedBack(models.Model):
+choice = (
+    ("yes","yes"),
+    ("no","no"),
+)
+
+choice_contest = (
+    ("Puzzle Solving","Puzzle Solving"),
+    ("Problem solving strategies","Problem solving strategies"),
+    ("Mental Maths","Mental Maths"),
+    ("Mathematics to entertain your spirit","Mathematics to entertain your spirit"),
+)
+
+# class FeedBack(models.Model):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     learn_new = models.PositiveIntegerField()
+#     like_participating = models.PositiveIntegerField()
+#     difficulty = models.PositiveSmallIntegerField()
+#     participate_again = models.CharField(max_length=5, choices=choice)
+#     time_sufficient = models.CharField(max_length=5, choices=choice)
+#     attend_webinar = models.CharField(max_length=5, choices=choice)
+#     language_english = models.CharField(max_length=5, choices=choice)
+#     mini_course = models.CharField(max_length=5, choices=choice)
+#     next_contest = models.CharField(max_length=150, choices=choice_contest)
+#     suggestions = models.CharField(max_length = 200, default="")
+
+#     def __str__(self):
+#         return f"{self.user}'s feedback"
+
+class FeedBackForm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quiz_question = models.PositiveSmallIntegerField()
-    interface = models.PositiveSmallIntegerField()
+    learn_new = models.PositiveIntegerField()
+    like_participating = models.PositiveIntegerField()
     difficulty = models.PositiveSmallIntegerField()
+    participate_again = models.CharField(max_length=5, choices=choice)
+    time_sufficient = models.CharField(max_length=5, choices=choice)
+    attend_webinar = models.CharField(max_length=5, choices=choice)
+    language_english = models.CharField(max_length=5, choices=choice)
+    mini_course = models.CharField(max_length=5, choices=choice)
+    next_contest = models.CharField(max_length=150, choices=choice_contest)
+    suggestions = models.CharField(max_length = 200, default="")
 
     def __str__(self):
         return f"{self.user}'s feedback"

@@ -237,18 +237,32 @@ Documentation of our API endpoints starts here
 `POST http://127.0.0.1:8000/api/postFeedback/`
 
         {
-            "quiz_question": 3,
-            "interface": 4,
+            "learn_new": 4,
+            "like_participating": 4,
             "difficulty": 3,
+            "participate_again": "yes",
+            "time_sufficient": "no",
+            "attend_webinar": "yes",
+            "language_english": "yes",
+            "mini_course": "yes",
+            "next_contest": "Puzzle Solving",
+            "suggestions": "it was fantastic",
             "user": 7
         }
 
 ### Response
 
-    {
-        "id": "99e1ed89-e7e2-4be1-ac81-54e04c159543",
-        "quiz_question": 3,
-        "interface": 4,
-        "difficulty": 3,
-        "user": 7
-    }
+        {
+            "id": "bfc55d53-7a4b-4d0f-92a1-9ecf2e3d8091",
+            "learn_new": 4,
+            "like_participating": 4,
+            "difficulty": 3,
+            "participate_again": "yes",
+            "time_sufficient": "yes",
+            "attend_webinar": "yes",
+            "language_english": "yes",
+            "mini_course": "yes",
+            "next_contest": "Puzzle Solving",
+            "suggestions": "it was fantastic",
+            "user": 1
+        }

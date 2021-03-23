@@ -22,4 +22,4 @@ class ResponseAdmin(admin.ModelAdmin):
     list_filter = ["user", "quiz"]
 
 
-admin.site.register(FeedBack)
+admin.site.register(FeedBackForm)

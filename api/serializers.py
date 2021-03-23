@@ -35,5 +35,5 @@ class AssignQuizSerializer(serializers.ModelSerializer):
 
 class FeedBackSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FeedBack
+        model = FeedBackForm
         fields = "__all__"

@@ -1,7 +1,7 @@
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
@@ -337,12 +337,12 @@ class QuizCollection(GenericAPIView):
 
 class PostFeedback(GenericAPIView):
     serializer_class = FeedBackSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+    # authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         data = request.data
-        if int(data['quiz_question']) <= 5 and int(data['interface']) <= 5 and int(data['difficulty']) <= 5:
+        if int(data['learn_new']) <= 5 and int(data['like_participating']) <= 5 and int(data['difficulty']) <= 5:
             ser = self.serializer_class(data=data)
             if ser.is_valid():
                 ser.save()

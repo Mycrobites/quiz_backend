@@ -18,7 +18,14 @@ class Quiz(models.Model):
     endtime = models.DateTimeField()
 
     def __str__(self):
-        return str(self.title)+" "+str(self.creator.username)
+        return str(self.title)
+
+    def is_active(self, time):
+        if self.endtime > time:
+            return True
+        else:
+            return False
+
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -37,7 +44,7 @@ class Question(models.Model):
 class AssignQuiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
-    user = models.ManyToManyField(User,)
+    user = models.ManyToManyField(User, )
 
     def __str__(self):
         return str(self.quiz)
@@ -53,6 +60,7 @@ class QuizResponse(models.Model):
     def __str__(self):
         return f"{self.user}'s response on {self.quiz}"
 
+
 class FeedBack(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -60,3 +68,5 @@ class FeedBack(models.Model):
     interface = models.PositiveSmallIntegerField()
     difficulty = models.PositiveSmallIntegerField()
 
+    def __str__(self):
+        return f"{self.user}'s feedback"

@@ -1,12 +1,14 @@
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
 from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 import json
 
 
@@ -15,37 +17,42 @@ import json
 
 class QuizView(GenericAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, quiz_id):
         result = {}
         try:
             quiz = Quiz.objects.get(id=quiz_id)
-            serializer = self.serializer_class(quiz)
-            questions = Question.objects.filter(quiz=quiz)
-            ques_serializer = QuestionSerializer(questions, many=True)
-            questions = ques_serializer.data
-            for i in range(len(questions)):
-                try:
-                    options = questions[i]['option'].replace("'", '"')
-                    questions[i]['option'] = json.loads(options)
-                    options = []
-                    for j in range(len(questions[i]['option'])):
-                        options.append({'key': j + 1, 'option': questions[i]['option'][str(j + 1)]})
-                    questions[i]['option'] = options
-                except:
-                    if questions[i]['option'] == "":
-                        questions[i]['option'] = []
-            result['quiz_details'] = serializer.data
-            result['quiz_questions'] = ques_serializer.data
-            return Response(result)
+            if quiz.is_active(timezone.now()):
+                serializer = self.serializer_class(quiz)
+                questions = Question.objects.filter(quiz=quiz)
+                ques_serializer = QuestionSerializer(questions, many=True)
+                questions = ques_serializer.data
+                for i in range(len(questions)):
+                    try:
+                        options = questions[i]['option'].replace("'", '"')
+                        questions[i]['option'] = json.loads(options)
+                        options = []
+                        for j in range(len(questions[i]['option'])):
+                            options.append({'key': j + 1, 'option': questions[i]['option'][str(j + 1)]})
+                        questions[i]['option'] = options
+                    except:
+                        if questions[i]['option'] == "":
+                            questions[i]['option'] = []
+                result['quiz_details'] = serializer.data
+                result['quiz_questions'] = ques_serializer.data
+                return Response(result)
+            else:
+                return Response({"message": "This quiz is closed now"}, status=status.HTTP_404_NOT_FOUND)
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Quiz not found with the given id"})
 
 
 class QuizCreateView(GenericAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         data = request.data
@@ -57,7 +64,8 @@ class QuizCreateView(GenericAPIView):
 
 class QuizEditView(GenericAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def put(self, request, quiz_id):
         try:
@@ -81,7 +89,8 @@ class QuizEditView(GenericAPIView):
 
 class QuizQuestionCreateView(GenericAPIView):
     serializer_class = QuestionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         data = request.data
@@ -110,7 +119,8 @@ class QuizQuestionCreateView(GenericAPIView):
 
 class QuizQuestionEditView(GenericAPIView):
     serializer_class = QuestionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def put(self, request, question_id):
         try:
@@ -151,36 +161,48 @@ class QuizQuestionEditView(GenericAPIView):
 
 class QuizCreateResponseView(GenericAPIView):
     serializer_class = QuizResponseSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         data = request.data
-        response = data['response']
-        resp = {}
-        for i in range(len(response)):
-            resp[response[i]['key']] = response[i]['answer']
-        data['response'] = str(resp)
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        response = serializer.data
-        for i in range(len(response['response'])):
+        user_id = request.data['user']
+        quiz_id = request.data['quiz']
+        try:
+            AssignQuiz.objects.get(quiz_id=quiz_id, user_id=user_id)
             try:
-                responses = response['response'].replace("'", '"')
-                response['response'] = json.loads(responses)
-                responses = []
-                for res in response['response']:
-                    responses.append({'key': res, 'answer': response['response'][res]})
-                response['response'] = responses
-            except:
-                if response['response'] == "":
-                    response['response'] = []
-        return Response(response)
+                QuizResponse.objects.get(quiz_id=quiz_id, user_id=user_id)
+                return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_400_BAD_REQUEST)
+            except ObjectDoesNotExist:
+                response = data['response']
+                resp = {}
+                for i in range(len(response)):
+                    resp[response[i]['key']] = response[i]['answer']
+                data['response'] = str(resp)
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                response = serializer.data
+                for i in range(len(response['response'])):
+                    try:
+                        responses = response['response'].replace("'", '"')
+                        response['response'] = json.loads(responses)
+                        responses = []
+                        for res in response['response']:
+                            responses.append({'key': res, 'answer': response['response'][res]})
+                        response['response'] = responses
+                    except:
+                        if response['response'] == "":
+                            response['response'] = []
+                return Response(response)
+        except ObjectDoesNotExist:
+            return Response({"message": "You can't attempt this quiz"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class QuizGetResponseView(GenericAPIView):
     serializer_class = QuizResponseSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, quiz_id, user_id):
         try:
@@ -213,7 +235,8 @@ class QuizGetResponseView(GenericAPIView):
 
 class QuizMarksView(GenericAPIView):
     serializer_class = QuizResponseSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, quiz_id, user_id):
         try:
@@ -254,7 +277,8 @@ class QuizMarksView(GenericAPIView):
 
 class AssignStudent(GenericAPIView):
     serializer_class = QuizResponseSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         try:
@@ -273,7 +297,8 @@ class AssignStudent(GenericAPIView):
 
 class QuizCollection(GenericAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, userid):
         try:
@@ -311,26 +336,18 @@ class QuizCollection(GenericAPIView):
 
 
 class PostFeedback(GenericAPIView):
-
     serializer_class = FeedBackSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
     def post(self, request):
         data = request.data
         if int(data['quiz_question']) <= 5 and int(data['interface']) <= 5 and int(data['difficulty']) <= 5:
-            ser = self.serializer_class(data = data)
+            ser = self.serializer_class(data=data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data)
             else:
                 return Response(ser.errors)
         else:
-            return Response({"message":"all response must be less than or equal to 5"})
-
-
-# def rajat():
-#     userobj = User.objects.get(username="abhinay")
-#     obj = AssignQuiz.objects.filter(user=userobj)
-#     for i in obj:
-#         print(i.quiz.title)
-
-# rajat()
+            return Response({"message": "All response must be less than or equal to 5"})

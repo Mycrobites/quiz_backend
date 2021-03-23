@@ -4,11 +4,10 @@ import jsonfield
 
 
 class QuizSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Quiz
         fields = "__all__"
-    
+
     def validate(self, attrs):
         return attrs
 
@@ -17,24 +16,22 @@ class QuizSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Question
         fields = "__all__"
 
 
 class QuizResponseSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = QuizResponse
         fields = "__all__"
 
 
 class AssignQuizSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = AssignQuiz
         fields = "__all__"
+
 
 class FeedBackSerializer(serializers.ModelSerializer):
     class Meta:

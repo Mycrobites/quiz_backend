@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'authentication',
     'corsheaders',
     'api',
-    'ckeditor'
+    'ckeditor',
+    'ckeditor_uploader'
 ]
 
 MIDDLEWARE = [
@@ -140,14 +141,13 @@ CKEDITOR_CONFIGS = {
             ['Link', 'Unlink'],
             ['RemoveFormat', 'Source'],
             ['Insert'],
-             ['Mathjax','Subscript', 'Superscript','Image' ]
+            ['Mathjax','Subscript', 'Superscript','Image',"Uploadimage"]
         ],
         'mathJaxLib': '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML',
         'extraPlugins': ','.join(['mathjax','image','uploadimage']),
     },
 }
 
-CKEDITOR_RESTRICT_BY_USER = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -175,8 +175,13 @@ else:
 
 
 MEDIA_URL = "/media/"
+CKEDITOR_UPLOAD_PATH = "uploads/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True

@@ -2,6 +2,7 @@ from djongo import models
 from authentication.models import User
 import uuid
 import jsonfield
+from ckeditor.fields import RichTextField
 
 
 # Create your models here.
@@ -30,7 +31,7 @@ class Quiz(models.Model):
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    question = models.TextField()
+    question = RichTextField()
     correct_marks = models.SmallIntegerField()
     negative_marks = models.SmallIntegerField()
     option = jsonfield.JSONField(blank=True, null=True)

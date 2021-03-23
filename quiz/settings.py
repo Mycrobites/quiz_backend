@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'authentication',
     'corsheaders',
     'api',
+    'ckeditor'
 ]
 
 MIDDLEWARE = [

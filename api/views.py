@@ -169,9 +169,9 @@ class QuizCreateResponseView(GenericAPIView):
         user_id = request.data['user']
         quiz_id = request.data['quiz']
         try:
-            AssignQuiz.objects.get(quiz_id=quiz_id, user_id=user_id)
+            AssignQuiz.objects.get(quiz=quiz_id, user=user_id)
             try:
-                QuizResponse.objects.get(quiz_id=quiz_id, user_id=user_id)
+                QuizResponse.objects.get(quiz=quiz_id, user=user_id)
                 return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_400_BAD_REQUEST)
             except ObjectDoesNotExist:
                 response = data['response']

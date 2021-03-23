@@ -236,33 +236,35 @@ Documentation of our API endpoints starts here
 
 `POST http://127.0.0.1:8000/api/postFeedback/`
 
-        {
-            "learn_new": 4,
-            "like_participating": 4,
-            "difficulty": 3,
-            "participate_again": "yes",
-            "time_sufficient": "no",
-            "attend_webinar": "yes",
-            "language_english": "yes",
-            "mini_course": "yes",
-            "next_contest": "Puzzle Solving",
-            "suggestions": "it was fantastic",
-            "user": 7
-        }
+    {
+        "learn_new": 3,
+        "like_participating": 3,
+        "difficulty": 4,
+        "participate_again": "yes",
+        "time_sufficient": "yes",
+        "attend_webinar": "yes",
+        "language_english": "yes",
+        "mini_course": "yes",
+        "next_contest": "Puzzle Solving",
+        "suggestions": "amazing work, add some esy questions too",
+        "user": 1,
+        "quiz_id": "4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f"
+    }
 
 ### Response
 
-        {
-            "id": "bfc55d53-7a4b-4d0f-92a1-9ecf2e3d8091",
-            "learn_new": 4,
-            "like_participating": 4,
-            "difficulty": 3,
-            "participate_again": "yes",
-            "time_sufficient": "yes",
-            "attend_webinar": "yes",
-            "language_english": "yes",
-            "mini_course": "yes",
-            "next_contest": "Puzzle Solving",
-            "suggestions": "it was fantastic",
-            "user": 1
-        }
+    {
+        "id": "4ca355ca-32ba-4ac7-863e-a0c1ff176022",
+        "learn_new": 3,
+        "like_participating": 3,
+        "difficulty": 4,
+        "participate_again": "yes",
+        "time_sufficient": "yes",
+        "attend_webinar": "yes",
+        "language_english": "yes",
+        "mini_course": "yes",
+        "next_contest": "Puzzle Solving",
+        "suggestions": "amazing work, add some esy questions too",
+        "user": 1,
+        "quiz_id": "4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f"
+    }

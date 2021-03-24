@@ -190,6 +190,28 @@ class QuizCreateResponseView(GenericAPIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
                 response = serializer.data
+                res_dict = json.loads(response['response'].replace("'", '"'))
+                quiz = Quiz.objects.get(id=quiz_id)
+                questions = Question.objects.filter(quiz=quiz)
+                marks = 0
+                for i in range(len(questions)):
+                    if questions[i].answer is None:
+                        if questions[i].text == res_dict[str(questions[i].id)]:
+                            marks += questions[i].correct_marks
+                        else:
+                            marks += questions[i].negative_marks
+                    elif questions[i].text == "":
+                        if str(questions[i].answer) == res_dict[str(questions[i].id)]:
+                            marks += questions[i].correct_marks
+                        else:
+                            marks += questions[i].negative_marks
+                    elif questions[i].answer == "" and questions[i].text == "":
+                        marks += 0
+                QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
+                response_id = response["id"]
+                quiz_response = QuizResponse.objects.get(id=response_id)
+                serializer = self.serializer_class(quiz_response)
+                response = serializer.data
                 for i in range(len(response['response'])):
                     try:
                         responses = response['response'].replace("'", '"')

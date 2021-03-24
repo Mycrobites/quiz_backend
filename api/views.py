@@ -30,6 +30,13 @@ class QuizView(GenericAPIView):
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
                 for i in range(len(questions)):
+                    flag = False
+                    string = questions[i]["question"]
+                    for j in range(len(string)):
+                        if(string[j]=="s" and string[j+1]=="r"and string[j+2]=="c"and string[j+3]=="="):
+                            Flag=True
+                            string = string[:j+5]+"https://quiz-mycrobites.herokuapp.com"+string[j+5:]
+                    questions[i]["question"] = string
                     try:
                         options = questions[i]['option'].replace("'", '"')
                         questions[i]['option'] = json.loads(options)

@@ -1,7 +1,7 @@
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
@@ -33,8 +33,8 @@ class QuizView(GenericAPIView):
                     flag = False
                     string = questions[i]["question"]
                     for j in range(len(string)):
-                        if(string[j]=="s" and string[j+1]=="r"and string[j+2]=="c"and string[j+3]=="="):
-                            Flag=True
+                        if string[j]== "s" and string[j + 1]== "r"and string[j + 2]== "c"and string[j + 3]== "=":
+                            flag=True
                             string = string[:j+5]+"https://quiz-mycrobites.herokuapp.com"+string[j+5:]
                     questions[i]["question"] = string
                     try:
@@ -176,56 +176,52 @@ class QuizCreateResponseView(GenericAPIView):
         user_id = request.data['user']
         quiz_id = request.data['quiz']
         try:
-            AssignQuiz.objects.get(quiz=quiz_id, user=user_id)
-            try:
-                QuizResponse.objects.get(quiz=quiz_id, user=user_id)
-                return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_400_BAD_REQUEST)
-            except ObjectDoesNotExist:
-                response = data['response']
-                resp = {}
-                for i in range(len(response)):
-                    resp[response[i]['key']] = response[i]['answer']
-                data['response'] = str(resp)
-                serializer = self.serializer_class(data=data)
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                response = serializer.data
-                res_dict = json.loads(response['response'].replace("'", '"'))
-                quiz = Quiz.objects.get(id=quiz_id)
-                questions = Question.objects.filter(quiz=quiz)
-                marks = 0
-                for i in range(len(questions)):
-                    if questions[i].answer is None:
-                        if questions[i].text == res_dict[str(questions[i].id)]:
-                            marks += questions[i].correct_marks
-                        else:
-                            marks += questions[i].negative_marks
-                    elif questions[i].text == "":
-                        if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                            marks += questions[i].correct_marks
-                        else:
-                            marks += questions[i].negative_marks
-                    elif questions[i].answer == "" and questions[i].text == "":
-                        marks += 0
-                QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
-                response_id = response["id"]
-                quiz_response = QuizResponse.objects.get(id=response_id)
-                serializer = self.serializer_class(quiz_response)
-                response = serializer.data
-                for i in range(len(response['response'])):
-                    try:
-                        responses = response['response'].replace("'", '"')
-                        response['response'] = json.loads(responses)
-                        responses = []
-                        for res in response['response']:
-                            responses.append({'key': res, 'answer': response['response'][res]})
-                        response['response'] = responses
-                    except:
-                        if response['response'] == "":
-                            response['response'] = []
-                return Response(response)
+            QuizResponse.objects.get(quiz=quiz_id, user=user_id)
+            return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
-            return Response({"message": "You can't attempt this quiz"}, status=status.HTTP_400_BAD_REQUEST)
+            response = data['response']
+            resp = {}
+            for i in range(len(response)):
+                resp[response[i]['key']] = response[i]['answer']
+            data['response'] = str(resp)
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response = serializer.data
+            res_dict = json.loads(response['response'].replace("'", '"'))
+            quiz = Quiz.objects.get(id=quiz_id)
+            questions = Question.objects.filter(quiz=quiz)
+            marks = 0
+            for i in range(len(questions)):
+                if questions[i].answer is None:
+                    if questions[i].text == res_dict[str(questions[i].id)]:
+                        marks += questions[i].correct_marks
+                    else:
+                        marks += questions[i].negative_marks
+                elif questions[i].text == "":
+                    if str(questions[i].answer) == res_dict[str(questions[i].id)]:
+                        marks += questions[i].correct_marks
+                    else:
+                        marks += questions[i].negative_marks
+                elif questions[i].answer == "" and questions[i].text == "":
+                    marks += 0
+            QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
+            response_id = response["id"]
+            quiz_response = QuizResponse.objects.get(id=response_id)
+            serializer = self.serializer_class(quiz_response)
+            response = serializer.data
+            for i in range(len(response['response'])):
+                try:
+                    responses = response['response'].replace("'", '"')
+                    response['response'] = json.loads(responses)
+                    responses = []
+                    for res in response['response']:
+                        responses.append({'key': res, 'answer': response['response'][res]})
+                    response['response'] = responses
+                except:
+                    if response['response'] == "":
+                        response['response'] = []
+            return Response(response)
 
 
 class QuizGetResponseView(GenericAPIView):
@@ -366,8 +362,8 @@ class QuizCollection(GenericAPIView):
 
 class PostFeedback(GenericAPIView):
     serializer_class = FeedBackSerializer
-    permission_classes = [AllowAny]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         data = request.data
@@ -380,3 +376,25 @@ class PostFeedback(GenericAPIView):
                 return Response(ser.errors)
         else:
             return Response({"message": "All response must be less than or equal to 5"})
+
+
+class CheckQuizAssigned(GenericAPIView):
+    serializer_class = AssignQuizSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        data = request.data
+        try:
+            quiz = Quiz.objects.get(id=data['quiz'])
+            try:
+                user = User.objects.get(id=data['user'])
+                try:
+                    assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
+                    return Response({"message": "Success"}, status=status.HTTP_200_OK)
+                except ObjectDoesNotExist:
+                    return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
+            except ObjectDoesNotExist:
+                return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
+        except ObjectDoesNotExist:
+            return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)

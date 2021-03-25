@@ -202,7 +202,7 @@ class QuizCreateResponseView(GenericAPIView):
                     if str(questions[i].answer) == res_dict[str(questions[i].id)]:
                         marks += questions[i].correct_marks
                     else:
-                        marks += questions[i].negative_marks
+                        marks -= questions[i].negative_marks
                 elif questions[i].answer == "" and questions[i].text == "":
                     marks += 0
             QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
@@ -282,7 +282,7 @@ class QuizMarksView(GenericAPIView):
                             if questions[i].text == res_dict[str(questions[i].id)]:
                                 marks += questions[i].correct_marks
                             else:
-                                marks += questions[i].negative_marks
+                                marks -= questions[i].negative_marks
                         elif questions[i].text == "":
                             if str(questions[i].answer) == res_dict[str(questions[i].id)]:
                                 marks += questions[i].correct_marks

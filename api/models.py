@@ -6,7 +6,6 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from ckeditor.fields import RichTextField
 
 
-
 # Create your models here.
 
 
@@ -34,8 +33,8 @@ class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     question = RichTextUploadingField()
-    correct_marks = models.SmallIntegerField()
-    negative_marks = models.SmallIntegerField()
+    correct_marks = models.PositiveSmallIntegerField()
+    negative_marks = models.PositiveSmallIntegerField()
     option = jsonfield.JSONField(blank=True, null=True)
     answer = models.PositiveSmallIntegerField(null=True, blank=True)
     text = models.TextField(blank=True)
@@ -65,15 +64,15 @@ class QuizResponse(models.Model):
 
 
 choice = (
-    ("yes","yes"),
-    ("no","no"),
+    ("yes", "yes"),
+    ("no", "no"),
 )
 
 choice_contest = (
-    ("Puzzle Solving","Puzzle Solving"),
-    ("Problem solving strategies","Problem solving strategies"),
-    ("Mental Maths","Mental Maths"),
-    ("Mathematics to entertain your spirit","Mathematics to entertain your spirit"),
+    ("Puzzle Solving", "Puzzle Solving"),
+    ("Problem solving strategies", "Problem solving strategies"),
+    ("Mental Maths", "Mental Maths"),
+    ("Mathematics to entertain your spirit", "Mathematics to entertain your spirit"),
 )
 
 
@@ -90,7 +89,7 @@ class FeedBackForm(models.Model):
     language_english = models.CharField(max_length=5, choices=choice)
     mini_course = models.CharField(max_length=5, choices=choice)
     next_contest = models.CharField(max_length=150, choices=choice_contest)
-    suggestions = models.CharField(max_length = 200, default="")
+    suggestions = models.CharField(max_length=200, default="")
 
     def __str__(self):
         return f"{self.user}'s feedback"

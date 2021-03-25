@@ -175,49 +175,53 @@ class QuizCreateResponseView(GenericAPIView):
         data = request.data
         user_id = request.data['user']
         quiz_id = request.data['quiz']
-        response = data['response']
-        resp = {}
-        for i in range(len(response)):
-            resp[response[i]['key']] = response[i]['answer']
-        data['response'] = str(resp)
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        response = serializer.data
-        res_dict = json.loads(response['response'].replace("'", '"'))
-        quiz = Quiz.objects.get(id=quiz_id)
-        questions = Question.objects.filter(quiz=quiz)
-        marks = 0
-        for i in range(len(questions)):
-            if questions[i].answer is None:
-                if questions[i].text == res_dict[str(questions[i].id)]:
-                    marks += questions[i].correct_marks
-                else:
-                    marks -= questions[i].negative_marks
-            elif questions[i].text == "":
-                if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                    marks += questions[i].correct_marks
-                else:
-                    marks += questions[i].negative_marks
-            elif questions[i].answer == "" and questions[i].text == "":
-                marks += 0
-        QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
-        response_id = response["id"]
-        quiz_response = QuizResponse.objects.get(id=response_id)
-        serializer = self.serializer_class(quiz_response)
-        response = serializer.data
-        for i in range(len(response['response'])):
-            try:
-                responses = response['response'].replace("'", '"')
-                response['response'] = json.loads(responses)
-                responses = []
-                for res in response['response']:
-                    responses.append({'key': res, 'answer': response['response'][res]})
-                response['response'] = responses
-            except:
-                if response['response'] == "":
-                    response['response'] = []
-        return Response(response)
+        try:
+            QuizResponse.objects.get(quiz=quiz_id, user=user_id)
+            return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            response = data['response']
+            resp = {}
+            for i in range(len(response)):
+                resp[response[i]['key']] = response[i]['answer']
+            data['response'] = str(resp)
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response = serializer.data
+            res_dict = json.loads(response['response'].replace("'", '"'))
+            quiz = Quiz.objects.get(id=quiz_id)
+            questions = Question.objects.filter(quiz=quiz)
+            marks = 0
+            for i in range(len(questions)):
+                if questions[i].answer is None:
+                    if questions[i].text == res_dict[str(questions[i].id)]:
+                        marks += questions[i].correct_marks
+                    else:
+                        marks -= questions[i].negative_marks
+                elif questions[i].text == "":
+                    if str(questions[i].answer) == res_dict[str(questions[i].id)]:
+                        marks += questions[i].correct_marks
+                    else:
+                        marks += questions[i].negative_marks
+                elif questions[i].answer == "" and questions[i].text == "":
+                    marks += 0
+            QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
+            response_id = response["id"]
+            quiz_response = QuizResponse.objects.get(id=response_id)
+            serializer = self.serializer_class(quiz_response)
+            response = serializer.data
+            for i in range(len(response['response'])):
+                try:
+                    responses = response['response'].replace("'", '"')
+                    response['response'] = json.loads(responses)
+                    responses = []
+                    for res in response['response']:
+                        responses.append({'key': res, 'answer': response['response'][res]})
+                    response['response'] = responses
+                except:
+                    if response['response'] == "":
+                        response['response'] = []
+            return Response(response)
 
 
 class QuizGetResponseView(GenericAPIView):

@@ -4,7 +4,7 @@ import uuid
 import jsonfield
 from ckeditor_uploader.fields import RichTextUploadingField
 from ckeditor.fields import RichTextField
-
+from datetime import datetime
 
 # Create your models here.
 
@@ -103,3 +103,11 @@ class FeedBackForm(models.Model):
 
     def __str__(self):
         return f"{self.user}'s feedback"
+
+
+class UserQuizSession(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
+    start_time = models.DateTimeField(null=True, blank=True, default=datetime.now)
+    remaining_duration = models.TimeField(null=True, blank=True)

@@ -24,3 +24,4 @@ class ResponseAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FeedBackForm)
+admin.site.register(UserQuizSession)

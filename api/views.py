@@ -11,8 +11,8 @@ from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 import json
-# from datetime import datetime
 import datetime
+
 
 # Create your views here.
 
@@ -35,9 +35,9 @@ class QuizView(GenericAPIView):
                     flag = False
                     string = questions[i]["question"]
                     for j in range(len(string)):
-                        if string[j]== "s" and string[j + 1]== "r"and string[j + 2]== "c"and string[j + 3]== "=":
-                            flag=True
-                            string = string[:j+5]+"https://quiz-mycrobites.herokuapp.com"+string[j+5:]
+                        if string[j] == "s" and string[j + 1] == "r" and string[j + 2] == "c" and string[j + 3] == "=":
+                            flag = True
+                            string = string[:j + 5] + "http://3.17.176.70/" + string[j + 5:]
                     questions[i]["question"] = string
                     try:
                         options = questions[i]['option'].replace("'", '"')
@@ -405,24 +405,26 @@ class CheckQuizAssigned(GenericAPIView):
         except ObjectDoesNotExist:
             return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
 
+
 class PostUserQuizSession(APIView):
     serializer_class = UserQuizSessionSerializer
     permission_classes = [AllowAny]
+
     # authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         try:
             data = request.data.copy()
-            quiz = Quiz.objects.get(id = data['quiz_id'])
+            quiz = Quiz.objects.get(id=data['quiz_id'])
             data['start_time '] = timezone.now()
             data['remaining_duration'] = quiz.duration
             print(data)
-            ser = UserQuizSessionSerializer(data = data)
+            ser = UserQuizSessionSerializer(data=data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data)
             return Response(ser.errors)
-        
+
         except Exception as e:
             return Response({"msg": str(e)})
 
@@ -430,8 +432,9 @@ class PostUserQuizSession(APIView):
 class GetUserQuizSession(GenericAPIView):
     serializer_class = UserQuizSessionSerializer
     permission_classes = [AllowAny]
+
     # authentication_classes = [JWTAuthentication]
-    
+
     def get(self, request, pk):
         data = UserQuizSession.objects.get(id=pk)
         ser = UserQuizSessionSerializer(data)
@@ -439,16 +442,17 @@ class GetUserQuizSession(GenericAPIView):
 
     def post(self, request, pk):
         try:
-            sess = UserQuizSession.objects.get(id = pk)
-            x = timezone.now()- sess.start_time
-            y = (datetime.datetime.min +x).time()
+            sess = UserQuizSession.objects.get(id=pk)
+            x = timezone.now() - sess.start_time
+            y = (datetime.datetime.min + x).time()
             print(y)
             print(sess.remaining_duration)
-            z = datetime.datetime.combine(datetime.date.today(),sess.remaining_duration) - datetime.datetime.combine(datetime.date.today(), y)
+            z = datetime.datetime.combine(datetime.date.today(), sess.remaining_duration) - datetime.datetime.combine(
+                datetime.date.today(), y)
             print(z)
             print(type(z))
-            sess.remaining_duration =  (datetime.datetime.min + z).time()
+            sess.remaining_duration = (datetime.datetime.min + z).time()
             sess.save()
-            return Response({"msg":"session saved successfully"})
+            return Response({"msg": "session saved successfully"})
         except Exception as e:
             return Response({"msg": str(e)})

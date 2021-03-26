@@ -28,6 +28,9 @@ class Quiz(models.Model):
         else:
             return False
 
+dificulty_choices = (
+    ("Easy","Easy"),("Medium","Medium"),("Hard","Hard")
+)
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -38,6 +41,12 @@ class Question(models.Model):
     option = jsonfield.JSONField(blank=True, null=True)
     answer = models.PositiveSmallIntegerField(null=True, blank=True)
     text = models.TextField(blank=True)
+    subject_tag = models.CharField(max_length=100,blank=True,default="")
+    topic_tag = models.CharField(max_length=100,blank=True,default="")
+    subtopic_tag = models.CharField(max_length=100,blank=True,default="")
+    dificulty_tag = models.CharField(choices=dificulty_choices,blank=True,default="",max_length=100)
+    skill = models.CharField(max_length=100,blank=True,default="")
+
 
     def __str__(self):
         return f"{self.quiz} - {self.question}"
@@ -47,6 +56,7 @@ class AssignQuiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
     user = models.ManyToManyField(User, )
+    
 
     def __str__(self):
         return str(self.quiz)

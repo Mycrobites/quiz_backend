@@ -268,3 +268,63 @@ Documentation of our API endpoints starts here
         "user": 1,
         "quiz_id": "4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f"
     }
+
+
+## To post UserSession at the start of the test
+
+### Request
+
+`POST http://127.0.0.1:8000/api/userSession/`
+
+    {
+        "user": 8,
+        "quiz_id": "4f66e07d-91a3-428d-86e0-31187898a975"
+    }
+
+
+### Response
+
+    {
+        "id": "e3164b8c-a8c7-46a2-8a15-77de33ee2a4d",
+        "start_time": "2021-03-26T15:06:10.685197+05:30",
+        "remaining_duration": "01:30:00",
+        "user": 8,
+        "quiz_id": "4f66e07d-91a3-428d-86e0-31187898a975"
+    }
+
+
+## To get UserSession 
+
+### Request
+
+`GET http://127.0.0.1:8000/api/getUserSession/e3164b8c-a8c7-46a2-8a15-77de33ee2a4d`
+
+<slug: session_id>
+
+### Response
+
+    {
+        "id": "e3164b8c-a8c7-46a2-8a15-77de33ee2a4d",
+        "start_time": "2021-03-26T15:06:10.685000+05:30",
+        "remaining_duration": "01:26:00.975000",
+        "user": 8,
+        "quiz_id": "4f66e07d-91a3-428d-86e0-31187898a975"
+    }
+
+
+## To post usersession between the quiz
+
+### Request
+
+`POST http://127.0.0.1:8000/api/getUserSession/e3164b8c-a8c7-46a2-8a15-77de33ee2a4d`
+
+<slug: session_id>
+
+### Response
+
+    {
+        "msg": "session saved successfully"
+    }
+
+
+

@@ -395,7 +395,7 @@ class CheckQuizAssigned(GenericAPIView):
                     assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
                     try:
                         quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                        return Response({"message": "You have already attempted the test"}, status=status.HTTP_200_OK)
+                        return Response({"message": "You have already attempted the test"}, status=status.HTTP_400_BAD_REQUEST)
                     except ObjectDoesNotExist:
                         return Response({"message": "Success"}, status=status.HTTP_200_OK)
                 except ObjectDoesNotExist:

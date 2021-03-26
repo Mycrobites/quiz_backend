@@ -1,7 +1,8 @@
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
@@ -10,7 +11,8 @@ from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 import json
-
+# from datetime import datetime
+import datetime
 
 # Create your views here.
 
@@ -402,3 +404,46 @@ class CheckQuizAssigned(GenericAPIView):
                 return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
         except ObjectDoesNotExist:
             return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
+
+class PostUserQuizSession(APIView):
+    serializer_class = UserQuizSessionSerializer
+    permission_classes = [AllowAny]
+    # authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        try:
+            data = request.data.copy()
+            quiz = Quiz.objects.get(id = data['quiz_id'])
+            data['start_time '] = timezone.now()
+            data['remaining_duration'] = quiz.duration
+            print(data)
+            ser = UserQuizSessionSerializer(data = data)
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data)
+            return Response(ser.errors)
+        
+        except Exception as e:
+            return Response({"msg": str(e)})
+
+
+class GetUserQuizSession(GenericAPIView):
+    serializer_class = UserQuizSessionSerializer
+    permission_classes = [AllowAny]
+    # authentication_classes = [JWTAuthentication]
+    
+    def get(self, request, pk):
+        data = UserQuizSession.objects.get(id=pk)
+        ser = UserQuizSessionSerializer(data)
+        return Response(ser.data)
+
+    def post(self, request, pk):
+        # try:
+        sess = UserQuizSession.objects.get(id = pk)
+        x = timezone.now() - sess.start_time
+        print(x)
+       
+        sess.remaining_duration -=  x
+        sess.save()
+        # except Exception as e:
+        #     return Response({"msg": str(e)})

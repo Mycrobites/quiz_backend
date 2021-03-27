@@ -93,7 +93,7 @@ DATABASES = {
         "ENGINE": "djongo",
         'CLIENT': {
             'name': 'QuizDB',
-            'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/QuizDB?retryWrites=true&w=majority',
+            'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/QuizDB?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE',
             'username': 'admin',
             'password': 'mapple1205',
             'authMechanism': 'SCRAM-SHA-1'

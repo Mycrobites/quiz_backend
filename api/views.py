@@ -37,7 +37,7 @@ class QuizView(GenericAPIView):
                     for j in range(len(string)):
                         if string[j] == "s" and string[j + 1] == "r" and string[j + 2] == "c" and string[j + 3] == "=":
                             flag = True
-                            string = string[:j + 5] + "http://18.222.104.46/" + string[j + 5:]
+                            string = string[:j + 5] + "http://18.222.104.46" + string[j + 5:]
                     questions[i]["question"] = string
                     try:
                         options = questions[i]['option'].replace("'", '"')

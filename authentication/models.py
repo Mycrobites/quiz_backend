@@ -101,6 +101,7 @@ class User(AbstractBaseUser):
 class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)
     userdata = models.FileField(upload_to="userdata", max_length=1000)
+    filename = models.CharField(max_length=100,default="output.csv",blank=True)
 
     def save(self, *args, **kwargs):
         data = pd.read_csv(self.userdata)
@@ -118,5 +119,6 @@ class UserFromFile(models.Model):
                                          last_name=last_name, password=random_password)
                 data.loc[i, 'Username'] = username
                 data.loc[i, 'Password'] = random_password
-        data.to_csv("media/users/generated_user_details" + str(get_random_string(length=5)) + ".csv")
+        self.filename = "media/users/"+"generated_user_details"+str(get_random_string(length=5)) + ".csv"
+        data.to_csv(self.filename)
         super(UserFromFile, self).save(*args, **kwargs)

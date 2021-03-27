@@ -1,26 +1,24 @@
 from djongo import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from datetime import datetime
-from django.contrib.auth.hashers import make_password
+from django.utils.crypto import get_random_string
 import pandas as pd
-import numpy as np
-from datetime import datetime
 
 
 # Create your models here.
-def checkmail(email):
+def check_mail(email):
     try:
         obj = User.objects.get(email=email)
         return True
     except:
         return False
 
-def genUsername(email):
+
+def gen_username(email):
     username, domain = email.split("@")
     i = 1
-    while (1):
-        if (i == 5):
-            username = username + genPass()
+    while 1:
+        if i == 5:
+            username = username
             break
         try:
             obj = User.objects.get(username=username)
@@ -29,6 +27,8 @@ def genUsername(email):
         except:
             break
     return username
+
+
 # Create your models here.
 
 
@@ -97,7 +97,8 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
 
-class userFromFile(models.Model):
+
+class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)
     userdata = models.FileField(upload_to="userdata", max_length=1000)
 
@@ -106,18 +107,16 @@ class userFromFile(models.Model):
         data.fillna("NA", inplace=True)
         for i in range(data.shape[0]):
             email = data.iloc[i]["Email"]
-            if(checkmail(email)):
+            if check_mail(email):
                 data.loc[i, 'Username'] = "The email is already in use"
             else:
-                username = genUsername(data.iloc[i]["Email"])
+                username = gen_username(data.iloc[i]["Email"])
                 first_name = data.iloc[i]["First Name"]
                 last_name = data.iloc[i]["Last Name"]
-                password = make_password(username)
-                print(email,username,first_name,last_name,password)
-                obj = User.objects.create(email=email, username=username, first_name=first_name, last_name=last_name,
-                                        password=password,role="Student")
-                obj.save()
+                random_password = get_random_string(length=10)
+                User.objects.create_user(email=email, username=username, first_name=first_name,
+                                         last_name=last_name, password=random_password)
                 data.loc[i, 'Username'] = username
-                data.loc[i, 'Password'] = username
-        data.to_csv("media/output.csv")
-        super(userFromFile, self).save(*args, **kwargs)
+                data.loc[i, 'Password'] = random_password
+        data.to_csv("media/users/generated_user_details" + str(get_random_string(length=5)) + ".csv")
+        super(UserFromFile, self).save(*args, **kwargs)

@@ -13,6 +13,7 @@ from django.utils import timezone
 import json
 import datetime
 import regex as re
+from django.shortcuts import render
 
 
 # Create your views here.
@@ -446,3 +447,7 @@ class GetUserQuizSession(GenericAPIView):
         sess.save()
         ser = UserQuizSessionSerializer(sess)
         return Response(ser.data)
+
+def filterscore(request):
+    return render(request,"filterscore.html")
+   

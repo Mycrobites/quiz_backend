@@ -434,28 +434,15 @@ class PostUserQuizSession(APIView):
 
 class GetUserQuizSession(GenericAPIView):
     serializer_class = UserQuizSessionSerializer
-    permission_classes = [AllowAny]
-
-    # authentication_classes = [JWTAuthentication]
-
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
     def get(self, request, pk):
-        data = UserQuizSession.objects.get(id=pk)
-        ser = UserQuizSessionSerializer(data)
+        sess = UserQuizSession.objects.get(id = pk)
+        x = timezone.now()- sess.start_time
+        y = (datetime.datetime.min +x).time()
+        z = datetime.datetime.combine(datetime.date.today(),sess.remaining_duration) - datetime.datetime.combine(datetime.date.today(), y)
+        sess.remaining_duration =  (datetime.datetime.min + z).time()
+        sess.save()
+        ser = UserQuizSessionSerializer(sess)
         return Response(ser.data)
-
-    def post(self, request, pk):
-        try:
-            sess = UserQuizSession.objects.get(id=pk)
-            x = timezone.now() - sess.start_time
-            y = (datetime.datetime.min + x).time()
-            print(y)
-            print(sess.remaining_duration)
-            z = datetime.datetime.combine(datetime.date.today(), sess.remaining_duration) - datetime.datetime.combine(
-                datetime.date.today(), y)
-            print(z)
-            print(type(z))
-            sess.remaining_duration = (datetime.datetime.min + z).time()
-            sess.save()
-            return Response({"msg": "session saved successfully"})
-        except Exception as e:
-            return Response({"msg": str(e)})

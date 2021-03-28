@@ -79,3 +79,5 @@ uuid==1.30
 whitenoise==5.2.0
 wrapt==1.12.1
 xlrd==2.0.1
+openpyxl
+waitress

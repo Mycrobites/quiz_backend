@@ -364,8 +364,8 @@ class QuizCollection(GenericAPIView):
 
 class PostFeedback(GenericAPIView):
     serializer_class = FeedBackSerializer
-    permission_classes = [AllowAny]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         data = request.data

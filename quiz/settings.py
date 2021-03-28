@@ -57,6 +57,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+SECURE_SSL_REDIRECT = True
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
@@ -93,7 +94,7 @@ DATABASES = {
         "ENGINE": "djongo",
         'CLIENT': {
             'name': 'QuizDB',
-            'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/QuizDB?retryWrites=true&w=majority',
+            'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/QuizDB?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE',
             'username': 'admin',
             'password': 'mapple1205',
             'authMechanism': 'SCRAM-SHA-1'

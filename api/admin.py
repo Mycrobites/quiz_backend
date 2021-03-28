@@ -8,8 +8,8 @@ admin.site.register(Quiz)
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_filter = ["quiz"]
-    list_display= ["quiz","question","correct_marks","negative_marks","answer"]
+    list_filter = ["subject_tag", "topic_tag", "subtopic_tag", "dificulty_tag", "skill"]
+    list_display = ["quiz", "question", "correct_marks", "negative_marks", "answer"]
 
 
 @admin.register(AssignQuiz)

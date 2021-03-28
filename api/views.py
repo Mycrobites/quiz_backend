@@ -11,8 +11,9 @@ from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 import json
-# from datetime import datetime
 import datetime
+import regex as re
+
 
 # Create your views here.
 
@@ -32,15 +33,17 @@ class QuizView(GenericAPIView):
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
                 for i in range(len(questions)):
-                    flag = False
                     string = questions[i]["question"]
                     for j in range(len(string)):
-                        if string[j]== "s" and string[j + 1]== "r"and string[j + 2]== "c"and string[j + 3]== "=":
-                            flag=True
-                            string = string[:j+5]+"https://quiz-mycrobites.herokuapp.com"+string[j+5:]
+                        if string[j] == "s" and string[j + 1] == "r" and string[j + 2] == "c" and string[j + 3] == "=":
+                            string = string[:j + 5] + "http://18.222.104.46" + string[j + 5:]
                     questions[i]["question"] = string
                     try:
+                        matched_strings = re.findall(r'\"(.+?)\"', questions[i]['option'])
                         options = questions[i]['option'].replace("'", '"')
+                        for ms in matched_strings:
+                            new_str = ms.replace("'", '"')
+                            options = options.replace(new_str, ms)
                         questions[i]['option'] = json.loads(options)
                         options = []
                         for j in range(len(questions[i]['option'])):
@@ -395,7 +398,7 @@ class CheckQuizAssigned(GenericAPIView):
                     assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
                     try:
                         quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                        return Response({"message": "You have already attempted the test"}, status=status.HTTP_200_OK)
+                        return Response({"message": "You have already attempted the test"}, status=status.HTTP_400_BAD_REQUEST)
                     except ObjectDoesNotExist:
                         return Response({"message": "Success"}, status=status.HTTP_200_OK)
                 except ObjectDoesNotExist:
@@ -405,24 +408,26 @@ class CheckQuizAssigned(GenericAPIView):
         except ObjectDoesNotExist:
             return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
 
+
 class PostUserQuizSession(APIView):
     serializer_class = UserQuizSessionSerializer
     permission_classes = [AllowAny]
+
     # authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         try:
             data = request.data.copy()
-            quiz = Quiz.objects.get(id = data['quiz_id'])
+            quiz = Quiz.objects.get(id=data['quiz_id'])
             data['start_time '] = timezone.now()
             data['remaining_duration'] = quiz.duration
             print(data)
-            ser = UserQuizSessionSerializer(data = data)
+            ser = UserQuizSessionSerializer(data=data)
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data)
             return Response(ser.errors)
-        
+
         except Exception as e:
             return Response({"msg": str(e)})
 

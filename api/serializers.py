@@ -38,6 +38,7 @@ class FeedBackSerializer(serializers.ModelSerializer):
         model = FeedBackForm
         fields = "__all__"
 
+
 class UserQuizSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuizSession

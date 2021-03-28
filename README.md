@@ -254,22 +254,22 @@ Documentation of our API endpoints starts here
 
 ### Response
 
-{
-    "id": "ebfdc10d-e24a-4da6-a688-a95adfc94414",
-    "learn_new": 3,
-    "like_participating": 3,
-    "difficulty": 4,
-    "participate_again": "yes",
-    "time_sufficient": "yes",
-    "attend_webinar": "yes",
-    "language_english": "yes",
-    "mini_course": "yes",
-    "next_contest": "Puzzle Solving",
-    "suggestions": "amazing work, add some esy questions too",
-    "username": "abhishek-st",
-    "user": 77,
-    "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88"
-}
+    {
+        "id": "ebfdc10d-e24a-4da6-a688-a95adfc94414",
+        "learn_new": 3,
+        "like_participating": 3,
+        "difficulty": 4,
+        "participate_again": "yes",
+        "time_sufficient": "yes",
+        "attend_webinar": "yes",
+        "language_english": "yes",
+        "mini_course": "yes",
+        "next_contest": "Puzzle Solving",
+        "suggestions": "amazing work, add some esy questions too",
+        "username": "abhishek-st",
+        "user": 77,
+        "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88"
+    }
 
 ## To post UserSession at the start of the test
 

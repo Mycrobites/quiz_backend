@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import *
 
 
@@ -16,5 +17,6 @@ urlpatterns = [
     path("postFeedback/", PostFeedback.as_view(), name="postfeedback"),
     path("check-quiz-assigned", CheckQuizAssigned.as_view(), name="check-quiz-assigned"),
     path("userSession/", PostUserQuizSession.as_view(), name="userquizsesion"),
-    path("getUserSession/<slug:pk>", GetUserQuizSession.as_view(), name="getuserquizsesion")
+    path("getUserSession/<slug:pk>", GetUserQuizSession.as_view(), name="getuserquizsesion"),
+    path("filterscore",views.filterscore,name="filterscore"),
 ]

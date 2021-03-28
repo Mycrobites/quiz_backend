@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Filter Score</title>
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+
+	<div style="height: 50%; width: 50%; padding: 20px; margin: 20px;">
+		<form method="post" action="{% url 'filterscore' %}">
+			{% csrf_token %}
+		<label for="username">Username</label>
+		<input class="w3-input" type="text" name="user" id="username" required>
+		<br>
+		<label for="quizid">Quiz Id</label>
+		<input class="w3-input" type="text" name="quizid" id="quizid" required>
+		<br>
+		<label for="subject">Choose Subject tag</label>
+		<select class="w3-input" name="subject" id="subject">
+			<option>None</option>
+			<option>Mathematics</option>
+		</select>
+		<br>
+		<label for="topic">Choose Topic tag</label>
+		<select class="w3-input" name="topic" id="topic">
+			<option>None</option>
+			<option>Algebra</option>
+			<option>Calculus</option>
+			<option>Combinatorics</option>
+			<option>Geometry</option>
+			<option>Logical Thinking</option>
+			<option>Number Theory</option>
+		</select>
+		<br>
+		<label for="subtopic">Choose Subtopic tag</label>
+		<select class="w3-input" name="subtopic" id="subtopic">
+			<option>None</option>
+			<option>Application of derivatives</option>
+			<option>Combinations</option>
+			<option>Divisibility</option>
+			<option>Elementary Algebra</option>
+			<option>Game Theory</option>
+			<option>Graph theory</option>
+			<option>Linear Programming</option>
+			<option>Linear inequations</option>
+			<option>Parity</option>
+			<option>Pigeonhole Principle</option>
+			<option>Probability</option>
+			<option>Series</option>
+			<option>Set Theory</option>
+			<option>Triginometry</option>
+		</select>
+		<br>
+		<label for="difficulty">Choose Difficulty tag</label>
+		<select class="w3-input" name="difficulty" id="difficulty">
+			<option>None</option>
+			<option>Easy</option>
+			<option>Medium</option>
+			<option>Hard</option>
+		</select>
+		<br>
+		<label for="skill">Choose Skill tag</label>
+		<select class="w3-input" name="skill" id="skill">
+			<option>None</option>
+			<option>Application of derivatives</option>
+			<option>Combinations</option>
+			<option>Divisibility</option>
+			<option>Elementary Algebra</option>
+			<option>Game Theory</option>
+			<option>Graph Theory</option>
+			<option>Linear Programming</option>
+			<option>Linear inequations</option>
+			<option>Parity</option>
+			<option>Pigeonhole Principle</option>
+			<option>Probability</option>
+			<option>Series</option>
+			<option>Set Theory</option>
+			<option>Trigonometry</option>
+		</select>
+		<button type="submit">Submit</button>
+		</form>
+	</div>
+	{% if score %}
+	<div>
+		<h3>Your score is : <span style="color: green;">{{score}}</span></h3>
+	</div>
+	{% endif %}
+
+</body>
+</html>

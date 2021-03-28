@@ -429,8 +429,8 @@ class PostUserQuizSession(APIView):
 
 class GetUserQuizSession(GenericAPIView):
     serializer_class = UserQuizSessionSerializer
-    permission_classes = [AllowAny]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     def get(self, request, pk):
         sess = UserQuizSession.objects.get(id = pk)

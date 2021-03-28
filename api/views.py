@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 import json
 import datetime
+import regex as re
 
 
 # Create your views here.
@@ -32,15 +33,17 @@ class QuizView(GenericAPIView):
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
                 for i in range(len(questions)):
-                    flag = False
                     string = questions[i]["question"]
                     for j in range(len(string)):
                         if string[j] == "s" and string[j + 1] == "r" and string[j + 2] == "c" and string[j + 3] == "=":
-                            flag = True
                             string = string[:j + 5] + "http://18.222.104.46" + string[j + 5:]
                     questions[i]["question"] = string
                     try:
+                        matched_strings = re.findall(r'\"(.+?)\"', questions[i]['option'])
                         options = questions[i]['option'].replace("'", '"')
+                        for ms in matched_strings:
+                            new_str = ms.replace("'", '"')
+                            options = options.replace(new_str, ms)
                         questions[i]['option'] = json.loads(options)
                         options = []
                         for j in range(len(questions[i]['option'])):
@@ -431,28 +434,15 @@ class PostUserQuizSession(APIView):
 
 class GetUserQuizSession(GenericAPIView):
     serializer_class = UserQuizSessionSerializer
-    permission_classes = [AllowAny]
-
-    # authentication_classes = [JWTAuthentication]
-
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
     def get(self, request, pk):
-        data = UserQuizSession.objects.get(id=pk)
-        ser = UserQuizSessionSerializer(data)
+        sess = UserQuizSession.objects.get(id = pk)
+        x = timezone.now()- sess.start_time
+        y = (datetime.datetime.min +x).time()
+        z = datetime.datetime.combine(datetime.date.today(),sess.remaining_duration) - datetime.datetime.combine(datetime.date.today(), y)
+        sess.remaining_duration =  (datetime.datetime.min + z).time()
+        sess.save()
+        ser = UserQuizSessionSerializer(sess)
         return Response(ser.data)
-
-    def post(self, request, pk):
-        try:
-            sess = UserQuizSession.objects.get(id=pk)
-            x = timezone.now() - sess.start_time
-            y = (datetime.datetime.min + x).time()
-            print(y)
-            print(sess.remaining_duration)
-            z = datetime.datetime.combine(datetime.date.today(), sess.remaining_duration) - datetime.datetime.combine(
-                datetime.date.today(), y)
-            print(z)
-            print(type(z))
-            sess.remaining_duration = (datetime.datetime.min + z).time()
-            sess.save()
-            return Response({"msg": "session saved successfully"})
-        except Exception as e:
-            return Response({"msg": str(e)})

@@ -101,6 +101,7 @@ class FeedBackForm(models.Model):
     mini_course = models.CharField(max_length=5, choices=choice)
     next_contest = models.CharField(max_length=150, choices=choice_contest)
     suggestions = models.CharField(max_length=200, default="")
+    username = models.CharField(max_length=60, default="")
 
     def __str__(self):
         return f"{self.user}'s feedback"

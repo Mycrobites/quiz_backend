@@ -449,5 +449,18 @@ class GetUserQuizSession(GenericAPIView):
         return Response(ser.data)
 
 def filterscore(request):
-    return render(request,"filterscore.html")
+    if request.method=="POST":
+        username=request.POST['user']
+        quizid=request.POST['quizid']
+        subject=request.POST['subject']
+        topic=request.POST['topic']
+        subtopic=request.POST['subtopic']
+        difficulty=request.POST['difficulty']
+        skill=request.POST['skill']
+        user=User.objects.get(username=username)
+        q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+        score=10
+        return render(request,"filterscore.html",{"score":score})
+    else:
+        return render(request,"filterscore.html")
    

@@ -7,12 +7,13 @@
 <body>
 
 	<div style="height: 50%; width: 50%; padding: 20px; margin: 20px;">
-		<form >
+		<form method="post" action="{% url 'filterscore' %}">
+			{% csrf_token %}
 		<label for="username">Username</label>
-		<input class="w3-input" type="text" name="" id="username">
+		<input class="w3-input" type="text" name="user" id="username" required>
 		<br>
 		<label for="quizid">Quiz Id</label>
-		<input class="w3-input" type="text" name="" id="quizid">
+		<input class="w3-input" type="text" name="quizid" id="quizid" required>
 		<br>
 		<label for="subject">Choose Subject tag</label>
 		<select class="w3-input" name="subject" id="subject">
@@ -76,8 +77,14 @@
 			<option>Set Theory</option>
 			<option>Trigonometry</option>
 		</select>
+		<button type="submit">Submit</button>
 		</form>
 	</div>
+	{% if score %}
+	<div>
+		<h3>Your score is : <span style="color: green;">{{score}}</span></h3>
+	</div>
+	{% endif %}
 
 </body>
 </html>

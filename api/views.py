@@ -459,8 +459,19 @@ def filterscore(request):
         skill=request.POST['skill']
         user=User.objects.get(username=username)
         q=QuizResponse.objects.get(user=user.id,quiz=quizid)
-        score=10
+        response = q.response.replace("'", '"')
+        res_dict = json.loads(response)
+        score=0
+        for key,value in res_dict.items():
+            if(value):
+                ques=Question.objects.get(id=key)
+                if(subject==ques.subject_tag or topic==ques.topic_tag or subtopic==ques.subtopic_tag or difficulty==ques.dificulty_tag or skill==ques.skill):
+                    if value==ques.answer:
+                        score+=ques.correct_marks
+                    else:
+                        score+=ques.negative_marks
         return render(request,"filterscore.html",{"score":score})
     else:
         return render(request,"filterscore.html")
+
    

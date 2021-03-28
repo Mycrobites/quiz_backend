@@ -9,6 +9,7 @@ admin.site.register(Quiz)
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_filter = ["quiz"]
+    list_display= ["quiz","question","correct_marks","negative_marks","answer"]
 
 
 @admin.register(AssignQuiz)
@@ -23,3 +24,4 @@ class ResponseAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FeedBackForm)
+admin.site.register(UserQuizSession)

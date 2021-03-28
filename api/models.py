@@ -4,7 +4,7 @@ import uuid
 import jsonfield
 from ckeditor_uploader.fields import RichTextUploadingField
 from ckeditor.fields import RichTextField
-
+from datetime import datetime
 
 # Create your models here.
 
@@ -28,6 +28,9 @@ class Quiz(models.Model):
         else:
             return False
 
+dificulty_choices = (
+    ("Easy","Easy"),("Medium","Medium"),("Hard","Hard")
+)
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -38,6 +41,12 @@ class Question(models.Model):
     option = jsonfield.JSONField(blank=True, null=True)
     answer = models.PositiveSmallIntegerField(null=True, blank=True)
     text = models.TextField(blank=True)
+    subject_tag = models.CharField(max_length=100,blank=True,default="")
+    topic_tag = models.CharField(max_length=100,blank=True,default="")
+    subtopic_tag = models.CharField(max_length=100,blank=True,default="")
+    dificulty_tag = models.CharField(choices=dificulty_choices,blank=True,default="",max_length=100)
+    skill = models.CharField(max_length=100,blank=True,default="")
+
 
     def __str__(self):
         return f"{self.quiz} - {self.question}"
@@ -47,6 +56,7 @@ class AssignQuiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
     user = models.ManyToManyField(User, )
+    
 
     def __str__(self):
         return str(self.quiz)
@@ -90,6 +100,15 @@ class FeedBackForm(models.Model):
     mini_course = models.CharField(max_length=5, choices=choice)
     next_contest = models.CharField(max_length=150, choices=choice_contest)
     suggestions = models.CharField(max_length=200, default="")
+    username = models.CharField(max_length=60, default="")
 
     def __str__(self):
         return f"{self.user}'s feedback"
+
+
+class UserQuizSession(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
+    start_time = models.DateTimeField(null=True, blank=True, default=datetime.now)
+    remaining_duration = models.TimeField(null=True, blank=True)

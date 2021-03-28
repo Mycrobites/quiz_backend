@@ -450,6 +450,7 @@ class GetUserQuizSession(GenericAPIView):
 
 def filterscore(request):
     if request.method=="POST":
+        error=""
         username=request.POST['user']
         quizid=request.POST['quizid']
         subject=request.POST['subject']
@@ -457,8 +458,16 @@ def filterscore(request):
         subtopic=request.POST['subtopic']
         difficulty=request.POST['difficulty']
         skill=request.POST['skill']
-        user=User.objects.get(username=username)
-        q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+        try:
+            user=User.objects.get(username=username)
+        except:
+            error="user does not exist"
+            return render(request,"filterscore.html",{"error":error})
+        try:
+            q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+        except:
+            error="no matching username and quizid found"
+            return render(request,"filterscore.html",{"error":error})
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
         score=0
@@ -469,11 +478,13 @@ def filterscore(request):
                 if(value):
                     ques=Question.objects.get(id=key)
                     if(subject==ques.subject_tag or topic==ques.topic_tag or subtopic==ques.subtopic_tag or difficulty==ques.dificulty_tag or skill==ques.skill):
-                        if value==ques.answer:
+                        if str(value)==str(ques.answer):
+                            print("sahi",value,ques.answer)
                             score+=ques.correct_marks
                         else:
+                            print("galat",value,ques.answer)
                             score-=ques.negative_marks
-        return render(request,"filterscore.html",{"score":score})
+        return render(request,"filterscore.html",{"score":score,"error":error})
     else:
         return render(request,"filterscore.html")
 

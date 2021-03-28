@@ -247,28 +247,29 @@ Documentation of our API endpoints starts here
         "mini_course": "yes",
         "next_contest": "Puzzle Solving",
         "suggestions": "amazing work, add some esy questions too",
-        "user": 1,
-        "quiz_id": "4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f"
+        "user": 77,
+        "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88",
+        "username":"abhishek-st"
     }
 
 ### Response
 
-    {
-        "id": "4ca355ca-32ba-4ac7-863e-a0c1ff176022",
-        "learn_new": 3,
-        "like_participating": 3,
-        "difficulty": 4,
-        "participate_again": "yes",
-        "time_sufficient": "yes",
-        "attend_webinar": "yes",
-        "language_english": "yes",
-        "mini_course": "yes",
-        "next_contest": "Puzzle Solving",
-        "suggestions": "amazing work, add some esy questions too",
-        "user": 1,
-        "quiz_id": "4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f"
-    }
-
+{
+    "id": "ebfdc10d-e24a-4da6-a688-a95adfc94414",
+    "learn_new": 3,
+    "like_participating": 3,
+    "difficulty": 4,
+    "participate_again": "yes",
+    "time_sufficient": "yes",
+    "attend_webinar": "yes",
+    "language_english": "yes",
+    "mini_course": "yes",
+    "next_contest": "Puzzle Solving",
+    "suggestions": "amazing work, add some esy questions too",
+    "username": "abhishek-st",
+    "user": 77,
+    "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88"
+}
 
 ## To post UserSession at the start of the test
 
@@ -309,21 +310,6 @@ Documentation of our API endpoints starts here
         "remaining_duration": "01:26:00.975000",
         "user": 8,
         "quiz_id": "4f66e07d-91a3-428d-86e0-31187898a975"
-    }
-
-
-## To post usersession between the quiz
-
-### Request
-
-`POST http://127.0.0.1:8000/api/getUserSession/e3164b8c-a8c7-46a2-8a15-77de33ee2a4d`
-
-<slug: session_id>
-
-### Response
-
-    {
-        "msg": "session saved successfully"
     }
 
 

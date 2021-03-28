@@ -85,6 +85,11 @@
 		<h3>Your score is : <span style="color: green;">{{score}}</span></h3>
 	</div>
 	{% endif %}
+	{% ifequal score 0 %}
+	<div>
+		<h3>Your score is : <span style="color: green;">{{score}}</span></h3>
+	</div>
+	{% endifequal %}
 
 </body>
 </html>

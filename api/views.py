@@ -469,7 +469,8 @@ def filterscore(request):
                     if value==ques.answer:
                         score+=ques.correct_marks
                     else:
-                        score+=ques.negative_marks
+                        score-=ques.negative_marks
+        print("sc",score)
         return render(request,"filterscore.html",{"score":score})
     else:
         return render(request,"filterscore.html")

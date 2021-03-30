@@ -471,13 +471,64 @@ def filterscore(request):
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
         score=0
+
+        dicti = {"subject":1,"topic":1,"subtopic":1,"difficulty":1,"skill":1}
+        if(subject=="None"):
+            dicti["subject"]= 0
+        if(topic=="None"):
+            dicti["topic"]= 0
+        if(subtopic=="None"):
+            dicti["subtopic"]= 0
+        if(difficulty=="None"):
+            dicti["difficulty"]= 0
+        if(skill=="None"):
+            dicti["skill"]= 0
+
+        tags=[]
+        i=0
+        for key,value in dicti.items():
+            i=i+1
+            if(value==1):
+                tags.append(i)
+
+        print(tags)                
+        temp=1
+
         if(subject=="None" and topic=="None" and subtopic=="None" and difficulty=="None" and skill=="None"):
             score=q.marks
         else:
             for key,value in res_dict.items():
                 if(value):
                     ques=Question.objects.get(id=key)
-                    if(subject==ques.subject_tag or topic==ques.topic_tag or subtopic==ques.subtopic_tag or difficulty==ques.dificulty_tag or skill==ques.skill):
+                    temp=1
+                    for tag in tags:
+                        if(tag==1):
+                            if(subject==ques.subject_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        elif(tag==2):
+                            if(topic==ques.topic_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        elif(tag==3):
+                            if(subtopic==ques.subtopic_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        elif(tag==4):
+                            if(difficulty==ques.dificulty_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        else:
+                            if(skill==ques.skill):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                    
+                    if(temp==1):
                         if str(value)==str(ques.answer):
                             print("sahi",value,ques.answer)
                             score+=ques.correct_marks

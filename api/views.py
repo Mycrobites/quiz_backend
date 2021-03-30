@@ -13,6 +13,7 @@ from django.utils import timezone
 import json
 import datetime
 import regex as re
+from django.shortcuts import render
 
 
 # Create your views here.
@@ -446,3 +447,45 @@ class GetUserQuizSession(GenericAPIView):
         sess.save()
         ser = UserQuizSessionSerializer(sess)
         return Response(ser.data)
+
+def filterscore(request):
+    if request.method=="POST":
+        error=""
+        username=request.POST['user']
+        quizid=request.POST['quizid']
+        subject=request.POST['subject']
+        topic=request.POST['topic']
+        subtopic=request.POST['subtopic']
+        difficulty=request.POST['difficulty']
+        skill=request.POST['skill']
+        try:
+            user=User.objects.get(username=username)
+        except:
+            error="user does not exist"
+            return render(request,"filterscore.html",{"error":error})
+        try:
+            q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+        except:
+            error="no matching username and quizid found"
+            return render(request,"filterscore.html",{"error":error})
+        response = q.response.replace("'", '"')
+        res_dict = json.loads(response)
+        score=0
+        if(subject=="None" and topic=="None" and subtopic=="None" and difficulty=="None" and skill=="None"):
+            score=q.marks
+        else:
+            for key,value in res_dict.items():
+                if(value):
+                    ques=Question.objects.get(id=key)
+                    if(subject==ques.subject_tag or topic==ques.topic_tag or subtopic==ques.subtopic_tag or difficulty==ques.dificulty_tag or skill==ques.skill):
+                        if str(value)==str(ques.answer):
+                            print("sahi",value,ques.answer)
+                            score+=ques.correct_marks
+                        else:
+                            print("galat",value,ques.answer)
+                            score-=ques.negative_marks
+        return render(request,"filterscore.html",{"score":score,"error":error})
+    else:
+        return render(request,"filterscore.html")
+
+   

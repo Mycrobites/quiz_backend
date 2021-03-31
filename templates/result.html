@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Result Analysis</title>
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+
+	<div style="height: 50%; width: 50%; padding: 20px; margin: 20px;">
+	<form method="post" action="{% url 'resultanalysis' %}">
+			{% csrf_token %}
+		<label for="username">Username</label>
+		<input class="w3-input" type="text" name="user" id="username" required>
+		<br>
+		<label for="quizid">Quiz Id</label>
+		<input class="w3-input" type="text" name="quizid" id="quizid" required>
+		<br>
+		<button type="submit">Submit</button>
+		</form>
+
+</body>
+</html>

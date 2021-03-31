@@ -490,8 +490,7 @@ def filterscore(request):
             i=i+1
             if(value==1):
                 tags.append(i)
-
-        print(tags)                
+               
         temp=1
 
         if(subject=="None" and topic=="None" and subtopic=="None" and difficulty=="None" and skill=="None"):
@@ -539,4 +538,44 @@ def filterscore(request):
     else:
         return render(request,"filterscore.html")
 
+
+def result(request):
+    return render(request,"result.html")
+
+def resultanalysis(request):
+    if request.method=="POST":
+        error=""
+        username=request.POST['user']
+        quizid=request.POST['quizid']
+        try:
+            user=User.objects.get(username=username)
+        except:
+            error="user does not exist"
+            return render(request,"filterscore.html",{"error":error})
+        try:
+            q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+        except:
+            error="no matching username and quizid found"
+            return render(request,"filterscore.html",{"error":error})
+        response = q.response.replace("'", '"')
+        res_dict = json.loads(response)
+        details={}
+        details["Total Marks Obtained"]=q.marks
+        details["Total Questions"]=len(res_dict)
+        posscore=0
+        negscore=0
+        attempt=0
+        for key,value in res_dict.items():
+            ques=Question.objects.get(id=key)
+            if(value):
+                attempt+=1
+                if str(value)==str(ques.answer):
+                    posscore+=ques.correct_marks
+                else:
+                    negscore-=ques.negative_marks
+        details["Attempted"]=attempt
+        details["Not Attempted"]=details["Total Questions"]-attempt
+        details["Positive Score"]=posscore
+        details["Negative Score"]=negscore
+        return render(request,"resultanalysis.html",{"details":details})
    

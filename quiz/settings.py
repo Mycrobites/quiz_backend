@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import platform
 from datetime import timedelta
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ijo21y0uk#)xgepf)$3^j(s*#d&by2z0=-gx+%8g73dj&fkuh1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '18.222.104.46', 'api.progressiveminds.in']
 
@@ -45,6 +44,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'sslserver'
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

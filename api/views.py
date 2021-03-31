@@ -489,3 +489,60 @@ def filterscore(request):
         return render(request,"filterscore.html")
 
    
+class GetResult(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        username = request.data['user']
+        quiz = request.data['quizid']
+        topics = ['Algebra', 'Calculus', 'Combinatorics', 'Geometry', 'Logical Thinking', 'Number Theory']
+        difficulty = ['Easy', 'Medium', 'Hard']
+        try:
+            user=User.objects.get(username=username)
+        except:
+            error="user does not exist"
+            return Response({"message":error})
+        try:
+            q=QuizResponse.objects.get(user=user.id,quiz=quiz)
+        except:
+            error="no matching username and quizid found"
+            return Response({"message":error})
+        response = q.response.replace("'", '"')
+        res_dict = json.loads(response)
+        
+        if(topics=="None"):
+            print(q.marks)
+        else:
+            d_topics = {}
+            for topic in topics:
+                score=0
+                for key,value in res_dict.items():
+                    if(value):
+                        ques=Question.objects.get(id=key)
+                        if(topic==ques.topic_tag ):
+                            if str(value)==str(ques.answer):
+                                # print("sahi",value,ques.answer)
+                                score+=ques.correct_marks
+                            else:
+                                # print("galat",value,ques.answer)
+                                score-=ques.negative_marks
+                            d_topics[str(topic)] = score
+                
+            d_difficulty = {}
+            for topic in difficulty:
+                score=0
+                for key,value in res_dict.items():
+                    if(value):
+                        ques=Question.objects.get(id=key)
+                        if(topic==ques.dificulty_tag ):
+                            if str(value)==str(ques.answer):
+                                # print("sahi",value,ques.answer)
+                                score+=ques.correct_marks
+                            else:
+                                # print("galat",value,ques.answer)
+                                score-=ques.negative_marks
+                        d_difficulty[str(topic)] = score
+            
+            feed = FeedBackForm.objects.get(user=user, quiz_id = quiz)
+            ser = FeedBackSerializer(feed)
+
+        return Response({"topic_wise": d_topics, "dissiculty_wise":d_difficulty, "feedback":ser.data})

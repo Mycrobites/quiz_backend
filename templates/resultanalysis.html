@@ -9,28 +9,12 @@
 
 	<div style="background-color: lightblue;">
 	<h1>Overall</h1>
+
 	{% for key,value in details.items %}
-	<h3>{{key}} : {{value}}</h3>
-	{% endfor %}
-	</div>
-	<div style="background-color: lightblue; float: left; width: 450px;">
-	<h1>Easy</h1>
-	{% for key,value in easy.items %}
-	<h3>{{key}} : {{value}}</h3>
-	{% endfor %}
-	</div>
-	<div style="background-color: lightblue; float: left; width: 450px;">
-	<h1>Medium</h1>
-	{% for key,value in med.items %}
-	<h3>{{key}} : {{value}}</h3>
-	{% endfor %}
-	</div>
-	<div style="background-color: lightblue; float: left; width: 450px;">
-	<h1>Hard</h1>
-	{% for key,value in hard.items %}
-	<h3>{{key}} : {{value}}</h3>
-	{% endfor %}
-    </div>
+		<h3>{{key}}</h3>        
+			{{ value }}     
+    {% endfor %}
+
 
 </body>
 </html>

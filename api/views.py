@@ -528,7 +528,7 @@ def filterscore(request):
                                 temp=temp*0
                     
                     if(temp==1):
-                        if str(value)==str(ques.answer):
+                        if(str(value)==str(ques.answer) or str(value)==str(ques.text)):
                             print("sahi",value,ques.answer)
                             score+=ques.correct_marks
                         else:
@@ -559,13 +559,15 @@ def resultanalysis(request):
             return render(request,"result.html",{"error":error})
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
-        details={}
-        easy={}
-        med={}
-        hard={}
-        details["Total Marks Obtained"]=q.marks
-        details["Total Questions"]=len(res_dict)
-        posscore=negscore=attempt=easyTot=easyAttempt=easyPos=easyNeg=medTot=medAttempt=medPos=medNeg=hardTot=hardAttempt=hardPos=hardNeg=0
+        
+        details={"total":{},"easy":{},"med":{},"hard":{},"algebra":{},"calculus":{},"combinatorics":{},"geometry":{},"logicalThinking":{},"numberTheory":{}}
+        
+        details["total"]["total questions"]=len(res_dict)
+
+        posscore=negscore=easyTot=easyPos=easyNeg=medTot=medPos=medNeg=hardTot=hardPos=hardNeg=0
+        algebraTot=algebraPos=algebraNeg=calculusTot=calculusPos=calculusNeg=combinatoricsTot=combinatoricsPos=combinatoricsNeg=0
+        geometryTot=geometryPos=geometryNeg=logicalThinkingTot=logicalThinkingPos=logicalThinkingNeg=numberTheoryTot=numberTheoryPos=numberTheoryNeg=0
+        
         for key,value in res_dict.items():
             ques=Question.objects.get(id=key)
             if(ques.dificulty_tag=="Easy"):
@@ -574,51 +576,97 @@ def resultanalysis(request):
                 medTot+=1
             elif(ques.dificulty_tag=="Hard"):
                 hardTot+=1
-            easy["Total Questions"]=easyTot
-            med["Total Questions"]=medTot
-            hard["Total Questions"]=hardTot
+
+            if(ques.topic_tag=="Algebra"):
+                algebraTot+=1
+            elif(ques.topic_tag=="Calculus"):
+                calculusTot+=1
+            elif(ques.topic_tag=="Combinatorics"):
+                combinatoricsTot+=1
+            elif(ques.topic_tag=="Geometry"):
+                geometryTot+=1
+            elif(ques.topic_tag=="Logical Thinking"):
+                logicalThinkingTot+=1
+            else:
+                numberTheoryTot+=1
+
+            details["easy"]["total questions"]=easyTot
+            details["med"]["total questions"]=medTot
+            details["hard"]["total questions"]=hardTot
+            details["algebra"]["total questions"]=algebraTot
+            details["calculus"]["total questions"]=calculusTot
+            details["combinatorics"]["total questions"]=combinatoricsTot
+            details["geometry"]["total questions"]=geometryTot
+            details["logicalThinking"]["total questions"]=logicalThinkingTot
+            details["numberTheory"]["total questions"]=numberTheoryTot
+
             if(value):
-                attempt+=1
-                if(ques.dificulty_tag=="Easy"):
-                    easyAttempt+=1
-                elif(ques.dificulty_tag=="Medium"):
-                    medAttempt+=1
-                elif(ques.dificulty_tag=="Hard"):
-                    hardAttempt+=1
-                if str(value)==str(ques.answer):
-                    posscore+=ques.correct_marks
+                if(str(value)==str(ques.answer) or str(value)==str(ques.text)):
+                    posscore+=1
                     if(ques.dificulty_tag=="Easy"):
-                        easyPos+=ques.correct_marks
+                        easyPos+=1
                     elif(ques.dificulty_tag=="Medium"):
-                        medPos+=ques.correct_marks
+                        medPos+=1
                     elif(ques.dificulty_tag=="Hard"):
-                        hardPos+=ques.correct_marks
+                        hardPos+=1
+                    
+                    if(ques.topic_tag=="Algebra"):
+                        algebraPos+=1
+                    elif(ques.topic_tag=="Calculus"):
+                        calculusPos+=1
+                    elif(ques.topic_tag=="Combinatorics"):
+                        combinatoricsPos+=1
+                    elif(ques.topic_tag=="Geometry"):
+                        geometryPos+=1
+                    elif(ques.topic_tag=="Logical Thinking"):
+                        logicalThinkingPos+=1
+                    else:
+                        numberTheoryPos+=1
                 else:
-                    negscore-=ques.negative_marks
+                    negscore+=1
                     if(ques.dificulty_tag=="Easy"):
-                        easyNeg-=ques.negative_marks
+                        easyNeg+=1
                     elif(ques.dificulty_tag=="Medium"):
-                        medNeg-=ques.negative_marks
+                        medNeg+=1
                     elif(ques.dificulty_tag=="Hard"):
-                        hardNeg-=ques.negative_marks
-        details["Attempted"]=attempt
-        details["Not Attempted"]=details["Total Questions"]-attempt
-        details["Positive Score"]=posscore
-        details["Negative Score"]=negscore
-        easy["Attempted"]=easyAttempt
-        med["Attempted"]=medAttempt
-        hard["Attempted"]=hardAttempt
-        easy["Not Attempted"]=easy["Total Questions"]-easyAttempt
-        med["Not Attempted"]=med["Total Questions"]-medAttempt
-        hard["Not Attempted"]=hard["Total Questions"]-hardAttempt
-        easy["Positive Score"]=easyPos
-        med["Positive Score"]=medPos
-        hard["Positive Score"]=hardPos
-        easy["Negative Score"]=easyNeg
-        med["Negative Score"]=medNeg
-        hard["Negative Score"]=hardNeg
-        easy["Total Marks Obtained"]=easyPos+easyNeg
-        med["Total Marks Obtained"]=medPos+medNeg
-        hard["Total Marks Obtained"]=hardPos+hardNeg
-        return render(request,"resultanalysis.html",{"username":username,"quizid":quizid,"details":details,"easy":easy,"med":med,"hard":hard})
+                        hardNeg+=1
+
+                    if(ques.topic_tag=="Algebra"):
+                        algebraNeg+=1
+                    elif(ques.topic_tag=="Calculus"):
+                        calculusNeg+=1
+                    elif(ques.topic_tag=="Combinatorics"):
+                        combinatoricsNeg+=1
+                    elif(ques.topic_tag=="Geometry"):
+                        geometryNeg+=1
+                    elif(ques.topic_tag=="Logical Thinking"):
+                        logicalThinkingNeg+=1
+                    else:
+                        numberTheoryNeg+=1
+
+    
+        details["total"]["correct questions"]=posscore
+        details["total"]["Incorrect questions"]=negscore
+
+        details["easy"]["correct questions"]=easyPos
+        details["easy"]["Incorrect questions"]=easyNeg
+        details["med"]["correct questions"]=medPos
+        details["med"]["Incorrect questions"]=medNeg
+        details["hard"]["correct questions"]=hardPos
+        details["hard"]["Incorrect questions"]=hardNeg
+
+        details["algebra"]["correct questions"]=algebraPos
+        details["algebra"]["Incorrect questions"]=algebraNeg
+        details["calculus"]["correct questions"]=calculusPos
+        details["calculus"]["Incorrect questions"]=calculusNeg
+        details["combinatorics"]["correct questions"]=combinatoricsPos
+        details["combinatorics"]["Incorrect questions"]=combinatoricsNeg
+        details["geometry"]["correct questions"]=geometryPos
+        details["geometry"]["Incorrect questions"]=geometryNeg
+        details["logicalThinking"]["correct questions"]=logicalThinkingPos
+        details["logicalThinking"]["Incorrect questions"]=logicalThinkingNeg
+        details["numberTheory"]["correct questions"]=numberTheoryPos
+        details["numberTheory"]["Incorrect questions"]=numberTheoryNeg
+        
+        return render(request,"resultanalysis.html",{"username":username,"quizid":quizid,"details":details})
    

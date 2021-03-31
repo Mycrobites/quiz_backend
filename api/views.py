@@ -489,7 +489,7 @@ def filterscore(request):
         return render(request,"filterscore.html")
 
    
-class GetResult(APIView):
+class GetResult(GenericAPIView):
     permission_classes = [AllowAny]
     def get(self, request):
         username = request.data['user']
@@ -542,7 +542,7 @@ class GetResult(APIView):
                                 score-=ques.negative_marks
                         d_difficulty[str(topic)] = score
             
-            feed = FeedBackForm.objects.get(user=user, quiz_id = quiz)
-            ser = FeedBackSerializer(feed)
+            # feed = FeedBackForm.objects.get(user=user, quiz_id = quiz)
+            # ser = FeedBackSerializer(feed)
 
-        return Response({"topic_wise": d_topics, "dissiculty_wise":d_difficulty, "feedback":ser.data})
+        return Response({"topic_wise": d_topics, "dissiculty_wise":d_difficulty})

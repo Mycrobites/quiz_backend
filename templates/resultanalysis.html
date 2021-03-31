@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Result Analysis</title>
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+	<h2>Result Analysis of <span style="color: green">{{username}}</span> for quiz id  <span style="color: green">{{quizid}}</span></h2>
+
+	<div style="background-color: lightblue;">
+	<h1>Overall</h1>
+
+	{% for key,value in details.items %}
+		<h3>{{key}}</h3>        
+			{{ value }}     
+    {% endfor %}
+
+
+</body>
+</html>

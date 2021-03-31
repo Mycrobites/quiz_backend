@@ -471,14 +471,64 @@ def filterscore(request):
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
         score=0
+
+        dicti = {"subject":1,"topic":1,"subtopic":1,"difficulty":1,"skill":1}
+        if(subject=="None"):
+            dicti["subject"]= 0
+        if(topic=="None"):
+            dicti["topic"]= 0
+        if(subtopic=="None"):
+            dicti["subtopic"]= 0
+        if(difficulty=="None"):
+            dicti["difficulty"]= 0
+        if(skill=="None"):
+            dicti["skill"]= 0
+
+        tags=[]
+        i=0
+        for key,value in dicti.items():
+            i=i+1
+            if(value==1):
+                tags.append(i)
+               
+        temp=1
+
         if(subject=="None" and topic=="None" and subtopic=="None" and difficulty=="None" and skill=="None"):
             score=q.marks
         else:
             for key,value in res_dict.items():
                 if(value):
                     ques=Question.objects.get(id=key)
-                    if(subject==ques.subject_tag or topic==ques.topic_tag or subtopic==ques.subtopic_tag or difficulty==ques.dificulty_tag or skill==ques.skill):
-                        if str(value)==str(ques.answer):
+                    temp=1
+                    for tag in tags:
+                        if(tag==1):
+                            if(subject==ques.subject_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        elif(tag==2):
+                            if(topic==ques.topic_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        elif(tag==3):
+                            if(subtopic==ques.subtopic_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        elif(tag==4):
+                            if(difficulty==ques.dificulty_tag):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                        else:
+                            if(skill==ques.skill):
+                                temp= temp * 1
+                            else:
+                                temp=temp*0
+                    
+                    if(temp==1):
+                        if(str(value)==str(ques.answer) or str(value)==str(ques.text)):
                             print("sahi",value,ques.answer)
                             score+=ques.correct_marks
                         else:
@@ -488,6 +538,137 @@ def filterscore(request):
     else:
         return render(request,"filterscore.html")
 
+
+def result(request):
+    return render(request,"result.html")
+
+def resultanalysis(request):
+    if request.method=="POST":
+        error=""
+        username=request.POST['user']
+        quizid=request.POST['quizid']
+        try:
+            user=User.objects.get(username=username)
+        except:
+            error="user does not exist"
+            return render(request,"result.html",{"error":error})
+        try:
+            q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+        except:
+            error="no matching username and quizid found"
+            return render(request,"result.html",{"error":error})
+        response = q.response.replace("'", '"')
+        res_dict = json.loads(response)
+        
+        details={"total":{},"easy":{},"med":{},"hard":{},"algebra":{},"calculus":{},"combinatorics":{},"geometry":{},"logicalThinking":{},"numberTheory":{}}
+        
+        details["total"]["total questions"]=len(res_dict)
+
+        posscore=negscore=easyTot=easyPos=easyNeg=medTot=medPos=medNeg=hardTot=hardPos=hardNeg=0
+        algebraTot=algebraPos=algebraNeg=calculusTot=calculusPos=calculusNeg=combinatoricsTot=combinatoricsPos=combinatoricsNeg=0
+        geometryTot=geometryPos=geometryNeg=logicalThinkingTot=logicalThinkingPos=logicalThinkingNeg=numberTheoryTot=numberTheoryPos=numberTheoryNeg=0
+        
+        for key,value in res_dict.items():
+            ques=Question.objects.get(id=key)
+            if(ques.dificulty_tag=="Easy"):
+                easyTot+=1
+            elif(ques.dificulty_tag=="Medium"):
+                medTot+=1
+            elif(ques.dificulty_tag=="Hard"):
+                hardTot+=1
+
+            if(ques.topic_tag=="Algebra"):
+                algebraTot+=1
+            elif(ques.topic_tag=="Calculus"):
+                calculusTot+=1
+            elif(ques.topic_tag=="Combinatorics"):
+                combinatoricsTot+=1
+            elif(ques.topic_tag=="Geometry"):
+                geometryTot+=1
+            elif(ques.topic_tag=="Logical Thinking"):
+                logicalThinkingTot+=1
+            else:
+                numberTheoryTot+=1
+
+            details["easy"]["total questions"]=easyTot
+            details["med"]["total questions"]=medTot
+            details["hard"]["total questions"]=hardTot
+            details["algebra"]["total questions"]=algebraTot
+            details["calculus"]["total questions"]=calculusTot
+            details["combinatorics"]["total questions"]=combinatoricsTot
+            details["geometry"]["total questions"]=geometryTot
+            details["logicalThinking"]["total questions"]=logicalThinkingTot
+            details["numberTheory"]["total questions"]=numberTheoryTot
+
+            if(value):
+                if(str(value)==str(ques.answer) or str(value)==str(ques.text)):
+                    posscore+=1
+                    if(ques.dificulty_tag=="Easy"):
+                        easyPos+=1
+                    elif(ques.dificulty_tag=="Medium"):
+                        medPos+=1
+                    elif(ques.dificulty_tag=="Hard"):
+                        hardPos+=1
+                    
+                    if(ques.topic_tag=="Algebra"):
+                        algebraPos+=1
+                    elif(ques.topic_tag=="Calculus"):
+                        calculusPos+=1
+                    elif(ques.topic_tag=="Combinatorics"):
+                        combinatoricsPos+=1
+                    elif(ques.topic_tag=="Geometry"):
+                        geometryPos+=1
+                    elif(ques.topic_tag=="Logical Thinking"):
+                        logicalThinkingPos+=1
+                    else:
+                        numberTheoryPos+=1
+                else:
+                    negscore+=1
+                    if(ques.dificulty_tag=="Easy"):
+                        easyNeg+=1
+                    elif(ques.dificulty_tag=="Medium"):
+                        medNeg+=1
+                    elif(ques.dificulty_tag=="Hard"):
+                        hardNeg+=1
+
+                    if(ques.topic_tag=="Algebra"):
+                        algebraNeg+=1
+                    elif(ques.topic_tag=="Calculus"):
+                        calculusNeg+=1
+                    elif(ques.topic_tag=="Combinatorics"):
+                        combinatoricsNeg+=1
+                    elif(ques.topic_tag=="Geometry"):
+                        geometryNeg+=1
+                    elif(ques.topic_tag=="Logical Thinking"):
+                        logicalThinkingNeg+=1
+                    else:
+                        numberTheoryNeg+=1
+
+    
+        details["total"]["correct questions"]=posscore
+        details["total"]["Incorrect questions"]=negscore
+
+        details["easy"]["correct questions"]=easyPos
+        details["easy"]["Incorrect questions"]=easyNeg
+        details["med"]["correct questions"]=medPos
+        details["med"]["Incorrect questions"]=medNeg
+        details["hard"]["correct questions"]=hardPos
+        details["hard"]["Incorrect questions"]=hardNeg
+
+        details["algebra"]["correct questions"]=algebraPos
+        details["algebra"]["Incorrect questions"]=algebraNeg
+        details["calculus"]["correct questions"]=calculusPos
+        details["calculus"]["Incorrect questions"]=calculusNeg
+        details["combinatorics"]["correct questions"]=combinatoricsPos
+        details["combinatorics"]["Incorrect questions"]=combinatoricsNeg
+        details["geometry"]["correct questions"]=geometryPos
+        details["geometry"]["Incorrect questions"]=geometryNeg
+        details["logicalThinking"]["correct questions"]=logicalThinkingPos
+        details["logicalThinking"]["Incorrect questions"]=logicalThinkingNeg
+        details["numberTheory"]["correct questions"]=numberTheoryPos
+        details["numberTheory"]["Incorrect questions"]=numberTheoryNeg
+        
+        return render(request,"resultanalysis.html",{"username":username,"quizid":quizid,"details":details})
    
 class GetResult(GenericAPIView):
     permission_classes = [AllowAny]

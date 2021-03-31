@@ -680,10 +680,11 @@ class GetResult(GenericAPIView):
             error="user does not exist"
             return Response({"message":error})
         try:
-            quizes=QuizResponse.objects.filter(user=user.id)
+            quizes=QuizResponse.objects.get(user=user.id)
         except:
             error="The user has attempted no quiz"
             return Response({"message":error})
+        quizes=QuizResponse.objects.filter(user=user.id)
         arr = []
         for q in quizes:
             quizobj = Quiz.objects.get(title=q.quiz)
@@ -704,12 +705,13 @@ class GetResult(GenericAPIView):
                     quesdic["Question "+str(totalquestion)] = {"correct answer":obj.text,"your answer":res_dict[ques]}
                 else:
                     if(res_dict[ques]!=""):
-                        quesdic["Question "+str(totalquestion)] = {"correct answer":obj.option[str(obj.answer)],"your answer":obj.option[str(res_dict[ques])]}
+                        quesdic["Question "+str(totalquestion)] = {"correct answer":"option "+str(obj.answer),"your answer":"option "+str(res_dict[ques])}
                     else:
-                        quesdic["Question "+str(totalquestion)] = {"correct answer":obj.option[str(obj.answer)],"your answer":""}
+                        quesdic["Question "+str(totalquestion)] = {"correct answer":"option "+str(obj.answer),"your answer":""}
                 if(res_dict[ques]!=""):
                     attemptedquestion+=1
-                    if((obj.answer is not None and int(obj.answer)==int(res_dict[ques])) or str(obj.text)==str(res_dict[ques])):
+                    print(obj.question)
+                    if((obj.answer is not None and str(obj.answer)==str(res_dict[ques])) or str(obj.text)==str(res_dict[ques])):
                         correctquestion+=1
                         totalmarks+=int(obj.correct_marks)
                         flag = "True"
@@ -719,6 +721,7 @@ class GetResult(GenericAPIView):
                         flag = "False"
                 else:
                     nonattempted+=1
+                    flag="Not attempted"
                 subjecttag = obj.subject_tag
                 if(subjecttag.strip()!=""):
                     try:
@@ -726,15 +729,15 @@ class GetResult(GenericAPIView):
                         if(flag=="True"):
                             dic["subject: "+subjecttag]["correct_questions"]+=1
                         else:
-                            dic["subject: "+subjecttag]["incorrect_questions"]+=1
+                            dic["subject: "+subjecttag]["incorrect_or_not_attempted"]+=1
                     except:
                         dic["subject: "+subjecttag] = {}
                         dic["subject: "+subjecttag]["total_questions"] =1
                         if(flag=="True"):
                             dic["subject: "+subjecttag]["correct_questions"] =1
-                            dic["subject: "+subjecttag]["incorrect_questions"] = 0
+                            dic["subject: "+subjecttag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["subject: "+subjecttag]["incorrect_questions"] = 1
+                            dic["subject: "+subjecttag]["incorrect_or_not_attempted"] = 1
                             dic["subject: "+subjecttag]["correct_questions"] = 0
                 topictag = obj.subtopic_tag
                 if(topictag.strip()!=""):
@@ -743,15 +746,15 @@ class GetResult(GenericAPIView):
                         if(flag=="True"):
                             dic["topic: "+topictag]["correct_questions"]+=1
                         else:
-                            dic["topic: "+topictag]["incorrect_questions"]+=1
+                            dic["topic: "+topictag]["incorrect_or_not_attempted"]+=1
                     except:
                         dic["topic: "+topictag] = {}
                         dic["topic: "+topictag]["total_questions"] =1
                         if(flag=="True"):
                             dic["topic: "+topictag]["correct_questions"] =1
-                            dic["topic: "+topictag]["incorrect_questions"] = 0
+                            dic["topic: "+topictag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["topic: "+topictag]["incorrect_questions"] = 1
+                            dic["topic: "+topictag]["incorrect_or_not_attempted"] = 1
                             dic["topic: "+topictag]["correct_questions"] =0
                 subtopictag = obj.topic_tag
                 if(subtopictag.strip()!=""):
@@ -760,15 +763,15 @@ class GetResult(GenericAPIView):
                         if(flag=="True"):
                             dic["subtopic: "+subtopictag]["correct_questions"]+=1
                         else:
-                            dic["subtopic: "+subtopictag]["incorrect_questions"]+=1
+                            dic["subtopic: "+subtopictag]["incorrect_or_not_attempted"]+=1
                     except:
                         dic["subtopic: "+subtopictag] = {}
                         dic["subtopic: "+subtopictag]["total_questions"] =1
                         if(flag=="True"):
                             dic["subtopic: "+subtopictag]["correct_questions"] =1
-                            dic["subtopic: "+subtopictag]["incorrect_questions"] = 0
+                            dic["subtopic: "+subtopictag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["subtopic: "+subtopictag]["incorrect_questions"] = 1
+                            dic["subtopic: "+subtopictag]["incorrect_or_not_attempted"] = 1
                             dic["subtopic: "+subtopictag]["correct_questions"] =0
                 skilltag = obj.skill
                 if(skilltag.strip()!=""):
@@ -777,15 +780,15 @@ class GetResult(GenericAPIView):
                         if(flag=="True"):
                             dic["skill: "+skilltag]["correct_questions"]+=1
                         else:
-                            dic["skill: "+skilltag]["incorrect_questions"]+=1
+                            dic["skill: "+skilltag]["incorrect_or_not_attempted"]+=1
                     except:
                         dic["skill: "+skilltag] = {}
                         dic["skill: "+skilltag]["total_questions"] =1
                         if(flag=="True"):
                             dic["skill: "+skilltag]["correct_questions"] =1
-                            dic["skill: "+skilltag]["incorrect_questions"] = 0
+                            dic["skill: "+skilltag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["skill: "+skilltag]["incorrect_questions"] = 1
+                            dic["skill: "+skilltag]["incorrect_or_not_attempted"] = 1
                             dic["skill: "+skilltag]["correct_questions"] =0
                 dificultytag = obj.dificulty_tag
                 if(dificultytag.strip()!=""):
@@ -794,15 +797,15 @@ class GetResult(GenericAPIView):
                         if(flag=="True"):
                             dic["dificulty: "+dificultytag]["correct_questions"]+=1
                         else:
-                            dic["dificulty: "+dificultytag]["incorrect_questions"]+=1
+                            dic["dificulty: "+dificultytag]["incorrect_or_not_attempted"]+=1
                     except:
                         dic["dificulty: "+dificultytag] = {}
                         dic["dificulty: "+dificultytag]["total_questions"] =1
                         if(flag=="True"):
                             dic["dificulty: "+dificultytag]["correct_questions"] =1
-                            dic["dificulty: "+dificultytag]["incorrect_questions"] = 0
+                            dic["dificulty: "+dificultytag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["dificulty: "+dificultytag]["incorrect_questions"] = 1
+                            dic["dificulty: "+dificultytag]["incorrect_or_not_attempted"] = 1
                             dic["dificulty: "+dificultytag]["correct_questions"] =0
             result = {"Quiz Name":quizobj.title+" by "+str(quizobj.creator), "totalquestion":totalquestion,"correctquestion":correctquestion,"incorrectquestion":wrongquestion,"attempted": attemptedquestion,"not_attempted":nonattempted,"marks_obtained":totalmarks,"responses":quesdic,"analysis":dic}
             arr.append(result)

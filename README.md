@@ -313,4 +313,49 @@ Documentation of our API endpoints starts here
     }
 
 
+## To get Result
+
+### Request
+
+`GET http://localhost:8000/api/getresult`
+
+    {
+        "user":"dasguptasayon2020",
+        "quizid":"4cbbbe73-c086-4e22-b4d7-efd0776dbb85"
+    }
+
+
+### Response
+
+    {
+        "topic_wise": {
+            "Algebra": -7,
+            "Calculus": 3,
+            "Combinatorics": -3,
+            "Logical Thinking": 0,
+            "Number Theory": 8
+        },
+        "dissiculty_wise": {
+            "Easy": 9,
+            "Medium": -7,
+            "Hard": -1
+        },
+        "feedback": {
+            "id": "2fd4e137-be49-4e0c-8316-d936463933cc",
+            "learn_new": 3,
+            "like_participating": 4,
+            "difficulty": 1,
+            "participate_again": "yes",
+            "time_sufficient": "yes",
+            "attend_webinar": "yes",
+            "language_english": "yes",
+            "mini_course": "yes",
+            "next_contest": "Problem solving strategies",
+            "suggestions": "Questions need to be more precise.",
+            "username": "Sayon Dasgupta",
+            "user": 440,
+            "quiz_id": "4cbbbe73-c086-4e22-b4d7-efd0776dbb85"
+        }
+    }
+
 

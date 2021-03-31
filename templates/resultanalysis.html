@@ -5,12 +5,32 @@
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 </head>
 <body>
+	<h2>Result Analysis of <span style="color: green">{{username}}</span> for quiz id  <span style="color: green">{{quizid}}</span></h2>
 
-	<div style="background-color: lightblue; float: left;">
+	<div style="background-color: lightblue;">
+	<h1>Overall</h1>
 	{% for key,value in details.items %}
-	<h3>{{key}} : {{value}}<h3>
+	<h3>{{key}} : {{value}}</h3>
 	{% endfor %}
 	</div>
+	<div style="background-color: lightblue; float: left; width: 450px;">
+	<h1>Easy</h1>
+	{% for key,value in easy.items %}
+	<h3>{{key}} : {{value}}</h3>
+	{% endfor %}
+	</div>
+	<div style="background-color: lightblue; float: left; width: 450px;">
+	<h1>Medium</h1>
+	{% for key,value in med.items %}
+	<h3>{{key}} : {{value}}</h3>
+	{% endfor %}
+	</div>
+	<div style="background-color: lightblue; float: left; width: 450px;">
+	<h1>Hard</h1>
+	{% for key,value in hard.items %}
+	<h3>{{key}} : {{value}}</h3>
+	{% endfor %}
+    </div>
 
 </body>
 </html>

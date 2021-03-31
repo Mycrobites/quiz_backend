@@ -551,31 +551,74 @@ def resultanalysis(request):
             user=User.objects.get(username=username)
         except:
             error="user does not exist"
-            return render(request,"filterscore.html",{"error":error})
+            return render(request,"result.html",{"error":error})
         try:
             q=QuizResponse.objects.get(user=user.id,quiz=quizid)
         except:
             error="no matching username and quizid found"
-            return render(request,"filterscore.html",{"error":error})
+            return render(request,"result.html",{"error":error})
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
         details={}
+        easy={}
+        med={}
+        hard={}
         details["Total Marks Obtained"]=q.marks
         details["Total Questions"]=len(res_dict)
-        posscore=0
-        negscore=0
-        attempt=0
+        posscore=negscore=attempt=easyTot=easyAttempt=easyPos=easyNeg=medTot=medAttempt=medPos=medNeg=hardTot=hardAttempt=hardPos=hardNeg=0
         for key,value in res_dict.items():
             ques=Question.objects.get(id=key)
+            if(ques.dificulty_tag=="Easy"):
+                easyTot+=1
+            elif(ques.dificulty_tag=="Medium"):
+                medTot+=1
+            elif(ques.dificulty_tag=="Hard"):
+                hardTot+=1
+            easy["Total Questions"]=easyTot
+            med["Total Questions"]=medTot
+            hard["Total Questions"]=hardTot
             if(value):
                 attempt+=1
+                if(ques.dificulty_tag=="Easy"):
+                    easyAttempt+=1
+                elif(ques.dificulty_tag=="Medium"):
+                    medAttempt+=1
+                elif(ques.dificulty_tag=="Hard"):
+                    hardAttempt+=1
                 if str(value)==str(ques.answer):
                     posscore+=ques.correct_marks
+                    if(ques.dificulty_tag=="Easy"):
+                        easyPos+=ques.correct_marks
+                    elif(ques.dificulty_tag=="Medium"):
+                        medPos+=ques.correct_marks
+                    elif(ques.dificulty_tag=="Hard"):
+                        hardPos+=ques.correct_marks
                 else:
                     negscore-=ques.negative_marks
+                    if(ques.dificulty_tag=="Easy"):
+                        easyNeg-=ques.negative_marks
+                    elif(ques.dificulty_tag=="Medium"):
+                        medNeg-=ques.negative_marks
+                    elif(ques.dificulty_tag=="Hard"):
+                        hardNeg-=ques.negative_marks
         details["Attempted"]=attempt
         details["Not Attempted"]=details["Total Questions"]-attempt
         details["Positive Score"]=posscore
         details["Negative Score"]=negscore
-        return render(request,"resultanalysis.html",{"details":details})
+        easy["Attempted"]=easyAttempt
+        med["Attempted"]=medAttempt
+        hard["Attempted"]=hardAttempt
+        easy["Not Attempted"]=easy["Total Questions"]-easyAttempt
+        med["Not Attempted"]=med["Total Questions"]-medAttempt
+        hard["Not Attempted"]=hard["Total Questions"]-hardAttempt
+        easy["Positive Score"]=easyPos
+        med["Positive Score"]=medPos
+        hard["Positive Score"]=hardPos
+        easy["Negative Score"]=easyNeg
+        med["Negative Score"]=medNeg
+        hard["Negative Score"]=hardNeg
+        easy["Total Marks Obtained"]=easyPos+easyNeg
+        med["Total Marks Obtained"]=medPos+medNeg
+        hard["Total Marks Obtained"]=hardPos+hardNeg
+        return render(request,"resultanalysis.html",{"username":username,"quizid":quizid,"details":details,"easy":easy,"med":med,"hard":hard})
    

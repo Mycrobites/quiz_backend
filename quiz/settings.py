@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import platform
 from datetime import timedelta
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,7 +25,7 @@ SECRET_KEY = 'ijo21y0uk#)xgepf)$3^j(s*#d&by2z0=-gx+%8g73dj&fkuh1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '18.222.104.46', 'api.progressiveminds.in',"127.0.0.1"]
 
 # Application definition
 
@@ -42,10 +41,14 @@ INSTALLED_APPS = [
     'corsheaders',
     'api',
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader',
+    'sslserver'
 ]
 
+
+
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -56,11 +59,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+os.environ['HTTPS'] = "on"
+os.environ['wsgi.url_scheme'] = 'https'
 CORS_ORIGIN_ALLOW_ALL = True
-# SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = ['api.progressiveminds.in']
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
@@ -167,12 +176,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-if platform.system() == "Windows":
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, "static")
-    ]
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 MEDIA_URL = "/media/"

@@ -21,4 +21,5 @@ urlpatterns = [
     path("filterscore",views.filterscore,name="filterscore"),
     path("result",views.result,name="result"),
     path("resultanalysis",views.resultanalysis,name="resultanalysis"),
+    path("getresult", views.GetResult.as_view()),
 ]

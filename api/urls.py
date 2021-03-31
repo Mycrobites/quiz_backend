@@ -19,4 +19,5 @@ urlpatterns = [
     path("userSession/", PostUserQuizSession.as_view(), name="userquizsesion"),
     path("getUserSession/<slug:pk>", GetUserQuizSession.as_view(), name="getuserquizsesion"),
     path("filterscore",views.filterscore,name="filterscore"),
+    path("getresult", views.GetResult.as_view()),
 ]

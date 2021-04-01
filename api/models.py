@@ -3,9 +3,7 @@ from authentication.models import User
 import uuid
 import jsonfield
 from ckeditor_uploader.fields import RichTextUploadingField
-from ckeditor.fields import RichTextField
 from datetime import datetime
-import pandas as pd
 
 
 # Create your models here.

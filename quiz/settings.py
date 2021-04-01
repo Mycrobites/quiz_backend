@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-import platform
+import sys
 from datetime import timedelta
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,9 +24,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ijo21y0uk#)xgepf)$3^j(s*#d&by2z0=-gx+%8g73dj&fkuh1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '18.222.104.46', 'api.progressiveminds.in',"127.0.0.1"]
+ALLOWED_HOSTS = ['localhost', '18.222.104.46', 'api.progressiveminds.in', "127.0.0.1", "quiz-mycrobites.herokuapp.com"]
 
 # Application definition
 
@@ -42,10 +43,7 @@ INSTALLED_APPS = [
     'api',
     'ckeditor',
     'ckeditor_uploader',
-    'sslserver'
 ]
-
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,14 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-os.environ['HTTPS'] = "on"
-os.environ['wsgi.url_scheme'] = 'https'
 CORS_ORIGIN_ALLOW_ALL = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = ['api.progressiveminds.in']
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
@@ -103,7 +94,8 @@ DATABASES = {
         "ENGINE": "djongo",
         'CLIENT': {
             'name': 'QuizDB',
-            'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/QuizDB?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE',
+            'host': 'mongodb+srv://admin:mapple1205@quiz.np003.mongodb.net/QuizDB?retryWrites=true&w=majority&ssl'
+                    '=true&ssl_cert_reqs=CERT_NONE',
             'username': 'admin',
             'password': 'mapple1205',
             'authMechanism': 'SCRAM-SHA-1'
@@ -140,34 +132,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 CKEDITOR_CONFIGS = {
     'default': {
         'skin': 'moono',
-         'toolbar': 'Custom',
+        'toolbar': 'Custom',
         'toolbar_Custom': [
             ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter',
+             'JustifyRight', 'JustifyBlock'],
             ['Link', 'Unlink'],
             ['RemoveFormat', 'Source'],
             ['Insert'],
-            ['Mathjax','Subscript', 'Superscript','Image',"Uploadimage"]
+            ['Mathjax', 'Subscript', 'Superscript', 'Image', "Uploadimage"]
         ],
         'mathJaxLib': '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML',
-        'extraPlugins': ','.join(['mathjax','image','uploadimage']),
+        'extraPlugins': ','.join(['mathjax', 'image', 'uploadimage']),
     },
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Asia/Kolkata'
-
 USE_I18N = True
-
 USE_L10N = True
 USE_TZ = True
 
@@ -175,16 +163,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-
 MEDIA_URL = "/media/"
-CKEDITOR_UPLOAD_PATH = "uploads/"
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
+CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
 
@@ -194,3 +178,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'quiz.mailsender@gmail.com'
 EMAIL_HOST_PASSWORD = 'mapple1205'
+
+
+# Settings configuration for production
+if sys.argv[-1] == '0.0.0.0:8080':
+    from quiz.settings_prod import *

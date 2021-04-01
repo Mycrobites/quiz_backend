@@ -115,5 +115,5 @@ class UserQuizSession(models.Model):
     start_time = models.DateTimeField(null=True, blank=True, default=datetime.now)
     remaining_duration = models.TimeField(null=True, blank=True)
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.user}'s remaining time is {self.remaining_duration}"

@@ -15,6 +15,8 @@ import datetime
 import regex as re
 from django.shortcuts import render
 import pandas as pd
+from csv import writer
+
 
 # Create your views here.
 
@@ -389,28 +391,22 @@ class PostFeedback(GenericAPIView):
             ser = self.serializer_class(data=data)
             if ser.is_valid():
                 ser.save()
-                feedbacks = FeedBackForm.objects.all()
-                data = pd.read_csv("media/feedback/Feedback - Sheet1.csv")
-                data.fillna("NA", inplace=True)
-
-                for i in range(len(feedbacks)):
-                    data.loc[i , "User"] = feedbacks[i].user
-                    data.loc[i , "Quiz ID"] = feedbacks[i].quiz_id
-                    data.loc[i , "Learn New"] = feedbacks[i].learn_new
-                    data.loc[i , "Like Participating"] = feedbacks[i].like_participating
-                    data.loc[i , "Difficulty"] = feedbacks[i].difficulty
-                    data.loc[i , "Participate Again"] = feedbacks[i].participate_again
-                    data.loc[i , "Time Sufficient"] = feedbacks[i].time_sufficient
-                    data.loc[i , "Attend Webinar"] = feedbacks[i].attend_webinar
-                    data.loc[i , "Language English"] = feedbacks[i].language_english
-                    data.loc[i , "Mini Course"] = feedbacks[i].mini_course
-                    data.loc[i , "Next Contest"] = feedbacks[i].next_contest
-                    data.loc[i , "Suggestions"] = feedbacks[i].suggestions
-                    data.loc[i , "Username"] = feedbacks[i].username
-
-                filename = "media/feedbackResponses/output.csv"
-                data.to_csv(filename)
-                return Response(ser.data)
+                feedback = ser.data
+                feedbacks = pd.read_csv('media/feedbackResponses/output.csv', error_bad_lines=False)
+                sno = len(feedbacks)
+                user = User.objects.get(id=feedback['user'])
+                quiz = Quiz.objects.get(id=feedback['quiz_id'])
+                new_feedback = [sno, user, quiz, feedback['learn_new'],
+                                feedback['like_participating'], feedback['difficulty'],
+                                feedback['participate_again'], feedback['time_sufficient'],
+                                feedback['attend_webinar'], feedback['language_english'],
+                                feedback['mini_course'], feedback['next_contest'],
+                                feedback['suggestions'], feedback['username']]
+                with open('media/feedbackResponses/output.csv', 'a') as f_object:
+                    writer_object = writer(f_object)
+                    writer_object.writerow(new_feedback)
+                    f_object.close()
+                return Response(feedback)
             else:
                 return Response(ser.errors)
         else:
@@ -432,7 +428,8 @@ class CheckQuizAssigned(GenericAPIView):
                     assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
                     try:
                         quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                        return Response({"message": "You have already attempted the test"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({"message": "You have already attempted the test"},
+                                        status=status.HTTP_400_BAD_REQUEST)
                     except ObjectDoesNotExist:
                         return Response({"message": "Success"}, status=status.HTTP_200_OK)
                 except ObjectDoesNotExist:
@@ -470,254 +467,260 @@ class GetUserQuizSession(GenericAPIView):
     serializer_class = UserQuizSessionSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-    
+
     def get(self, request, pk):
-        sess = UserQuizSession.objects.get(id = pk)
-        x = timezone.now()- sess.start_time
-        y = (datetime.datetime.min +x).time()
-        z = datetime.datetime.combine(datetime.date.today(),sess.remaining_duration) - datetime.datetime.combine(datetime.date.today(), y)
-        sess.remaining_duration =  (datetime.datetime.min + z).time()
+        sess = UserQuizSession.objects.get(id=pk)
+        x = timezone.now() - sess.start_time
+        y = (datetime.datetime.min + x).time()
+        z = datetime.datetime.combine(datetime.date.today(), sess.remaining_duration) - datetime.datetime.combine(
+            datetime.date.today(), y)
+        sess.remaining_duration = (datetime.datetime.min + z).time()
         sess.save()
         ser = UserQuizSessionSerializer(sess)
         return Response(ser.data)
 
+
 def filterscore(request):
-    if request.method=="POST":
-        error=""
-        username=request.POST['user']
-        quizid=request.POST['quizid']
-        subject=request.POST['subject']
-        topic=request.POST['topic']
-        subtopic=request.POST['subtopic']
-        difficulty=request.POST['difficulty']
-        skill=request.POST['skill']
+    if request.method == "POST":
+        error = ""
+        username = request.POST['user']
+        quizid = request.POST['quizid']
+        subject = request.POST['subject']
+        topic = request.POST['topic']
+        subtopic = request.POST['subtopic']
+        difficulty = request.POST['difficulty']
+        skill = request.POST['skill']
         try:
-            user=User.objects.get(username=username)
+            user = User.objects.get(username=username)
         except:
-            error="user does not exist"
-            return render(request,"filterscore.html",{"error":error})
+            error = "user does not exist"
+            return render(request, "filterscore.html", {"error": error})
         try:
-            q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+            q = QuizResponse.objects.get(user=user.id, quiz=quizid)
         except:
-            error="no matching username and quizid found"
-            return render(request,"filterscore.html",{"error":error})
+            error = "no matching username and quizid found"
+            return render(request, "filterscore.html", {"error": error})
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
-        score=0
+        score = 0
 
-        dicti = {"subject":1,"topic":1,"subtopic":1,"difficulty":1,"skill":1}
-        if(subject=="None"):
-            dicti["subject"]= 0
-        if(topic=="None"):
-            dicti["topic"]= 0
-        if(subtopic=="None"):
-            dicti["subtopic"]= 0
-        if(difficulty=="None"):
-            dicti["difficulty"]= 0
-        if(skill=="None"):
-            dicti["skill"]= 0
+        dicti = {"subject": 1, "topic": 1, "subtopic": 1, "difficulty": 1, "skill": 1}
+        if subject == "None":
+            dicti["subject"] = 0
+        if topic == "None":
+            dicti["topic"] = 0
+        if subtopic == "None":
+            dicti["subtopic"] = 0
+        if difficulty == "None":
+            dicti["difficulty"] = 0
+        if skill == "None":
+            dicti["skill"] = 0
 
-        tags=[]
-        i=0
-        for key,value in dicti.items():
-            i=i+1
-            if(value==1):
+        tags = []
+        i = 0
+        for key, value in dicti.items():
+            i = i + 1
+            if value == 1:
                 tags.append(i)
-               
-        temp=1
 
-        if(subject=="None" and topic=="None" and subtopic=="None" and difficulty=="None" and skill=="None"):
-            score=q.marks
+        temp = 1
+
+        if subject == "None" and topic == "None" and subtopic == "None" and difficulty == "None" and skill == "None":
+            score = q.marks
         else:
-            for key,value in res_dict.items():
-                if(value):
-                    ques=Question.objects.get(id=key)
-                    temp=1
+            for key, value in res_dict.items():
+                if value:
+                    ques = Question.objects.get(id=key)
+                    temp = 1
                     for tag in tags:
-                        if(tag==1):
-                            if(subject==ques.subject_tag):
-                                temp= temp * 1
+                        if tag == 1:
+                            if subject == ques.subject_tag:
+                                temp = temp * 1
                             else:
-                                temp=temp*0
-                        elif(tag==2):
-                            if(topic==ques.topic_tag):
-                                temp= temp * 1
+                                temp = temp * 0
+                        elif tag == 2:
+                            if topic == ques.topic_tag:
+                                temp = temp * 1
                             else:
-                                temp=temp*0
-                        elif(tag==3):
-                            if(subtopic==ques.subtopic_tag):
-                                temp= temp * 1
+                                temp = temp * 0
+                        elif tag == 3:
+                            if subtopic == ques.subtopic_tag:
+                                temp = temp * 1
                             else:
-                                temp=temp*0
-                        elif(tag==4):
-                            if(difficulty==ques.dificulty_tag):
-                                temp= temp * 1
+                                temp = temp * 0
+                        elif tag == 4:
+                            if difficulty == ques.dificulty_tag:
+                                temp = temp * 1
                             else:
-                                temp=temp*0
+                                temp = temp * 0
                         else:
-                            if(skill==ques.skill):
-                                temp= temp * 1
+                            if skill == ques.skill:
+                                temp = temp * 1
                             else:
-                                temp=temp*0
-                    
-                    if(temp==1):
-                        if(str(value)==str(ques.answer) or str(value)==str(ques.text)):
-                            print("sahi",value,ques.answer)
-                            score+=ques.correct_marks
+                                temp = temp * 0
+
+                    if temp == 1:
+                        if str(value) == str(ques.answer) or str(value) == str(ques.text):
+                            print("sahi", value, ques.answer)
+                            score += ques.correct_marks
                         else:
-                            print("galat",value,ques.answer)
-                            score-=ques.negative_marks
-        return render(request,"filterscore.html",{"score":score,"error":error})
+                            print("galat", value, ques.answer)
+                            score -= ques.negative_marks
+        return render(request, "filterscore.html", {"score": score, "error": error})
     else:
-        return render(request,"filterscore.html")
+        return render(request, "filterscore.html")
 
 
 def result(request):
-    return render(request,"result.html")
+    return render(request, "result.html")
+
 
 def resultanalysis(request):
-    if request.method=="POST":
-        error=""
-        username=request.POST['user']
-        quizid=request.POST['quizid']
+    if request.method == "POST":
+        error = ""
+        username = request.POST['user']
+        quizid = request.POST['quizid']
         try:
-            user=User.objects.get(username=username)
+            user = User.objects.get(username=username)
         except:
-            error="user does not exist"
-            return render(request,"result.html",{"error":error})
+            error = "user does not exist"
+            return render(request, "result.html", {"error": error})
         try:
-            q=QuizResponse.objects.get(user=user.id,quiz=quizid)
+            q = QuizResponse.objects.get(user=user.id, quiz=quizid)
         except:
-            error="no matching username and quizid found"
-            return render(request,"result.html",{"error":error})
+            error = "no matching username and quizid found"
+            return render(request, "result.html", {"error": error})
         response = q.response.replace("'", '"')
         res_dict = json.loads(response)
-        
-        details={"total":{},"easy":{},"med":{},"hard":{},"algebra":{},"calculus":{},"combinatorics":{},"geometry":{},"logicalThinking":{},"numberTheory":{}}
-        
-        details["total"]["total questions"]=len(res_dict)
 
-        posscore=negscore=easyTot=easyPos=easyNeg=medTot=medPos=medNeg=hardTot=hardPos=hardNeg=0
-        algebraTot=algebraPos=algebraNeg=calculusTot=calculusPos=calculusNeg=combinatoricsTot=combinatoricsPos=combinatoricsNeg=0
-        geometryTot=geometryPos=geometryNeg=logicalThinkingTot=logicalThinkingPos=logicalThinkingNeg=numberTheoryTot=numberTheoryPos=numberTheoryNeg=0
-        
-        for key,value in res_dict.items():
-            ques=Question.objects.get(id=key)
-            if(ques.dificulty_tag=="Easy"):
-                easyTot+=1
-            elif(ques.dificulty_tag=="Medium"):
-                medTot+=1
-            elif(ques.dificulty_tag=="Hard"):
-                hardTot+=1
+        details = {"total": {}, "easy": {}, "med": {}, "hard": {}, "algebra": {}, "calculus": {}, "combinatorics": {},
+                   "geometry": {}, "logicalThinking": {}, "numberTheory": {}}
 
-            if(ques.topic_tag=="Algebra"):
-                algebraTot+=1
-            elif(ques.topic_tag=="Calculus"):
-                calculusTot+=1
-            elif(ques.topic_tag=="Combinatorics"):
-                combinatoricsTot+=1
-            elif(ques.topic_tag=="Geometry"):
-                geometryTot+=1
-            elif(ques.topic_tag=="Logical Thinking"):
-                logicalThinkingTot+=1
+        details["total"]["total questions"] = len(res_dict)
+
+        posscore = negscore = easyTot = easyPos = easyNeg = medTot = medPos = medNeg = hardTot = hardPos = hardNeg = 0
+        algebraTot = algebraPos = algebraNeg = calculusTot = calculusPos = calculusNeg = combinatoricsTot = combinatoricsPos = combinatoricsNeg = 0
+        geometryTot = geometryPos = geometryNeg = logicalThinkingTot = logicalThinkingPos = logicalThinkingNeg = numberTheoryTot = numberTheoryPos = numberTheoryNeg = 0
+
+        for key, value in res_dict.items():
+            ques = Question.objects.get(id=key)
+            if ques.dificulty_tag == "Easy":
+                easyTot += 1
+            elif ques.dificulty_tag == "Medium":
+                medTot += 1
+            elif ques.dificulty_tag == "Hard":
+                hardTot += 1
+
+            if ques.topic_tag == "Algebra":
+                algebraTot += 1
+            elif ques.topic_tag == "Calculus":
+                calculusTot += 1
+            elif ques.topic_tag == "Combinatorics":
+                combinatoricsTot += 1
+            elif ques.topic_tag == "Geometry":
+                geometryTot += 1
+            elif ques.topic_tag == "Logical Thinking":
+                logicalThinkingTot += 1
             else:
-                numberTheoryTot+=1
+                numberTheoryTot += 1
 
-            details["easy"]["total questions"]=easyTot
-            details["med"]["total questions"]=medTot
-            details["hard"]["total questions"]=hardTot
-            details["algebra"]["total questions"]=algebraTot
-            details["calculus"]["total questions"]=calculusTot
-            details["combinatorics"]["total questions"]=combinatoricsTot
-            details["geometry"]["total questions"]=geometryTot
-            details["logicalThinking"]["total questions"]=logicalThinkingTot
-            details["numberTheory"]["total questions"]=numberTheoryTot
+            details["easy"]["total questions"] = easyTot
+            details["med"]["total questions"] = medTot
+            details["hard"]["total questions"] = hardTot
+            details["algebra"]["total questions"] = algebraTot
+            details["calculus"]["total questions"] = calculusTot
+            details["combinatorics"]["total questions"] = combinatoricsTot
+            details["geometry"]["total questions"] = geometryTot
+            details["logicalThinking"]["total questions"] = logicalThinkingTot
+            details["numberTheory"]["total questions"] = numberTheoryTot
 
-            if(value):
-                if(str(value)==str(ques.answer) or str(value)==str(ques.text)):
-                    posscore+=1
-                    if(ques.dificulty_tag=="Easy"):
-                        easyPos+=1
-                    elif(ques.dificulty_tag=="Medium"):
-                        medPos+=1
-                    elif(ques.dificulty_tag=="Hard"):
-                        hardPos+=1
-                    
-                    if(ques.topic_tag=="Algebra"):
-                        algebraPos+=1
-                    elif(ques.topic_tag=="Calculus"):
-                        calculusPos+=1
-                    elif(ques.topic_tag=="Combinatorics"):
-                        combinatoricsPos+=1
-                    elif(ques.topic_tag=="Geometry"):
-                        geometryPos+=1
-                    elif(ques.topic_tag=="Logical Thinking"):
-                        logicalThinkingPos+=1
+            if value:
+                if str(value) == str(ques.answer) or str(value) == str(ques.text):
+                    posscore += 1
+                    if ques.dificulty_tag == "Easy":
+                        easyPos += 1
+                    elif ques.dificulty_tag == "Medium":
+                        medPos += 1
+                    elif ques.dificulty_tag == "Hard":
+                        hardPos += 1
+
+                    if ques.topic_tag == "Algebra":
+                        algebraPos += 1
+                    elif ques.topic_tag == "Calculus":
+                        calculusPos += 1
+                    elif ques.topic_tag == "Combinatorics":
+                        combinatoricsPos += 1
+                    elif ques.topic_tag == "Geometry":
+                        geometryPos += 1
+                    elif ques.topic_tag == "Logical Thinking":
+                        logicalThinkingPos += 1
                     else:
-                        numberTheoryPos+=1
+                        numberTheoryPos += 1
                 else:
-                    negscore+=1
-                    if(ques.dificulty_tag=="Easy"):
-                        easyNeg+=1
-                    elif(ques.dificulty_tag=="Medium"):
-                        medNeg+=1
-                    elif(ques.dificulty_tag=="Hard"):
-                        hardNeg+=1
+                    negscore += 1
+                    if ques.dificulty_tag == "Easy":
+                        easyNeg += 1
+                    elif ques.dificulty_tag == "Medium":
+                        medNeg += 1
+                    elif ques.dificulty_tag == "Hard":
+                        hardNeg += 1
 
-                    if(ques.topic_tag=="Algebra"):
-                        algebraNeg+=1
-                    elif(ques.topic_tag=="Calculus"):
-                        calculusNeg+=1
-                    elif(ques.topic_tag=="Combinatorics"):
-                        combinatoricsNeg+=1
-                    elif(ques.topic_tag=="Geometry"):
-                        geometryNeg+=1
-                    elif(ques.topic_tag=="Logical Thinking"):
-                        logicalThinkingNeg+=1
+                    if ques.topic_tag == "Algebra":
+                        algebraNeg += 1
+                    elif ques.topic_tag == "Calculus":
+                        calculusNeg += 1
+                    elif ques.topic_tag == "Combinatorics":
+                        combinatoricsNeg += 1
+                    elif ques.topic_tag == "Geometry":
+                        geometryNeg += 1
+                    elif ques.topic_tag == "Logical Thinking":
+                        logicalThinkingNeg += 1
                     else:
-                        numberTheoryNeg+=1
+                        numberTheoryNeg += 1
 
-    
-        details["total"]["correct questions"]=posscore
-        details["total"]["Incorrect questions"]=negscore
+        details["total"]["correct questions"] = posscore
+        details["total"]["Incorrect questions"] = negscore
 
-        details["easy"]["correct questions"]=easyPos
-        details["easy"]["Incorrect questions"]=easyNeg
-        details["med"]["correct questions"]=medPos
-        details["med"]["Incorrect questions"]=medNeg
-        details["hard"]["correct questions"]=hardPos
-        details["hard"]["Incorrect questions"]=hardNeg
+        details["easy"]["correct questions"] = easyPos
+        details["easy"]["Incorrect questions"] = easyNeg
+        details["med"]["correct questions"] = medPos
+        details["med"]["Incorrect questions"] = medNeg
+        details["hard"]["correct questions"] = hardPos
+        details["hard"]["Incorrect questions"] = hardNeg
 
-        details["algebra"]["correct questions"]=algebraPos
-        details["algebra"]["Incorrect questions"]=algebraNeg
-        details["calculus"]["correct questions"]=calculusPos
-        details["calculus"]["Incorrect questions"]=calculusNeg
-        details["combinatorics"]["correct questions"]=combinatoricsPos
-        details["combinatorics"]["Incorrect questions"]=combinatoricsNeg
-        details["geometry"]["correct questions"]=geometryPos
-        details["geometry"]["Incorrect questions"]=geometryNeg
-        details["logicalThinking"]["correct questions"]=logicalThinkingPos
-        details["logicalThinking"]["Incorrect questions"]=logicalThinkingNeg
-        details["numberTheory"]["correct questions"]=numberTheoryPos
-        details["numberTheory"]["Incorrect questions"]=numberTheoryNeg
-        
-        return render(request,"resultanalysis.html",{"username":username,"quizid":quizid,"details":details})
-   
+        details["algebra"]["correct questions"] = algebraPos
+        details["algebra"]["Incorrect questions"] = algebraNeg
+        details["calculus"]["correct questions"] = calculusPos
+        details["calculus"]["Incorrect questions"] = calculusNeg
+        details["combinatorics"]["correct questions"] = combinatoricsPos
+        details["combinatorics"]["Incorrect questions"] = combinatoricsNeg
+        details["geometry"]["correct questions"] = geometryPos
+        details["geometry"]["Incorrect questions"] = geometryNeg
+        details["logicalThinking"]["correct questions"] = logicalThinkingPos
+        details["logicalThinking"]["Incorrect questions"] = logicalThinkingNeg
+        details["numberTheory"]["correct questions"] = numberTheoryPos
+        details["numberTheory"]["Incorrect questions"] = numberTheoryNeg
+
+        return render(request, "resultanalysis.html", {"username": username, "quizid": quizid, "details": details})
+
+
 class GetResult(GenericAPIView):
     permission_classes = [AllowAny]
+
     def get(self, request):
+        result = {}
         username = request.data['user']
         try:
-            user=User.objects.get(username=username)
+            user = User.objects.get(username=username)
         except:
-            error="user does not exist"
-            return Response({"message":error})
+            error = "user does not exist"
+            return Response({"message": error})
         try:
-            quizes=QuizResponse.objects.get(user=user.id)
+            quizes = QuizResponse.objects.get(user=user.id)
         except:
-            error="The user has attempted no quiz"
-            return Response({"message":error})
-        quizes=QuizResponse.objects.filter(user=user.id)
+            error = "The user has attempted no quiz"
+            return Response({"message": error})
+        quizes = QuizResponse.objects.filter(user=user.id)
         arr = []
         for q in quizes:
             quizobj = Quiz.objects.get(title=q.quiz)
@@ -732,114 +735,121 @@ class GetResult(GenericAPIView):
             response = q.response.replace("'", '"')
             res_dict = json.loads(response)
             for ques in res_dict:
-                totalquestion+=1
+                totalquestion += 1
                 obj = Question.objects.get(id=ques)
-                if(obj.answer is None):
-                    quesdic["Question "+str(totalquestion)] = {"correct answer":obj.text,"your answer":res_dict[ques]}
+                if obj.answer is None:
+                    quesdic["Question " + str(totalquestion)] = {"correct answer": obj.text,
+                                                                 "your answer": res_dict[ques]}
                 else:
-                    if(res_dict[ques]!=""):
-                        quesdic["Question "+str(totalquestion)] = {"correct answer":"option "+str(obj.answer),"your answer":"option "+str(res_dict[ques])}
+                    if res_dict[ques] != "":
+                        quesdic["Question " + str(totalquestion)] = {"correct answer": "option " + str(obj.answer),
+                                                                     "your answer": "option " + str(res_dict[ques])}
                     else:
-                        quesdic["Question "+str(totalquestion)] = {"correct answer":"option "+str(obj.answer),"your answer":""}
-                if(res_dict[ques]!=""):
-                    attemptedquestion+=1
+                        quesdic["Question " + str(totalquestion)] = {"correct answer": "option " + str(obj.answer),
+                                                                     "your answer": ""}
+                if res_dict[ques] != "":
+                    attemptedquestion += 1
                     print(obj.question)
-                    if((obj.answer is not None and str(obj.answer)==str(res_dict[ques])) or str(obj.text)==str(res_dict[ques])):
-                        correctquestion+=1
-                        totalmarks+=int(obj.correct_marks)
+                    if ((obj.answer is not None and str(obj.answer) == str(res_dict[ques])) or str(obj.text) == str(
+                            res_dict[ques])):
+                        correctquestion += 1
+                        totalmarks += int(obj.correct_marks)
                         flag = "True"
                     else:
-                        wrongquestion+=1
-                        totalmarks-=int(obj.negative_marks)
+                        wrongquestion += 1
+                        totalmarks -= int(obj.negative_marks)
                         flag = "False"
                 else:
-                    nonattempted+=1
-                    flag="Not attempted"
+                    nonattempted += 1
+                    flag = "Not attempted"
                 subjecttag = obj.subject_tag
-                if(subjecttag.strip()!=""):
+                if subjecttag.strip() != "":
                     try:
-                        dic["subject: "+subjecttag]["total_questions"]+=1
-                        if(flag=="True"):
-                            dic["subject: "+subjecttag]["correct_questions"]+=1
+                        dic["subject: " + subjecttag]["total_questions"] += 1
+                        if flag == "True":
+                            dic["subject: " + subjecttag]["correct_questions"] += 1
                         else:
-                            dic["subject: "+subjecttag]["incorrect_or_not_attempted"]+=1
+                            dic["subject: " + subjecttag]["incorrect_or_not_attempted"] += 1
                     except:
-                        dic["subject: "+subjecttag] = {}
-                        dic["subject: "+subjecttag]["total_questions"] =1
-                        if(flag=="True"):
-                            dic["subject: "+subjecttag]["correct_questions"] =1
-                            dic["subject: "+subjecttag]["incorrect_or_not_attempted"] = 0
+                        dic["subject: " + subjecttag] = {}
+                        dic["subject: " + subjecttag]["total_questions"] = 1
+                        if flag == "True":
+                            dic["subject: " + subjecttag]["correct_questions"] = 1
+                            dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["subject: "+subjecttag]["incorrect_or_not_attempted"] = 1
-                            dic["subject: "+subjecttag]["correct_questions"] = 0
+                            dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 1
+                            dic["subject: " + subjecttag]["correct_questions"] = 0
                 topictag = obj.subtopic_tag
-                if(topictag.strip()!=""):
+                if topictag.strip() != "":
                     try:
-                        dic["topic: "+topictag]["total_questions"]+=1
-                        if(flag=="True"):
-                            dic["topic: "+topictag]["correct_questions"]+=1
+                        dic["topic: " + topictag]["total_questions"] += 1
+                        if flag == "True":
+                            dic["topic: " + topictag]["correct_questions"] += 1
                         else:
-                            dic["topic: "+topictag]["incorrect_or_not_attempted"]+=1
+                            dic["topic: " + topictag]["incorrect_or_not_attempted"] += 1
                     except:
-                        dic["topic: "+topictag] = {}
-                        dic["topic: "+topictag]["total_questions"] =1
-                        if(flag=="True"):
-                            dic["topic: "+topictag]["correct_questions"] =1
-                            dic["topic: "+topictag]["incorrect_or_not_attempted"] = 0
+                        dic["topic: " + topictag] = {}
+                        dic["topic: " + topictag]["total_questions"] = 1
+                        if flag == "True":
+                            dic["topic: " + topictag]["correct_questions"] = 1
+                            dic["topic: " + topictag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["topic: "+topictag]["incorrect_or_not_attempted"] = 1
-                            dic["topic: "+topictag]["correct_questions"] =0
+                            dic["topic: " + topictag]["incorrect_or_not_attempted"] = 1
+                            dic["topic: " + topictag]["correct_questions"] = 0
                 subtopictag = obj.topic_tag
-                if(subtopictag.strip()!=""):
+                if subtopictag.strip() != "":
                     try:
-                        dic["subtopic: "+subtopictag]["total_questions"]+=1
-                        if(flag=="True"):
-                            dic["subtopic: "+subtopictag]["correct_questions"]+=1
+                        dic["subtopic: " + subtopictag]["total_questions"] += 1
+                        if flag == "True":
+                            dic["subtopic: " + subtopictag]["correct_questions"] += 1
                         else:
-                            dic["subtopic: "+subtopictag]["incorrect_or_not_attempted"]+=1
+                            dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] += 1
                     except:
-                        dic["subtopic: "+subtopictag] = {}
-                        dic["subtopic: "+subtopictag]["total_questions"] =1
-                        if(flag=="True"):
-                            dic["subtopic: "+subtopictag]["correct_questions"] =1
-                            dic["subtopic: "+subtopictag]["incorrect_or_not_attempted"] = 0
+                        dic["subtopic: " + subtopictag] = {}
+                        dic["subtopic: " + subtopictag]["total_questions"] = 1
+                        if flag == "True":
+                            dic["subtopic: " + subtopictag]["correct_questions"] = 1
+                            dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["subtopic: "+subtopictag]["incorrect_or_not_attempted"] = 1
-                            dic["subtopic: "+subtopictag]["correct_questions"] =0
+                            dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 1
+                            dic["subtopic: " + subtopictag]["correct_questions"] = 0
                 skilltag = obj.skill
-                if(skilltag.strip()!=""):
+                if skilltag.strip() != "":
                     try:
-                        dic["skill: "+skilltag]["total_questions"]+=1
-                        if(flag=="True"):
-                            dic["skill: "+skilltag]["correct_questions"]+=1
+                        dic["skill: " + skilltag]["total_questions"] += 1
+                        if flag == "True":
+                            dic["skill: " + skilltag]["correct_questions"] += 1
                         else:
-                            dic["skill: "+skilltag]["incorrect_or_not_attempted"]+=1
+                            dic["skill: " + skilltag]["incorrect_or_not_attempted"] += 1
                     except:
-                        dic["skill: "+skilltag] = {}
-                        dic["skill: "+skilltag]["total_questions"] =1
-                        if(flag=="True"):
-                            dic["skill: "+skilltag]["correct_questions"] =1
-                            dic["skill: "+skilltag]["incorrect_or_not_attempted"] = 0
+                        dic["skill: " + skilltag] = {}
+                        dic["skill: " + skilltag]["total_questions"] = 1
+                        if flag == "True":
+                            dic["skill: " + skilltag]["correct_questions"] = 1
+                            dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["skill: "+skilltag]["incorrect_or_not_attempted"] = 1
-                            dic["skill: "+skilltag]["correct_questions"] =0
+                            dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 1
+                            dic["skill: " + skilltag]["correct_questions"] = 0
                 dificultytag = obj.dificulty_tag
-                if(dificultytag.strip()!=""):
+                if dificultytag.strip() != "":
                     try:
-                        dic["dificulty: "+dificultytag]["total_questions"]+=1
-                        if(flag=="True"):
-                            dic["dificulty: "+dificultytag]["correct_questions"]+=1
+                        dic["dificulty: " + dificultytag]["total_questions"] += 1
+                        if flag == "True":
+                            dic["dificulty: " + dificultytag]["correct_questions"] += 1
                         else:
-                            dic["dificulty: "+dificultytag]["incorrect_or_not_attempted"]+=1
+                            dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] += 1
                     except:
-                        dic["dificulty: "+dificultytag] = {}
-                        dic["dificulty: "+dificultytag]["total_questions"] =1
-                        if(flag=="True"):
-                            dic["dificulty: "+dificultytag]["correct_questions"] =1
-                            dic["dificulty: "+dificultytag]["incorrect_or_not_attempted"] = 0
+                        dic["dificulty: " + dificultytag] = {}
+                        dic["dificulty: " + dificultytag]["total_questions"] = 1
+                        if flag == "True":
+                            dic["dificulty: " + dificultytag]["correct_questions"] = 1
+                            dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 0
                         else:
-                            dic["dificulty: "+dificultytag]["incorrect_or_not_attempted"] = 1
-                            dic["dificulty: "+dificultytag]["correct_questions"] =0
-            result = {"Quiz Name":quizobj.title+" by "+str(quizobj.creator), "totalquestion":totalquestion,"correctquestion":correctquestion,"incorrectquestion":wrongquestion,"attempted": attemptedquestion,"not_attempted":nonattempted,"marks_obtained":totalmarks,"responses":quesdic,"analysis":dic}
+                            dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 1
+                            dic["dificulty: " + dificultytag]["correct_questions"] = 0
+            result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,
+                      "correctquestion": correctquestion, "incorrectquestion": wrongquestion,
+                      "attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,
+                      "responses": quesdic, "analysis": dic}
             arr.append(result)
-        return Response({"data":result})
+        return Response({"data": result})

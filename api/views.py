@@ -389,6 +389,27 @@ class PostFeedback(GenericAPIView):
             ser = self.serializer_class(data=data)
             if ser.is_valid():
                 ser.save()
+                feedbacks = FeedBackForm.objects.all()
+                data = pd.read_csv("media/feedback/Feedback - Sheet1.csv")
+                data.fillna("NA", inplace=True)
+
+                for i in range(len(feedbacks)):
+                    data.loc[i , "User"] = feedbacks[i].user
+                    data.loc[i , "Quiz ID"] = feedbacks[i].quiz_id
+                    data.loc[i , "Learn New"] = feedbacks[i].learn_new
+                    data.loc[i , "Like Participating"] = feedbacks[i].like_participating
+                    data.loc[i , "Difficulty"] = feedbacks[i].difficulty
+                    data.loc[i , "Participate Again"] = feedbacks[i].participate_again
+                    data.loc[i , "Time Sufficient"] = feedbacks[i].time_sufficient
+                    data.loc[i , "Attend Webinar"] = feedbacks[i].attend_webinar
+                    data.loc[i , "Language English"] = feedbacks[i].language_english
+                    data.loc[i , "Mini Course"] = feedbacks[i].mini_course
+                    data.loc[i , "Next Contest"] = feedbacks[i].next_contest
+                    data.loc[i , "Suggestions"] = feedbacks[i].suggestions
+                    data.loc[i , "Username"] = feedbacks[i].username
+
+                filename = "media/feedbackResponses/output.csv"
+                data.to_csv(filename)
                 return Response(ser.data)
             else:
                 return Response(ser.errors)

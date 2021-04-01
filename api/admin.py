@@ -1,6 +1,5 @@
 from django.contrib import admin
 from .models import *
-
 # Register your models here.
 
 
@@ -11,8 +10,8 @@ class QuizAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     model = Question
-    list_filter = ["quiz", "subject_tag", "topic_tag", "subtopic_tag", "dificulty_tag", "skill"]
-    list_display = ["quiz", "question", "correct_marks", "negative_marks", "get_answer"]
+    list_display = ["get_quiz", "question", "correct_marks", "negative_marks", "get_answer"]
+    list_filter = ["quiz__title", "subject_tag", "topic_tag", "subtopic_tag", "dificulty_tag", "skill"]
 
     def get_answer(self, obj):
         if obj.answer is None:
@@ -22,33 +21,49 @@ class QuestionAdmin(admin.ModelAdmin):
         else:
             return None
 
+    def get_quiz(self, obj):
+        return obj.quiz.title
+
+    get_quiz.short_description = 'Quiz'
     get_answer.short_description = 'Answer'
 
 
 class AssignAdmin(admin.ModelAdmin):
-    list_filter = ["quiz"]
+    model = AssignQuiz
+    list_display = ["get_quiz"]
+    list_filter = ["quiz__title"]
+
+    def get_quiz(self, obj):
+        return obj.quiz.title
+
+    get_quiz.short_description = "Quiz"
 
 
 class ResponseAdmin(admin.ModelAdmin):
-    list_display = ["get_user", "quiz", "marks"]
-    list_filter = ["quiz", "user"]
+    model = QuizResponse
+    list_display = ["get_user", "get_quiz", "marks"]
+    list_filter = ["quiz__title", "user"]
 
     def get_user(self, obj):
         return f"{obj.user}'s response"
 
+    def get_quiz(self, obj):
+        return obj.quiz.title
+
     get_user.short_description = "User's Response"
+    get_quiz.short_description = "Quiz"
 
 
 class FeedbackAdmin(admin.ModelAdmin):
     model = FeedBackForm
     list_display = ['get_user', 'get_quiz']
-    list_filter = ['quiz_id']
+    list_filter = ['quiz_id__title']
 
     def get_user(self, obj):
         return obj.user.username
 
     def get_quiz(self, obj):
-        return obj.quiz_id
+        return obj.quiz_id.title
 
     get_quiz.short_description = 'Quiz'
     get_user.short_description = 'Username'

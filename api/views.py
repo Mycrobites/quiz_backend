@@ -200,15 +200,21 @@ class QuizCreateResponseView(GenericAPIView):
             marks = 0
             for i in range(len(questions)):
                 if questions[i].answer is None:
-                    if questions[i].text == res_dict[str(questions[i].id)]:
-                        marks += questions[i].correct_marks
+                    if res_dict[str(questions[i].id)] == "":
+                        marks += 0
                     else:
-                        marks -= questions[i].negative_marks
+                        if questions[i].text == res_dict[str(questions[i].id)]:
+                            marks += questions[i].correct_marks
+                        else:
+                            marks -= questions[i].negative_marks
                 elif questions[i].text == "":
-                    if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                        marks += questions[i].correct_marks
+                    if res_dict[str(questions[i].id)] == "":
+                        marks += 0
                     else:
-                        marks -= questions[i].negative_marks
+                        if str(questions[i].answer) == res_dict[str(questions[i].id)]:
+                            marks += questions[i].correct_marks
+                        else:
+                            marks -= questions[i].negative_marks
                 elif questions[i].answer == "" and questions[i].text == "":
                     marks += 0
             QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
@@ -285,15 +291,21 @@ class QuizMarksView(GenericAPIView):
                     marks = 0
                     for i in range(len(questions)):
                         if questions[i].answer is None:
-                            if questions[i].text == res_dict[str(questions[i].id)]:
-                                marks += questions[i].correct_marks
+                            if res_dict[str(questions[i].id)] == "":
+                                marks += 0
                             else:
-                                marks -= questions[i].negative_marks
+                                if questions[i].text == res_dict[str(questions[i].id)]:
+                                    marks += questions[i].correct_marks
+                                else:
+                                    marks -= questions[i].negative_marks
                         elif questions[i].text == "":
-                            if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                                marks += questions[i].correct_marks
+                            if res_dict[str(questions[i].id)] == "":
+                                marks += 0
                             else:
-                                marks -= questions[i].negative_marks
+                                if str(questions[i].answer) == res_dict[str(questions[i].id)]:
+                                    marks += questions[i].correct_marks
+                                else:
+                                    marks -= questions[i].negative_marks
                         elif questions[i].answer == "" and questions[i].text == "":
                             marks += 0
                     QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)

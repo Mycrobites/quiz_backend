@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'api',
     'ckeditor',
     'ckeditor_uploader',
-    'sslserver'
 ]
 
 
@@ -63,10 +62,12 @@ os.environ['HTTPS'] = "on"
 os.environ['wsgi.url_scheme'] = 'https'
 CORS_ORIGIN_ALLOW_ALL = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = ['api.progressiveminds.in']
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_SSL_REDIRECT = True
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),

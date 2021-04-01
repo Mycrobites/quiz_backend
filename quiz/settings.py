@@ -26,7 +26,7 @@ SECRET_KEY = 'ijo21y0uk#)xgepf)$3^j(s*#d&by2z0=-gx+%8g73dj&fkuh1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '18.222.104.46', 'api.progressiveminds.in', "127.0.0.1"]
+ALLOWED_HOSTS = ['localhost', '18.222.104.46', 'api.progressiveminds.in', "127.0.0.1", "quiz-mycrobites.herokuapp.com"]
 
 # Application definition
 

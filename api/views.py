@@ -707,9 +707,8 @@ def resultanalysis(request):
 class GetResult(GenericAPIView):
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    def get(self, request,username):
         result = {}
-        username = request.data['user']
         try:
             user = User.objects.get(username=username)
         except:

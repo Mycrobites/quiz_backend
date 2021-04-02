@@ -19,7 +19,8 @@ class Quiz(models.Model):
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
 
-    def _str_(self):
+
+    def __str__(self):
         return str(self.title)
 
     def is_active(self, time):
@@ -49,7 +50,7 @@ class Question(models.Model):
     dificulty_tag = models.CharField(choices=dificulty_choices, blank=True, default="", max_length=100)
     skill = models.CharField(max_length=100, blank=True, default="")
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.quiz} - {self.question}"
 
 
@@ -58,7 +59,7 @@ class AssignQuiz(models.Model):
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
     user = models.ManyToManyField(User, )
 
-    def _str_(self):
+    def __str__(self):
         return str(self.quiz)
 
 
@@ -69,7 +70,7 @@ class QuizResponse(models.Model):
     response = jsonfield.JSONField(blank=True)
     marks = models.IntegerField(default=0)
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.user}'s response on {self.quiz}"
 
 
@@ -102,7 +103,7 @@ class FeedBackForm(models.Model):
     suggestions = models.CharField(max_length=200, default="")
     username = models.CharField(max_length=60, default="")
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.user}'s feedback"
 
 
@@ -113,5 +114,5 @@ class UserQuizSession(models.Model):
     start_time = models.DateTimeField(null=True, blank=True, default=datetime.now)
     remaining_duration = models.TimeField(null=True, blank=True)
 
-    def __str__(self):
+    def ___str___(self):
         return f"{self.user}'s remaining time is {self.remaining_duration}"

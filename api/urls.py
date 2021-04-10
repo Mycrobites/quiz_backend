@@ -22,4 +22,5 @@ urlpatterns = [
     path("result",views.result,name="result"),
     path("resultanalysis",views.resultanalysis,name="resultanalysis"),
     path("getresult/<str:username>", views.GetResult.as_view()),
+    path("getExcelForResult", views.CreateExcelForScore.as_view()),
 ]

@@ -10,6 +10,7 @@ from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.http import HttpResponse
 import json
 import datetime
 import regex as re
@@ -912,4 +913,8 @@ class CreateExcelForScore(APIView):
             df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
             df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
         print('************************ bas khatam ***************************')
-        return Response({"message":"yeyeye"}, status=200)
+        with open("media/result_response/Result.xlsx", "rb") as excel:
+            content = excel.read()
+        response = HttpResponse(content=content, content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
+        return response

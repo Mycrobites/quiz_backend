@@ -902,5 +902,14 @@ class CreateExcelForScore(APIView):
         f_object.close()
         f_object_question.close()
         f_object_tag.close()
+
+        df1 = pd.read_csv('media/result_response/output_result_question.csv')
+        df2 = pd.read_csv('media/result_response/output_result_tag.csv')
+        df3 = pd.read_csv('media/result_response/output_result.csv')
+
+        with pd.ExcelWriter('media/result_response/Result.xlsx') as Main:
+            df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
+            df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
+            df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
         print('************************ bas khatam ***************************')
         return Response({"message":"yeyeye"}, status=200)

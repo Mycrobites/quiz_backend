@@ -869,6 +869,10 @@ class CreateExcelForScore(APIView):
         writer_object_question = writer(f_object_question)
         writer_object_question.writerow(['S No','User', 'Question No', 'Correct Answer', 'User Answer'])
 
+        f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
+        writer_object_tag = writer(f_object_tag)
+        writer_object_tag.writerow(['S No','User', 'Analysis On', 'Total Question', 'Correct','Incorrect Or Not Attempted'])
+
         sno = 1
         for user in users:
             try:
@@ -884,6 +888,11 @@ class CreateExcelForScore(APIView):
                     new_result_question = [sno, user, quest, resp['correct answer'], resp['your answer']]
                     writer_object_question.writerow(new_result_question)
                 
+                for tag,resp in data['analysis'].items():
+                    new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect_or_not_attempted']]
+                    writer_object_tag.writerow(new_result_tag)
+
+
                 sno += 1
 
             
@@ -892,5 +901,6 @@ class CreateExcelForScore(APIView):
 
         f_object.close()
         f_object_question.close()
+        f_object_tag.close()
         print('************************ bas khatam ***************************')
         return Response({"message":"yeyeye"}, status=200)

@@ -17,6 +17,8 @@ from django.shortcuts import render
 import pandas as pd
 from csv import writer
 
+import requests
+
 
 # Create your views here.
 
@@ -852,3 +854,29 @@ class GetResult(GenericAPIView):
                       "responses": quesdic, "analysis": dic}
             arr.append(result)
         return Response({"data": result})
+
+
+class CreateExcelForScore(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        users = QuizResponse.objects.all().values_list('user', flat=True)
+        
+        with open('media/result_response/output_result.csv', 'w') as f_object:
+            writer_object = writer(f_object)
+            writer_object.writerow(['S No','User','Quiz Name', 'Total Question', 'Correct', 'Incorrect','Attempted','Not Attempted', 'Marks']) 
+            sno = 1
+            for user in users:
+                try:
+                    user  = User.objects.get(id=user).username
+                    data = requests.get(f'http://localhost:8000/api/getresult/{user}').json()['data']                                            
+                    new_result = [sno, user, data['Quiz Name'],data['totalquestion'], data['correctquestion'], data['incorrectquestion'],
+                                data['attempted'], data['not_attempted'],data['marks_obtained']]
+                    writer_object.writerow(new_result)
+                    sno += 1
+
+                
+                except Exception:
+                    print('kx to gadbad hai')
+                print('ab dusra')
+        print('************************ bas khatam ***************************')
+        return Response({"message":"yeyeye"}, status=200)

@@ -860,23 +860,37 @@ class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
         users = QuizResponse.objects.all().values_list('user', flat=True)
-        
-        with open('media/result_response/output_result.csv', 'w') as f_object:
-            writer_object = writer(f_object)
-            writer_object.writerow(['S No','User','Quiz Name', 'Total Question', 'Correct', 'Incorrect','Attempted','Not Attempted', 'Marks']) 
-            sno = 1
-            for user in users:
-                try:
-                    user  = User.objects.get(id=user).username
-                    data = requests.get(f'http://localhost:8000/api/getresult/{user}').json()['data']                                            
-                    new_result = [sno, user, data['Quiz Name'],data['totalquestion'], data['correctquestion'], data['incorrectquestion'],
-                                data['attempted'], data['not_attempted'],data['marks_obtained']]
-                    writer_object.writerow(new_result)
-                    sno += 1
 
+        f_object = open('media/result_response/output_result.csv', 'w')
+        writer_object = writer(f_object)
+        writer_object.writerow(['S No','User','Quiz Name', 'Total Question', 'Correct', 'Incorrect','Attempted','Not Attempted', 'Marks']) 
+        
+        f_object_question = open('media/result_response/output_result_question.csv', 'w')
+        writer_object_question = writer(f_object_question)
+        writer_object_question.writerow(['S No','User', 'Question No', 'Correct Answer', 'User Answer'])
+
+        sno = 1
+        for user in users:
+            try:
+                user  = User.objects.get(id=user).username
+                data = requests.get(f'http://localhost:8000/api/getresult/{user}').json()['data']                                            
                 
-                except Exception:
-                    print('kx to gadbad hai')
-                print('ab dusra')
+                ## basic analysis
+                new_result = [sno, user, data['Quiz Name'],data['totalquestion'], data['correctquestion'], data['incorrectquestion'],
+                            data['attempted'], data['not_attempted'],data['marks_obtained']]
+                writer_object.writerow(new_result)
+                
+                for quest,resp in data['responses'].items():
+                    new_result_question = [sno, user, quest, resp['correct answer'], resp['your answer']]
+                    writer_object_question.writerow(new_result_question)
+                
+                sno += 1
+
+            
+            except Exception:
+                print('kx to gadbad hai')
+
+        f_object.close()
+        f_object_question.close()
         print('************************ bas khatam ***************************')
         return Response({"message":"yeyeye"}, status=200)

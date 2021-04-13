@@ -1,5 +1,7 @@
 # Separate Quiz Platform
 
+### Added CI Workflow
+
 ## REST API DOCUMENTATION
 
 Documentation of our API endpoints starts here

@@ -1,6 +1,6 @@
 # Separate Quiz Platform
 
-### Added CI Workflow
+### Added CI Workflow (Testing Runserver)
 
 ## REST API DOCUMENTATION
 

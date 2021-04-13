@@ -60,7 +60,6 @@ PyJWT==1.7.1
 pylint==2.6.0
 pymongo==3.11.2
 python-dateutil==2.8.1
-python-magic-debian-bin==0.4.25; platform_system == "Linux"
 python-monkey-business==1.0.0
 python3-openid==3.2.0
 pytz==2020.4

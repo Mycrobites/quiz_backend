@@ -24,6 +24,13 @@ import requests
 # Create your views here.
 
 
+class HomeView(GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response("Hey! Welcome to Quiz Platform")
+
+
 class QuizView(GenericAPIView):
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
@@ -710,7 +717,7 @@ def resultanalysis(request):
 class GetResult(GenericAPIView):
     permission_classes = [AllowAny]
 
-    def get(self, request,username):
+    def get(self, request, username):
         result = {}
         try:
             user = User.objects.get(username=username)
@@ -859,44 +866,49 @@ class GetResult(GenericAPIView):
 
 class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
+
     def get(self, request):
         users = QuizResponse.objects.all().values_list('user', flat=True)
 
         f_object = open('media/result_response/output_result.csv', 'w')
         writer_object = writer(f_object)
-        writer_object.writerow(['S No','User','Quiz Name', 'Total Question', 'Correct', 'Incorrect','Attempted','Not Attempted', 'Marks']) 
-        
+        writer_object.writerow(
+            ['S No', 'User', 'Quiz Name', 'Total Question', 'Correct', 'Incorrect', 'Attempted', 'Not Attempted',
+             'Marks'])
+
         f_object_question = open('media/result_response/output_result_question.csv', 'w')
         writer_object_question = writer(f_object_question)
-        writer_object_question.writerow(['S No','User', 'Question No', 'Correct Answer', 'User Answer'])
+        writer_object_question.writerow(['S No', 'User', 'Question No', 'Correct Answer', 'User Answer'])
 
         f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
         writer_object_tag = writer(f_object_tag)
-        writer_object_tag.writerow(['S No','User', 'Analysis On', 'Total Question', 'Correct','Incorrect Or Not Attempted'])
+        writer_object_tag.writerow(
+            ['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect Or Not Attempted'])
 
         sno = 1
         for user in users:
             try:
-                user  = User.objects.get(id=user).username
-                data = requests.get(f'https://api.progressiveminds.in/api/getResult/{user}').json()['data']                                            
-                
+                user = User.objects.get(id=user).username
+                data = requests.get(f'https://api.progressiveminds.in/api/getResult/{user}').json()['data']
+
                 ## basic analysis
-                new_result = [sno, user, data['Quiz Name'],data['totalquestion'], data['correctquestion'], data['incorrectquestion'],
-                            data['attempted'], data['not_attempted'],data['marks_obtained']]
+                new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
+                              data['incorrectquestion'],
+                              data['attempted'], data['not_attempted'], data['marks_obtained']]
                 writer_object.writerow(new_result)
-                
-                for quest,resp in data['responses'].items():
+
+                for quest, resp in data['responses'].items():
                     new_result_question = [sno, user, quest, resp['correct answer'], resp['your answer']]
                     writer_object_question.writerow(new_result_question)
-                
-                for tag,resp in data['analysis'].items():
-                    new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect_or_not_attempted']]
-                    writer_object_tag.writerow(new_result_tag)
 
+                for tag, resp in data['analysis'].items():
+                    new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],
+                                      resp['incorrect_or_not_attempted']]
+                    writer_object_tag.writerow(new_result_tag)
 
                 sno += 1
 
-            
+
             except Exception:
                 print('kx to gadbad hai')
 

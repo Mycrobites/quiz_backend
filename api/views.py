@@ -28,7 +28,7 @@ class HomeView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response("Hey! Welcome to Quiz Platform")
+        return Response("Hey, Welcome to Quiz Platform!")
 
 
 class QuizView(GenericAPIView):

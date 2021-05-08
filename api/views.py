@@ -6,17 +6,21 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
+from .forms import *
 from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.http import HttpResponse
 import json
+from django.contrib.auth.decorators import login_required
 import datetime
 import regex as re
 from django.shortcuts import render
 import pandas as pd
 from csv import writer
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, HttpResponse, redirect,Http404
 
 import requests
 
@@ -42,7 +46,7 @@ class QuizView(GenericAPIView):
             quiz = Quiz.objects.get(id=quiz_id)
             if quiz.is_active(timezone.now()):
                 serializer = self.serializer_class(quiz)
-                questions = Question.objects.filter(quiz=quiz)
+                questions = quiz.question
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
                 for i in range(len(questions)):
@@ -208,7 +212,7 @@ class QuizCreateResponseView(GenericAPIView):
             response = serializer.data
             res_dict = json.loads(response['response'].replace("'", '"'))
             quiz = Quiz.objects.get(id=quiz_id)
-            questions = Question.objects.filter(quiz=quiz)
+            questions = quiz.question
             marks = 0
             for i in range(len(questions)):
                 if questions[i].answer is None:
@@ -299,7 +303,7 @@ class QuizMarksView(GenericAPIView):
                     response = response.replace("'", '"')
                     res_dict = json.loads(response)
                     quiz = quiz_assign.quiz
-                    questions = Question.objects.filter(quiz=quiz)
+                    questions = quiz.question
                     marks = 0
                     for i in range(len(questions)):
                         if questions[i].answer is None:
@@ -930,3 +934,232 @@ class CreateExcelForScore(APIView):
         response = HttpResponse(content=content, content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
         return response
+
+
+class AddQuestionToQuiz(APIView):
+    def post(self, request):
+        try:
+            quiz = Quiz.objects.get(id=request.data['quiz_id'])
+            quest_ids = request.data['quest_id']
+
+            for q in quest_ids:
+                try:
+                    quest = Question.objects.get(id=str(q))
+                    quiz.question.add(quest)
+                    quiz.save()
+                except Exception:
+                    return Response({"message": f"{q}, not valid"}, status=400)
+
+            return Response({"message": "added successfully"}, status=200)
+        except Exception:
+            return Response({"message": "something went wrong"}, status=400)
+
+
+
+
+
+
+
+################################ functions for question bank
+##################################
+##################################
+
+
+
+
+@login_required
+def getBank(request):
+    questions = Question.objects.all() 
+    try:
+        subject = request.GET["subject_tag"]
+        questions = Question.objects.filter(subject_tag=subject)
+    except:       
+        pass
+    try:
+        subject = request.GET["topic_tag"]
+        questions = Question.objects.filter(topic_tag=subject)
+    except:       
+        pass
+    try:
+        subject = request.GET["subtopic_tag"]
+        questions = Question.objects.filter(subtopic_tag=subject)
+    except:       
+        pass
+    try:
+        subject = request.GET["dificulty"]
+        questions = Question.objects.filter(dificulty_tag=subject)
+    except:       
+        pass
+    try:
+        subject = request.GET["skill"]
+        questions = Question.objects.filter(skill=subject)
+    except:       
+        pass
+    subjecttags = Question.objects.values_list("subject_tag").distinct()
+    dificulty = [("Easy"),("Medium"),("Hard")]
+    skill =Question.objects.values_list("skill").distinct()
+    subtopicstags = Question.objects.all().values_list("subtopic_tag").distinct()
+    topictags = Question.objects.all().values_list("topic_tag").distinct()
+    return render(request,"questions.html",{"questions":questions,"subjects":subjecttags,"topics":topictags,"subtopics":subtopicstags,"dificulty":dificulty,"skill":skill})
+
+@login_required
+def deleteQuestions(request):
+    queryset = json.loads(request.POST["objects"])
+    for i in queryset:
+        Question.objects.get(id=i).delete()
+
+    return HttpResponse("done")
+
+def bank(request):
+    if(request.method=="POST"):
+        question = request.POST["question"]
+        try:
+            answer = request.POST["answer"]
+            if(answer.strip()==""):
+                answer = None
+        except:
+            answer = None
+        try:
+            text = request.POST["text"]
+        except:
+            text = None
+        correct_marks = request.POST["correct_marks"]
+        negative_marks = request.POST["negative_marks"]
+        totaloptions = request.POST["totaloption"]
+        try:
+            dificulty_tag = request.POST["dificulty_tag"]
+        except:
+            dificulty_tag = "Easy"
+        try:
+            skill = request.POST["skill"]
+        except:
+            skill = None
+        try:
+            subject_tag = request.POST["subject_tag"]
+        except:
+            subject_tag = None
+        try:
+            topic_tag = request.POST["topic_tag"]
+        except:
+            topic_tag = None
+        try:
+            subtopic_tag = request.POST["subtopic_tag"]
+        except:
+            subtopic_tag = None
+        count = 1
+        option = {}
+        for i in range(int(totaloptions)+1):
+            try:
+                temp = request.POST["option"+str(i)]
+                if(temp.strip()!=""):
+                    option[count] = temp
+                    count+=1
+            except:
+                pass
+        try:
+           id =  request.POST["id"]
+           questionobj = Question.objects.get(id=id)
+           questionobj.answer = answer
+           questionobj.text = text
+           questionobj.subject_tag = subject_tag
+           questionobj.topic_tag = topic_tag
+           questionobj.subtopic_tag = subtopic_tag
+           questionobj.dificulty_tag = dificulty_tag
+           questionobj.skill = skill
+           questionobj.question = question
+           questionobj.option = option
+           questionobj.correct_marks = correct_marks
+           questionobj.negative_marks = negative_marks
+           questionobj.save()
+           return redirect("/questionbank")
+        except:
+            pass
+        obj = Question.objects.create(question=question,option=option,answer=answer,correct_marks=correct_marks,negative_marks=negative_marks,text=text,subject_tag=subject_tag,topic_tag=topic_tag,subtopic_tag=subtopic_tag,dificulty_tag=dificulty_tag,skill=skill)
+        return redirect("/questionbank")
+    form = QuestionForm
+    subjecttags = Question.objects.values_list("subject_tag").distinct()
+    dificulty = [("Easy"),("Medium"),("Hard")]
+    skill =Question.objects.values_list("skill").distinct()
+    subtopicstags = Question.objects.all().values_list("subtopic_tag").distinct()
+    topictags = Question.objects.all().values_list("topic_tag").distinct()
+    return render(request,"Questionbank.html",{"form":form,"subjects":subjecttags,"topics":topictags,"subtopics":subtopicstags,"dificulty":dificulty,"skill":skill})
+
+
+def editBank(request,qid):
+    try:
+        question = Question.objects.get(id=qid)
+    except:
+        raise Http404
+    try:
+        optionlist = question.option.values()
+    except:
+        optionlist = []
+    form = QuestionForm(instance=question)
+    subjecttags = Question.objects.values_list("subject_tag").distinct()
+    dificulty = [("Easy"),("Medium"),("Hard")]
+    skill =Question.objects.values_list("skill").distinct()
+    subtopicstags = Question.objects.all().values_list("subtopic_tag").distinct()
+    topictags = Question.objects.all().values_list("topic_tag").distinct()
+    if(len(optionlist)!=0):
+        return render(request,"Questionbank.html",{"options":optionlist,"question":question,"form":form,"subjects":subjecttags,"topics":topictags,"subtopics":subtopicstags,"dificulty":dificulty,"skill":skill})
+    else:
+        return render(request,"Questionbank.html",{"question":question,"form":form,"subjects":subjecttags,"topics":topictags,"subtopics":subtopicstags,"dificulty":dificulty,"skill":skill})
+
+
+@login_required
+def tagquestion(request):
+    questions = Question.objects.all()
+    subjecttags = Question.objects.values_list("subject_tag").distinct()
+    dificulty = [("Easy"),("Medium"),("Hard")]
+    skill =Question.objects.values_list("skill").distinct()
+    try:
+        subject = request.GET["subjecttag"]
+        topic = request.GET["topictag"]
+        subtopicstags = Question.objects.filter(subject_tag=subject,topic_tag=topic).values_list("subtopic_tag").distinct()
+        return render(request,"tagquestion.html",{"questions":questions,"subjects":subject,"topics":topic,"subtopics":subtopicstags,"dificulty":dificulty,"skill":skill})
+    except:
+        pass
+    try:
+        subject = request.GET["subjecttag"]
+        topictags = Question.objects.filter(subject_tag=subject).values_list("topic_tag").distinct()
+        return render(request,"tagquestion.html",{"questions":questions,"subjects":subject,"topics":topictags,"dificulty":dificulty,"skill":skill})
+    except:
+        pass
+    return render(request,"tagquestion.html",{"questions":questions,"subjects":subjecttags,"dificulty":dificulty,"skill":skill})
+
+
+@login_required
+def Addtags(request):
+    queryset = json.loads(request.POST["queryset"])
+    subject = request.POST["subject"]
+    try:
+        topic = request.POST["topic"]
+    except:
+        topic = ""
+    try:
+        subtopic = request.POST["subtopic"]
+    except:
+        subtopic = ""
+    dificulty = request.POST["dificulty"]
+    skill = request.POST["skill"]
+    print(queryset)
+    for i in queryset:
+        obj = Question.objects.get(id=i)
+        obj.subject_tag = subject
+        obj.topic_tag = topic
+        obj.subtopic_tag = subtopic
+        obj.dificulty_tag = dificulty
+        obj.skill = skill
+        obj.save()
+    return HttpResponse("done")
+
+
+
+@csrf_exempt
+def uploadimage(request):
+    # name = request.FILES["upload"].name
+    obj = upload_image.objects.create(file=request.FILES["upload"])
+    obj.save()
+    path = str(obj.file)
+    url = "https://lab.progressiveminds.in/media/" + path
+    return HttpResponse(json.dumps({"url": url, "uploaded": True}))

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://cdn.ckeditor.com/ckeditor5/27.0.0/classic/ckeditor.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/questionbank/style.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: antiquewhite;
+            line-height: 1.7;
+        }
+
+        button {
+            outline: none;
+        }
+
+        .header {
+            /* height: 10vh;*/
+            font-size: 24px;
+        }
+
+        .main button:hover {
+            background-color: antiquewhite;
+        }
+
+        input[type="number"] {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            margin-left: 13px;
+            outline: none;
+            transition: all 0.5s ease;
+        }
+
+        input[type="text"] {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            outline: none;
+            transition: all 0.5s ease;
+        }
+
+        input[type="text"]:focus {
+            transform: scale(1.1);
+        }
+
+        input[type="number"]:focus {
+            transform: scale(1.1);
+        }
+
+        select {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            width: 200px;
+            outline: none;
+            height: 30px;
+            transform: translateX(-45px);
+        }
+
+        label[for="id_text"] {
+            margin-left: 18px;
+            margin-right: 105px;
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_answer"] {
+            margin-left: 18px;
+            margin-right: 71px;
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_negative_marks"] {
+            margin-left: 18px;
+            margin-right: 0px;
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_correct_marks"] {
+            margin-left: 18px;
+            margin-right: 14px;
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[ for="id_dificulty_tag"] {
+            margin-left: 18px;
+            box-shadow: 0px 5px 16px antiquewhite;
+            margin-right: 90px;
+            font-size: 17px;
+        }
+
+        label[for="id_skill"] {
+            margin-left: 18px;
+            margin-right: 102px;
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        .editInput {
+            text-decoration: underline;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .editInput:hover {
+            color: blue;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">
+        <div id="branding">
+
+            <h1 id="site-name"><a href="/admin/" style="margin-top: 7px;font-weight: 500;">Django administration</a>
+            </h1>
+
+        </div>
+
+
+        <div id="user-tools">
+
+            Welcome,
+            <strong>{{request.user.username}}</strong>.
+
+
+
+            <a href="/questionbank">Home</a>
+
+            <a href="/admin/logout/">Log out</a>
+
+        </div>
+
+
+
+    </div>
+    <div class="header w3-card w3-white w3-border w3-margin w3-padding"
+        style="text-align: center; line-height: 1.8; font-family: sans-serif;font-weight: 700; margin-left: 30px;"><span
+            style="box-shadow: 2px 12px 13px antiquewhite;">Add Question to Question Bank</span>
+    </div>
+    <div class="main w3-card w3-white w3-border w3-margin w3-padding " style="padding: 13px 16px!important;">
+        <form action="/addquestion" method="post" id="newform">
+            {% csrf_token %}
+            {{form.media}}
+            {{form.as_p}}
+            <div id="subjective">
+                <p id="pforsubject"><label for="subject_tag"
+                        style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Subject
+                        Tag</label>
+
+
+                    <input type="text" value="{{question.subject_tag}}"
+                        style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        name="subject_tag" id="subject_tag" onkeyup="addTopic()">
+                </p>
+                <p id="pfordificulty"><label for="dificulty_tag"
+                    style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Dificulty
+                    Tag</label>
+                    <select name="dificulty_tag" id="dificulty" value="{{question.dificulty_tag}}">
+                        {% for i in dificulty %}
+                        <option value="{{i}}">{{i}}</option>
+                        {% endfor %}
+                    </select>
+            </p>
+            <p id="pforskill"><label for="skill"
+                style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Skill Tag</label>
+
+
+            <input type="text" value="{{question.skill}}"
+                style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                name="skill" id="skill">
+        </p>
+            </div>
+
+            <p>
+                <label for="question"
+                    style="margin-right: 68px; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Question</label>
+
+                <input type="text" value="{{question.question}}"
+                    style="margin-right: 15px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                    id="question" name="question" readonly required><a class="editInput"
+                    onclick="editinput('question')">Edit Input</a>
+            </p>
+            <div class="optionarr" id="listofoption">
+                {% if options %}
+                {% for i in options %}
+                <p>
+                    <label for="option{{forloop.counter}}"
+                        style="margin-right: 70px;margin-left: 18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Option
+                        {{forloop.counter}}</label>
+
+                    <input type="text"
+                        style="margin-right: 15px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;  "
+                        id="option{{forloop.counter}}" value="{{i}}" name="option{{forloop.counter}}" readonly
+                        required><a class="editInput" onclick="editinput('option{{forloop.counter}}')">Edit Input</a>
+                </p>
+                {% endfor %}
+                {% else %}
+                <p>
+                    <label for="option1"
+                        style="margin-right: 70px;margin-left: 18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Option
+                        1</label>
+
+                    <input type="text"
+                        style="margin-right: 15px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;  "
+                        id="option1" name="option1" readonly required><a class="editInput"
+                        onclick="editinput('option1')">Edit Input</a>
+                </p>
+                {% endif %}
+            </div>
+
+            <input type="hidden" name="totaloption" id="totaloption">
+            <a href="/questionbank"
+                style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                onclick="">Cancel</a>
+            <button type="button"
+                style="border-radius:100px ;height: 35px; width: 175px;margin-right:50px; padding: 0px; margin-top: 18px; margin-left: 18px;"
+                onclick="createOption()">create more option</button>
+
+
+            <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform()">Submit
+                Form</button>
+            <button type="submit" id="submitbtn" style="display: none;">Submit Form</button>
+        </form>
+    </div>
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content w3-card-4">
+            <header class="w3-container w3-teal">
+                <span onclick="document.getElementById('id01').style.display='none'"
+                    class="w3-button w3-display-topright">&times;</span>
+                <h2>Input Content</h2>
+            </header>
+            <div class="w3-container w3-margin w3-padding">
+                <textarea name="content" id="ckeditor"></textarea>
+            </div>
+            <footer class="w3-container w3-teal">
+                <button class="w3-btn w3-shadow w3-blue w3-margin w3-right w3-round-large"
+                    onclick="getText()">Apply</button>
+            </footer>
+        </div>
+    </div>
+    </div>
+</body>
+<!-- <script src="https://cdn.ckeditor.com/4.15.1/standard/ckeditor.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#ckeditor'), {
+            ckfinder: {
+                options: {
+                    resourceType: 'Images'
+                },
+                credentials: "include",
+                headers: {
+                    "X-CSRF-TOKEN":"{{csrf_token}}",
+                    csrftoken: "{{csrf_token}}",
+                    csrfmiddlewaretoken: "{{csrf_token}}",
+                },
+                uploadUrl: "https://lab.progressiveminds.in/uploadimages?command=QuickUpload&type=Images&responseType=json",
+            },
+            images: {
+                // Configure the available styles.
+                styles: [
+                    'alignLeft', 'alignCenter', 'alignRight'
+                ],
+
+                // Configure the available image resize options.
+                resizeOptions: [
+                    {
+                        name: 'resizeImage:original',
+                        label: 'Original',
+                        value: null
+                    },
+                    {
+                        name: 'resizeImage:50',
+                        label: '50%',
+                        value: '50'
+                    },
+                    {
+                        name: 'resizeImage:75',
+                        label: '75%',
+                        value: '75'
+                    }
+                ],
+
+                // You need to configure the image toolbar, too, so it shows the new style
+                // buttons as well as the resize buttons.
+                toolbar: [
+                    'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight',
+                    '|',
+                    'resizeImage',
+                    '|',
+                    'imageTextAlternative'
+                ]
+            }
+        })
+        .then(newEditor => {
+            editor = newEditor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    var option = 1;
+    var currentid = "";
+    const crop = (one) => {
+        one = one.replace("<p>", "");
+        one = one.replace("</p>", "");
+        one = one.trim();
+        return one;
+    };
+
+    const deleteOption = (option) => {
+        $("#pfor" + option).remove();
+    }
+    const createOption = () => {
+        option += 1;
+        temp = `<p id="pfor${option}">
+                <span class="w3-right w3-large" style="cursor:pointer" onclick="deleteOption('${option}')">&times;</span>
+                <label for="option${option}" style="margin-right:70px; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;" >Option ${option}</label>
+                <input type="text" name="option${option}" style="margin-right:15px; border-radius:10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;" id="option${option}" required readonly><a class="editInput" onclick="editinput('option${option}')">Edit Input</a>
+            </p>`;
+        $("#listofoption").append(temp);
+    }
+
+    const editinput = (id) => {
+        value = $("#" + id).val();
+        currentid = id;
+        editor.setData(value);
+        $("#id01").show();
+
+    }
+
+    const getText = () => {
+        value = editor.getData();
+        $("#" + currentid).val(value);
+        $("#id01").hide();
+        editor.setData("");
+    }
+
+    const submitform = () => {
+        $("#totaloption").val(option);
+        $("#submitbtn").click();
+    }
+
+    const addTopic = () => {
+        subject = $("#subject_tag").val().trim();
+        if (subject != "") {
+            try {
+                $("#pfortopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+            topictag = `<p id="pfortopic"><label for="topic_tag" style="margin-right:72px; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;" >Topic Tag</label><input type="text" style="border-radius:10px;border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;" name="topic_tag" id="topic_tag" onkeyup="addSubtopic()"></p>`;
+            $("#subjective").append(topictag);
+        }
+        else {
+            try {
+                $("#pfortopic").remove();
+                $("#pforsubtopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
+
+    const addSubtopic = () => {
+        topic = $("#topic_tag").val().trim();
+        if (topic != "") {
+            try {
+                $("#pforsubtopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+            subtopictag = `<p id="pforsubtopic"><label for="subtopic_tag" style="margin-right:33px; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;"   >Sub Topic Tag</label><input type="text" style="border-radius:10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;" name="subtopic_tag" id="subtopic_tag" ></p>`;
+            $("#subjective").append(subtopictag);
+        }
+        else {
+            try {
+                $("#pforsubtopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+    }
+</script>
+
+</html>

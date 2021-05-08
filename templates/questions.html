@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+<head>
+  <title>Select question_bank to change | Django site admin</title>
+  <link rel="stylesheet" type="text/css" href="/static/questionbank/style.css">
+
+
+  <link rel="stylesheet" type="text/css" href="/static/questionbank/sstyle.css">
+
+
+  <script type="text/javascript" src="/admin/jsi18n/"></script>
+
+
+
+
+
+
+
+  <script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+  <script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+  <script type="text/javascript" src="/static/admin/js/core.js"></script>
+  <script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+  <script type="text/javascript" src="/static/admin/js/actions.js"></script>
+  <script type="text/javascript" src="/static/admin/js/urlify.js"></script>
+  <script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>
+  <script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>
+
+
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/static/admin/css/responsive.css">
+
+
+  <meta name="robots" content="NONE,NOARCHIVE">
+  <style>
+ #bh:hover{
+   background-color:  #417690;
+ }
+ #bh{
+   background-color:  #999999;
+ }
+    
+  </style>
+</head>
+
+
+<body class=" app-blog model-question_bank change-list" data-admin-utc-offset="19800">
+  <div id="header">
+    <div id="branding">
+    
+<h1 id="site-name"><a href="/admin/" style="margin-top: 7px;">Django administration</a></h1>
+
+    </div>
+    
+    
+    <div id="user-tools">
+        
+            Welcome,
+            <strong>{{request.user.username}}</strong>.
+        
+        
+
+            <a href="/questionbank">Home</a>
+            
+            <a href="/admin/logout/">Log out</a>
+        
+    </div>
+    
+    
+    
+</div>
+  <!-- 
+    Confirmation dialogue
+   -->
+
+   
+<div id="id01" class="modal">
+  <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">×</span>
+  <form class="modal-content" >
+    <div class="container" >
+      <h1>Delete Questions</h1>
+    <span id="deletion"></span>
+      <div class="clearfix">
+        <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+        <button type="button" class="deletebtn" onclick="delQuestions()">Delete</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div id="id02" class="modal">
+  <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">×</span>
+  <form class="modal-content" >
+    <div class="container" >
+      <div class="main" id="sec1" style="line-height: 2.2;">
+        <form >
+          <fieldset>
+            <legend>Add tags</legend>
+        {% if subtopics %}
+        <p id="pforsubject">
+            <label for="subject" style="margin-left: 20px;margin-right: 53px ; margin-left:26px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Select subject tag</label>
+            <input type="text" list="subject" id="subjecttag">
+            <datalist name="subjecttag"  id="subject" style="border-radius: 20px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;height:30px;">
+              {% for i in subjects %}
+              {% for value in i %} 
+              <option value="{{value}}">{{value}}</option>
+              {% endfor %}
+              {% endfor %}
+            </datalist>
+        </p>
+        <p id="pfortopic">
+            <label for="topic"style="margin-left: 20px;margin-right: 67px ; margin-left:26px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Select topic tag</label>
+            <input type="text" list="topic" id="topictag">
+            <datalist name="topictag" id="topic" style="border-radius: 20px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;height:30px;">
+              {% for i in topics %}
+              {% for value in i %} 
+              <option value="{{value}}">{{value}}</option>
+              {% endfor %}
+              {% endfor %}  
+            </datalist>
+        </p>
+        </p>
+        <p id="pforsubtopic">
+            <label for="subtopic" style="margin-left: 20px;margin-right: 40px ; margin-left:26px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Select subtopic tag</label>
+            <input type="text" list="subtopic" id="subtopictag">           
+            <datalist name="subtopictag" id="subtopic" style="border-radius: 20px;border-color:#0cf;box-shadow: 0px 11px 20px antiquewhite;height:30px;">
+                {% for i in subtopics %}
+                {% for values in i %}
+                {% if values != "" %}
+                <option value="{{values}}">{{values}}</option>
+                {% endif %}
+                {%endfor %}
+                {% endfor %}
+            </datalist>
+        </p>
+
+        {%endif %}
+        <p id="pfordificulty">
+            <label for="dificulty" style="margin-left: 20px;margin-right: 47px ; margin-left:26px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Select dificulty tag</label>
+            <select name="dificultytag" id="dificulty" style="border-radius: 20px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;height:30px;">
+                {% for i in dificulty %}
+                <option value="{{i}}">{{i}}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <p id="pforskill">
+            <label for="skill" style="margin-left: 20px;margin-right: 82px ; margin-left:26px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">Select skill tag</label>
+            <input type="text" list="skill" id="skilltag">
+            <datalist name="skilltag" id="skill" style="border-radius: 20px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;height:30px;">
+                {% for i in skill %}
+                {% for values in i %}
+                <option value="{{values}}">{{values}}</option>
+                {%endfor %}
+                {% endfor %}
+            </datalist>
+        </p>
+        </fieldset>
+        </form>
+    </div>
+      <div class="clearfix">
+        <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn">Cancel</button>
+        <button type="button" class="deletebtn" style="color:blue" onclick="applyFilter()">Apply Filters</button>
+      </div>
+    </div>
+  </form>
+</div>
+  <!-- Container -->
+  <div id="container">
+
+
+    <!-- Header -->
+    <div id="header">
+      <div id="branding">
+
+
+
+      </div>
+
+
+
+
+
+
+    </div>
+    <!-- END Header -->
+
+
+
+
+
+
+
+    <!-- Content -->
+    <div id="content" class="flex">
+
+      <h1>Select question_bank to change</h1>
+
+      <div id="content-main">
+
+        <ul class="object-tools">
+
+
+
+
+
+          <li>
+
+            <a href="/addquestion" class="addlink" style="height: 22px;">
+              Add question
+            </a>
+          </li>
+
+
+
+
+        </ul>
+
+
+        <div class="module filtered" id="changelist">
+
+
+
+
+
+
+
+          <div id="changelist-filter">
+            <h2>Filter</h2>
+
+            <h3> By subject tag </h3>
+            <ul>
+
+              <li class="selected">
+                <a href="?" title="All">All</a>
+              </li>
+              {% for i in subjects %}
+              <li>
+                {% for value in i %}
+                <a href="?subject_tag={{value}}" title="{{value}}">{{value}}</a>
+              </li>
+              {% endfor %}
+              {% endfor %}
+            </ul>
+
+            <h3> By topic tag </h3>
+            <ul>
+
+              <li class="selected">
+                <a href="?" title="All">All</a>
+              </li>
+              {% for i in topics %}
+              <li>
+                {% for value in i %}
+                <a href="?topic_tag={{value}}" title="{{value}}">{{value}}</a>
+              </li>
+              {% endfor %}
+              {% endfor %}
+
+            </ul>
+
+            <h3> By subtopic tag </h3>
+            <ul>
+
+              <li class="selected">
+                <a href="?" title="All">All</a>
+              </li>
+              {% for i in subtopics %}
+              <li>
+                {% for value in i %}
+                <a href="?subtopic_tag={{value}}" title="{{value}}">{{value}}</a>
+              </li>
+              {% endfor %}
+              {% endfor %}
+
+            </ul>
+
+            <h3> By dificulty tag </h3>
+            <ul>
+
+              <li class="selected">
+                <a href="?" title="All">All</a>
+              </li>
+              {% for i in dificulty %}
+              <li>
+                <a href="?dificulty={{i}}" title="{{i}}">{{i}}</a>
+              </li>
+              {% endfor %}
+
+            </ul>
+
+            <h3> By skill </h3>
+            <ul>
+
+              <li class="selected">
+                <a href="?" title="All">All</a>
+              </li>
+              {% for i in skill %}
+              <li>
+                {% for value in i %}
+                <a href="?skill={{value}}" title="{{value}}">{{value}}</a>
+              </li>
+              {% endfor %}
+              {% endfor %}
+
+            </ul>
+
+          </div>
+
+
+
+          <form id="changelist-form" method="post" novalidate><input type="hidden" name="csrfmiddlewaretoken"
+              value="GkUBS8pKTOC0h0Xc8nVI56lQr8kGhPm70KKDfdsGC3fF68tXrSyy0fN2BMHf45WE">
+
+
+
+
+            <div class="actions">
+
+            <button type="button" id="bh"  onclick="showConfirm()" style="border-radius: 20px;height: 32px;border: 0px;color: white;margin-right: 15px;">Delete selected questions</button>
+            <button type="button" id="bh" onclick="showFilters()" style="border-radius: 20px; height: 32px;border: 0px;color: white;">Apply filters to selected Questions</button>
+
+            </div>
+
+
+
+
+            <div class="results">
+              <table id="result_list">
+                <thead>
+                  <tr>
+
+                    <th scope="col" class="action-checkbox-column">
+
+                      <div class="text"><span><input type="checkbox" id="action-toggle"></span></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-question">
+
+
+
+                      <div class="text"><a href="?o=1">Question</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-correct_marks">
+
+
+
+                      <div class="text"><a href="?o=2">Correct marks</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-negative_marks">
+
+
+
+                      <div class="text"><a href="?o=3">Negative marks</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-subject_tag">
+
+
+
+                      <div class="text"><a href="?o=4">Subject tag</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-topic_tag">
+
+
+
+                      <div class="text"><a href="?o=5">Topic tag</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-subtopic_tag">
+
+
+
+                      <div class="text"><a href="?o=6">Subtopic tag</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-dificulty_tag">
+
+
+
+                      <div class="text"><a href="?o=7">Dificulty tag</a></div>
+                      <div class="clear"></div>
+                    </th>
+                    <th scope="col" class="sortable column-skill">
+
+
+
+                      <div class="text"><a href="?o=8">Skill</a></div>
+                      <div class="clear"></div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  {% for i in questions %}
+                  <tr class="row1">
+                    <td class="action-checkbox"><input type="checkbox" name="_selected_action"
+                        value="{{i.id}}" class="action-select"></td>
+                    <th class="field-question"><a
+                        href="/questionbank/{{i.id}}/change/">{{i.question |truncatechars:255 }}</th>
+                    <td class="field-correct_marks">{{i.correct_marks}}</td>
+                    <td class="field-negative_marks">{{i.negative_marks}}</td>
+                    <td class="field-subject_tag">{{i.subject_tag}}</td>
+                    <td class="field-topic_tag">{{i.topic_tag}}</td>
+                    <td class="field-subtopic_tag">{{i.subtopic_tag}}</td>
+                    <td class="field-dificulty_tag">{{i.dificulty_tag}}</td>
+                    <td class="field-skill">{{i.skill}}</td>
+                  </tr>
+          {% endfor %}
+
+
+                </tbody>
+              </table>
+            </div>
+
+
+
+
+
+
+            <p class="paginator">
+
+              {{questions.count }} question_banks
+
+
+            </p>
+
+          </form>
+        </div>
+      </div>
+
+
+      <br class="clear">
+    </div>
+    <!-- END Content -->
+
+    <div id="footer"></div>
+  </div>
+  <!-- END Container -->
+
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+<script>
+      const showConfirm = () => {
+        let querySet = Array();
+        $("input:checkbox[name=_selected_action]:checked").each(function () {
+            querySet.push($(this).val());
+
+        });
+        if(querySet.length!=0){
+        message = "<p>Are you sure you want to delete "+querySet.length+" objects?</p>";
+        $("#deletion").html(message);
+        document.getElementById('id01').style.display='block';
+        }
+    }
+
+    const showFilters = ()=>{
+      let querySet = Array();
+        $("input:checkbox[name=_selected_action]:checked").each(function () {
+            querySet.push($(this).val());
+
+        });
+        if(querySet.length!=0){
+        $("#id02").show();
+        }
+    }
+
+    const delQuestions = ()=>{
+      let querySet = Array();
+        $("input:checkbox[name=_selected_action]:checked").each(function () {
+            querySet.push($(this).val());
+
+        });
+
+        if(querySet.length!=0){
+          $("#id01").hide();
+            $("#id02").hide();
+          $.post("/deleteSelected",{
+            "objects":JSON.stringify(querySet),
+            "csrfmiddlewaretoken":"{{csrf_token}}"
+          },(data,status)=>{
+            alert(querySet.length+" questions were deleted successfully");
+            location.reload();
+          })
+        }
+    }
+
+    const applyFilter = () => {
+        console.log("rajat");
+        let querySet = Array();
+        $("input:checkbox[name=_selected_action]:checked").each(function () {
+            querySet.push($(this).val());
+
+        });
+        console.log(querySet);
+        if (querySet.length != 0) {
+            subject = $("#subjecttag").val();
+            topic = $("#topictag").val();
+            subtopic = $("#subtopictag").val();
+            dificulty = $("#dificulty").val();
+            skill = $("#skilltag").val();
+            console.log(subject, topic, subtopic, dificulty, skill);
+            $.post("/addTags",{
+                "queryset":JSON.stringify(querySet),
+                "subject":subject,
+                "topic":topic,
+                "subtopic":subtopic,
+                "dificulty":dificulty,
+                "skill":skill,
+                "csrfmiddlewaretoken":"{{csrf_token}}"
+            },(data,status)=>{
+                console.log("added tag");
+                location.reload();
+            })
+        }
+    }
+    const getTopic = () => {
+        subject = $("#subject").val().trim();
+        if (subject != "") {
+            try {
+                $("#pfortopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+            location.href = "/tagquestion?subjecttag=" + subject;
+        }
+        else {
+            try {
+                $("#pfortopic").remove();
+                $("#pforsubtopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
+    {% if topics %}
+    const getSubtopic = () => {
+        topic = $("#topic").val().trim();
+        if (topic != "") {
+            try {
+                $("#pforsubtopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+            location.href = "/tagquestion?subjecttag={{subjects}}&topictag=" + topic;
+        }
+        else {
+            try {
+                $("#pforsubtopic").remove();
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+    }
+    {% endif %}
+
+
+</script>
+</html>

@@ -18,6 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from api.views import HomeView
+from api.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,6 +26,13 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('api/auth/', include('authentication.api.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('questionbank',getBank,name="bank"),
+    path("questionbank/<slug:qid>/change/",editBank),
+    path("addquestion",bank),
+    path("tagquestion",tagquestion),
+    path("addTags",Addtags),
+    path("deleteSelected",deleteQuestions),
+    path("uploadimages",upload_image)
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

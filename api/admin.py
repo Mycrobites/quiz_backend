@@ -10,7 +10,7 @@ class QuizAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     model = Question
-    list_display = ["get_quiz", "question", "correct_marks", "negative_marks", "get_answer"]
+    list_display = ["question", "correct_marks", "negative_marks", "get_answer"]
     list_filter = ["quiz__title", "subject_tag", "topic_tag", "subtopic_tag", "dificulty_tag", "skill"]
 
     def get_answer(self, obj):
@@ -21,10 +21,7 @@ class QuestionAdmin(admin.ModelAdmin):
         else:
             return None
 
-    def get_quiz(self, obj):
-        return obj.quiz.title
 
-    get_quiz.short_description = 'Quiz'
     get_answer.short_description = 'Answer'
 
 

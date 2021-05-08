@@ -4,6 +4,7 @@ import uuid
 import jsonfield
 from ckeditor_uploader.fields import RichTextUploadingField
 from datetime import datetime
+from datetime import date
 
 
 # Create your models here.
@@ -18,13 +19,14 @@ class Quiz(models.Model):
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
+    question = models.ManyToManyField("Question")
 
 
     def __str__(self):
         return str(self.title)
 
     def is_active(self, time):
-        if self.endtime > time:
+        if self.endtime > time and self.starttime < time:
             return True
         else:
             return False
@@ -37,7 +39,6 @@ dificulty_choices = (
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     question = RichTextUploadingField()
     correct_marks = models.PositiveSmallIntegerField()
     negative_marks = models.PositiveSmallIntegerField()
@@ -51,7 +52,7 @@ class Question(models.Model):
     skill = models.CharField(max_length=100, blank=True, default="")
 
     def __str__(self):
-        return f"{self.quiz} - {self.question}"
+        return self.question[:250]
 
 
 class AssignQuiz(models.Model):
@@ -116,3 +117,13 @@ class UserQuizSession(models.Model):
 
     def ___str___(self):
         return f"{self.user}'s remaining time is {self.remaining_duration}"
+
+def upload_and_Rename(instance,filename):
+    datea = str(date.today())
+    year,month,datea = datea.split("-")
+    upload_to = "uploads/"+str(year)+"/"+str(month)+"/"+str(datea)+"/"+filename
+    return upload_to
+
+class upload_image(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    file = models.ImageField(upload_to=upload_and_Rename, height_field=None, width_field=None, max_length=None)

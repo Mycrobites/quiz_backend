@@ -188,7 +188,7 @@ Documentation of our API endpoints starts here
 
 `PUT http://127.0.0.1:8000/api/edit-question/<slug:question_id>`
 
-   `{
+     `{
         "quiz": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
         "question": "what is 1+1(rename)",
         "option": [
@@ -200,7 +200,6 @@ Documentation of our API endpoints starts here
             "key":"2",
             "option":"2"
             }
-
         ],
         "correct_marks": "4",
         "negative_marks": "1",

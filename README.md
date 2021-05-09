@@ -13,21 +13,24 @@ Documentation of our API endpoints starts here
 `POST http://127.0.0.1:8000/api/create-quiz`
 
     {
-      "title": "Quiz 3",
-      "creator": 1,
-      "desc": "This is for testing",
-      "endtime": "2021-03-16T00:00:00Z"
+        "title": "Quiz for documentation",
+        "creator": 566,
+        "starttime": "2020-03-16T00:00:00+05:30",
+        "endtime": "2021-07-16T05:30:00+05:30",
+        "duration": "00:45:00",
+        "desc": "This quiz is being created solely for documentation purpose"
     }
 
 ### Response
 
     {
-        "id": "a3db5155-cc6b-4ed6-90e0-8bb09598aa48",
-        "title": "Quiz 3",
-        "time": "2021-03-16T05:01:27.410233Z",
-        "desc": "This is for testing",
-        "endtime": "2021-03-16T00:00:00Z",
-        "creator": 1
+        "id": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
+        "title": "Quiz for documentation",
+        "creator": 566,
+        "starttime": "2020-03-16T00:00:00+05:30",
+        "endtime": "2021-07-16T05:30:00+05:30",
+        "duration": "00:45:00",
+        "desc": "This quiz is being created solely for documentation purpose"
     }
 
 ## To get a quiz
@@ -39,37 +42,49 @@ Documentation of our API endpoints starts here
 ### Response
 
     {
-        "quiz_details": {
-            "id": "994245ef-4a78-40d6-8dcf-c2f1dfdff74f",
-            "title": "Quiz 1",
-            "time": "2021-03-15T14:53:09.939730Z",
-            "desc": "This is a test quiz",
-            "endtime": "2021-03-16T00:00:00Z",
-            "creator": 1
-        },
-        "quiz_questions": [
-            {
-                "id": "c8215cfc-0d4e-48a0-8b98-5a8f5827f018",
-                "question": "LMS Full Form?",
-                "correct_marks": 1,
-                "negative_marks": -1,
-                "option": "{'1': 'Learning Management System', '2': 'Learning Manager System', '3': 'Learner Machine System', '4': 'Lesson Making System'}",
-                "answer": 1,
-                "text": "",
-                "quiz": "994245ef-4a78-40d6-8dcf-c2f1dfdff74f"
+    "quiz_details": {
+        "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
+        "title": "Quiz for testing 4",
+        "creator": 566,
+        "starttime": "2020-03-16T00:00:00+05:30",
+        "endtime": "2021-07-16T05:30:00+05:30",
+        "duration": "00:45:00",
+        "desc": "This quiz is being created solely for testing purpose"
+    },
+    "quiz_questions": [
+        {
+            "id": "5b54301e-ad1a-41f3-b123-d24445e5d603",
+            "question": "<p>A road connecting two mountain</p>",
+            "correct_marks": 6,
+            "negative_marks": 3,
+            "option": {
+                "1": "Yes",
+                "2": "No"
             },
-            {
-                "id": "2513e723-15ed-4777-9a00-19bf214ce97f",
-                "question": "What is your full name?",
-                "correct_marks": 0,
-                "negative_marks": 0,
-                "option": "",
-                "answer": null,
-                "text": "",
-                "quiz": "994245ef-4a78-40d6-8dcf-c2f1dfdff74f"
-            }
-        ]
-    }
+            "answer": 1,
+            "text": "",
+            "subject_tag": "Mathematics",
+            "topic_tag": "Algebra",
+            "subtopic_tag": "Elementary Algebra",
+            "dificulty_tag": "Easy",
+            "skill": "Elementary Algebra"
+        },
+        {
+            "id": "f423f295-ea08-4dd7-9a18-ab35c86c833c",
+            "question": "<p>The Mumbai city Chess committee is organising a Chess</p>",
+            "correct_marks": 6,
+            "negative_marks": 2,
+            "option": {},
+            "answer": null,
+            "text": "153",
+            "subject_tag": "Mathematics",
+            "topic_tag": "Combinatorics",
+            "subtopic_tag": "Combinations",
+            "dificulty_tag": "Easy",
+            "skill": "Combinations"
+        }
+    ]
+}
     
 ## To edit a quiz
 
@@ -78,21 +93,24 @@ Documentation of our API endpoints starts here
 `PUT http://127.0.0.1:8000/api/edit-quiz/<slug:quiz_id>`
 
     {
-        "title": "Quiz 4 for testing",
-        "creator": 1,
-        "desc": "This is for testing",
-        "endtime": "2021-03-18T00:00:00Z"
+        "title": "Quiz for documentation(rename)",
+        "creator": 566,
+        "starttime": "2020-03-16T00:00:00+05:30",
+        "endtime": "2021-07-16T05:30:00+05:30",
+        "duration": "00:45:00",
+        "desc": "This quiz is being created solely for documentation purpose(rename)"
     }
 
 ### Response
 
     {
-        "id": "e9e34d7c-28a0-4e5f-a320-89d69322d311",
-        "title": "Quiz 4 for testing",
-        "time": "2021-03-17T09:16:48.033800Z",
-        "desc": "This is for testing",
-        "endtime": "2021-03-18T00:00:00Z",
-        "creator": 1
+        "id": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
+        "title": "Quiz for documentation(rename)",
+        "creator": 566,
+        "starttime": "2020-03-16T00:00:00+05:30",
+        "endtime": "2021-07-16T05:30:00+05:30",
+        "duration": "00:45:00",
+        "desc": "This quiz is being created solely for documentation purpose(rename)"
     }
     
 ## To delete a quiz
@@ -114,56 +132,109 @@ Documentation of our API endpoints starts here
 `POST http://127.0.0.1:8000/api/create-question`
 
     {
-        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311",
-        "question": "CORS Full Form?",
-        "option": "",
+        "quiz": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
+        "question": "what is 1+1",
+        "option": [
+            {
+            "key":"1",
+            "option":"1"
+            },
+            {
+            "key":"2",
+            "option":"2"
+            }
+
+        ],
         "correct_marks": "2",
-        "negative_marks": "-1",
-        "text": "Cross-Origin Resource Sharing",
-        "creator":1
+        "negative_marks": "1",
+        "answer": "2",
+        "creator":1,
+        "subject_tag": "Maths",
+        "topic_tag": "Arithmetic",
+        "subtopic_tag": "Algebra",
+        "dificulty_tag": "Easy",
+        "skill": "Parity"
     }
     
 ### Response
 
-    {
-        "id": "b43d3a4d-67a8-450d-85e4-d713bd11679b",
-        "question": "CORS Full Form?",
-        "correct_marks": 2,
-        "negative_marks": -1,
-        "option": "",
-        "answer": null,
-        "text": "Cross-Origin Resource Sharing",
-        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311"
-    }
+      `{
+            "id": "a60a3844-24ba-4ce8-ba2f-0e0cd63b9181",
+            "question": "what is 1+1",
+            "correct_marks": 2,
+            "negative_marks": 1,
+            "option": [
+                {
+                    "key": 1,
+                    "option": "1"
+                },
+                {
+                    "key": 2,
+                    "option": "2"
+                }
+            ],
+            "answer": 2,
+            "text": "",
+            "subject_tag": "Maths",
+            "topic_tag": "Arithmetic",
+            "subtopic_tag": "Algebra",
+            "dificulty_tag": "Easy",
+            "skill": "Parity"
+        }`
 
-## To edit a quesion
+## To edit a question
 
 ### Request
 
 `PUT http://127.0.0.1:8000/api/edit-question/<slug:question_id>`
 
-    {
-        "question": "What is CORS Full Form?",
-        "correct_marks": 2,
-        "negative_marks": -1,
-        "option": "",
-        "answer": null,
-        "text": "Cross-Origin Resource Sharing",
-        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311",
-        "creator":1
-    }
+     `{
+        "quiz": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
+        "question": "what is 1+1(rename)",
+        "option": [
+            {
+            "key":"1",
+            "option":"1"
+            },
+            {
+            "key":"2",
+            "option":"2"
+            }
+        ],
+        "correct_marks": "4",
+        "negative_marks": "1",
+        "answer": "2",
+        "creator":1,
+        "subject_tag": "Maths",
+        "topic_tag": "Arithmetic",
+        "subtopic_tag": "Algebra",
+        "dificulty_tag": "Easy"
+    }`
   
 ### Response
 
     {
-        "id": "5796aa80-328e-4159-af70-9126276e7ebe",
-        "question": "What is CORS Full Form?",
-        "correct_marks": 2,
-        "negative_marks": -1,
-        "option": "",
-        "answer": null,
-        "text": "Cross-Origin Resource Sharing",
-        "quiz": "e9e34d7c-28a0-4e5f-a320-89d69322d311"
+    "id": "a60a3844-24ba-4ce8-ba2f-0e0cd63b9181",
+    "question": "what is 1+1(rename)",
+    "correct_marks": 4,
+    "negative_marks": 1,
+    "option": [
+        {
+            "key": 1,
+            "option": "1"
+        },
+        {
+            "key": 2,
+            "option": "2"
+        }
+    ],
+    "answer": 2,
+    "text": "",
+    "subject_tag": "Maths",
+    "topic_tag": "Arithmetic",
+    "subtopic_tag": "Algebra",
+    "dificulty_tag": "Easy",
+    "skill": "Parity"
     }
 
 ## To delete a question
@@ -224,11 +295,48 @@ Documentation of our API endpoints starts here
 
 ### Response
 
-    {
-        "quiz": "994245ef-4a78-40d6-8dcf-c2f1dfdff74f",
-        "user": 2,
-        "marks": 1
-    }
+ 
+    
+## To add student
+
+### Request
+
+`POST http://127.0.0.1:8000/api/add-student`
+
+### Response
+
+    
+
+## To get all quizzes
+
+### Request
+
+`GET http://127.0.0.1:8000/api/get-all-quizzes/<slug:userid>`
+
+### Response
+
+    [
+        {
+            "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
+            "title": "Quiz for testing 3",
+            "creator": 566,
+            "starttime": "2020-03-16T00:00:00+05:30",
+            "endtime": "2021-06-16T05:30:00+05:30",
+            "duration": "00:45:00",
+            "desc": "This quiz is being created solely for testing purpose",
+            "creator_username": "administrator"
+        },
+        {
+            "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
+            "title": "Quiz for testing 4",
+            "creator": 566,
+            "starttime": "2020-03-16T00:00:00+05:30",
+            "endtime": "2021-07-16T05:30:00+05:30",
+            "duration": "00:45:00",
+            "desc": "This quiz is being created solely for testing purpose",
+            "creator_username": "administrator"
+        }
+    ]
 
 
 
@@ -272,12 +380,30 @@ Documentation of our API endpoints starts here
         "user": 77,
         "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88"
     }
+    
+## To check quiz assigned
+
+### Request
+
+`POST http://127.0.0.1:8000/api/check-quiz-assigned`
+
+    {
+        "user":"440",
+        "quiz":"4cbbbe73-c086-4e22-b4d7-efd0776dbb85"
+    }
+    
+ ### Response 
+     {
+        "message": "You have already attempted the test"
+    }
+    
+
 
 ## To post UserSession at the start of the test
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/userSession/`
+    `POST http://127.0.0.1:8000/api/userSession/`
 
     {
         "user": 8,
@@ -319,45 +445,74 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`GET http://localhost:8000/api/getresult`
-
-    {
-        "user":"dasguptasayon2020",
-        "quizid":"4cbbbe73-c086-4e22-b4d7-efd0776dbb85"
-    }
+`GET http://localhost:8000/api/getresult/<username>`
 
 
 ### Response
 
     {
-        "topic_wise": {
-            "Algebra": -7,
-            "Calculus": 3,
-            "Combinatorics": -3,
-            "Logical Thinking": 0,
-            "Number Theory": 8
+    "data": {
+        "Quiz Name": "Mathematics in Real life Problems (High School) by heyMatheists",
+        "totalquestion": 20,
+        "correctquestion": 9,
+        "incorrectquestion": 10,
+        "attempted": 19,
+        "not_attempted": 1,
+        "marks_obtained": 19,
+        "responses": {
+            "Question 1": {
+                "correct answer": "option 1",
+                "your answer": "option 2"
+            },
+            "Question 2": {
+                "correct answer": "option 2",
+                "your answer": "option 2"
+            },
+            "Question 3": {
+                "correct answer": "option 1",
+                "your answer": "option 2"
+            },
+            "Question 4": {
+                "correct answer": "option 3",
+                "your answer": "option 12"
+            }
         },
-        "dissiculty_wise": {
-            "Easy": 9,
-            "Medium": -7,
-            "Hard": -1
-        },
-        "feedback": {
-            "id": "2fd4e137-be49-4e0c-8316-d936463933cc",
-            "learn_new": 3,
-            "like_participating": 4,
-            "difficulty": 1,
-            "participate_again": "yes",
-            "time_sufficient": "yes",
-            "attend_webinar": "yes",
-            "language_english": "yes",
-            "mini_course": "yes",
-            "next_contest": "Problem solving strategies",
-            "suggestions": "Questions need to be more precise.",
-            "username": "Sayon Dasgupta",
-            "user": 440,
-            "quiz_id": "4cbbbe73-c086-4e22-b4d7-efd0776dbb85"
+        "analysis": {
+            "subject: Mathematics": {
+                "total_questions": 20,
+                "incorrect_or_not_attempted": 11,
+                "correct_questions": 9
+            },
+            "topic: Parity": {
+                "total_questions": 2,
+                "incorrect_or_not_attempted": 1,
+                "correct_questions": 1
+            }
+            "dificulty: Hard": {
+                "total_questions": 4,
+                "incorrect_or_not_attempted": 3,
+                "correct_questions": 1
+            }
         }
+    }
+}
+    
+## To add question to Quiz
+
+### Request
+
+`POST http://127.0.0.1:8000/api/addQuestionToQuiz`
+
+
+    `{
+     "quiz_id": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
+     "quest_id": ["dc3fd2a8-0a5a-4765-8f03-31463b95ccf5"]
+     }`
+
+### Response
+
+    {
+    "message": "added successfully"
     }
 
 

@@ -78,6 +78,6 @@ class LoginView(GenericAPIView):
             access = RefreshToken.for_user(user).access_token
             return Response({'refresh': str(refresh), 'access': str(access), 'user_id': user.id,
                              'username': user.username, 'email': user.email, 'first_name': user.first_name,
-                             'last_name': user.last_name, 'is_verified': user.is_verified}, status=status.HTTP_200_OK)
+                             'last_name': user.last_name, 'is_verified': user.is_verified, 'role':user.role}, status=status.HTTP_200_OK) 
         except ObjectDoesNotExist:
             raise ValidationError({"message": "User not found with the given email."})

@@ -2,7 +2,7 @@ from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import *
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
@@ -73,14 +73,14 @@ class QuizView(GenericAPIView):
                 result['quiz_questions'] = ques_serializer.data
                 return Response(result)
             else:
-                return Response({"message": "This quiz is closed now"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"message": "This quiz is either closed now or is not opened yet"}, status=status.HTTP_404_NOT_FOUND)
         except ObjectDoesNotExist:
             raise ValidationError({"message": "Quiz not found with the given id"})
 
 
 class QuizCreateView(GenericAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsTeacher]
     authentication_classes = [JWTAuthentication]
 
     def post(self, request):
@@ -93,14 +93,14 @@ class QuizCreateView(GenericAPIView):
 
 class QuizEditView(GenericAPIView):
     serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsTeacher]
     authentication_classes = [JWTAuthentication]
 
-    def put(self, request, quiz_id):
+    def patch(self, request, quiz_id):
         try:
             quiz = Quiz.objects.get(id=quiz_id)
             data = request.data
-            serializer = self.serializer_class(quiz, data=data)
+            serializer = self.serializer_class(quiz, data=data,partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
@@ -436,20 +436,23 @@ class CheckQuizAssigned(GenericAPIView):
         data = request.data
         try:
             quiz = Quiz.objects.get(id=data['quiz'])
-            try:
-                user = User.objects.get(id=data['user'])
+            if(quiz.is_active(timezone.now())):
                 try:
-                    assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
+                    user = User.objects.get(id=data['user'])
                     try:
-                        quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                        return Response({"message": "You have already attempted the test"},
-                                        status=status.HTTP_400_BAD_REQUEST)
+                        assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
+                        try:
+                            quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
+                            return Response({"message": "You have already attempted the test"},
+                                            status=status.HTTP_400_BAD_REQUEST)
+                        except ObjectDoesNotExist:
+                            return Response({"message": "Success"}, status=status.HTTP_200_OK)
                     except ObjectDoesNotExist:
-                        return Response({"message": "Success"}, status=status.HTTP_200_OK)
+                        return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
                 except ObjectDoesNotExist:
-                    return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
-            except ObjectDoesNotExist:
-                return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({"message": "This quiz is either not open yet or is now closed"}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -936,7 +939,26 @@ class CreateExcelForScore(APIView):
         return response
 
 
+class DeleteQuestionFromQuiz(GenericAPIView):
+
+    serializer_class = QuizResponseSerializer
+    permission_classes = [IsAuthenticated,IsTeacher]
+    authentication_classes = [JWTAuthentication]
+
+    def delete(self, request, quiz_id, question_id):
+        quiz = Quiz.objects.get(id=quiz_id)
+        quiz_questions = quiz.question
+        quiz_questions.remove(question_id)
+        # Quiz.objects.filter(id=quiz_id).update(questions=quiz_questions)
+        return Response({"message": "Question removed from the quiz successfully"})
+
+
 class AddQuestionToQuiz(APIView):
+
+    serializer_class = QuizResponseSerializer
+    permission_classes = [IsAuthenticated,IsTeacher]
+    authentication_classes = [JWTAuthentication]
+
     def post(self, request):
         try:
             quiz = Quiz.objects.get(id=request.data['quiz_id'])
@@ -954,7 +976,54 @@ class AddQuestionToQuiz(APIView):
         except Exception:
             return Response({"message": "something went wrong"}, status=400)
 
+class QuestionBankListView(GenericAPIView):
+    permission_classes = [IsAuthenticated,IsTeacher]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = QuestionSerializer
 
+    def get(self, request):
+        self.queryset = Question.objects.all()
+        serializer = self.serializer_class(self.queryset, many=True)
+        tags = {"subject": "", "dificulty": ["Easy", "Medium", "Hard"], "skill": ""}
+        subjecttags = Question.objects.values_list("subject_tag").distinct()
+        skill = Question.objects.values_list("skill").distinct()
+        tags["skill"]=[i[0].strip() for i in skill if i is not None ]
+        tags["subject"] = []
+        for i in subjecttags:
+            if (i[0] and i[0].strip() != ""):
+                temp = {}
+                subject = i[0]
+                temp['name']=subject
+                temp["topics"] = []
+                temp1={}
+                topictags = Question.objects.filter(subject_tag=subject).values_list("topic_tag").distinct()
+                for j in topictags:
+                    if (j[0] and j[0].strip() != ""):
+                        topic = j[0]
+                        temp1["name"]=j[0]
+                        subtopicstags = Question.objects.filter(subject_tag=subject, topic_tag=topic).values_list(
+                            "subtopic_tag").distinct()
+                        subtopiclist = [k[0] for k in subtopicstags if k[0].strip() != ""]
+                        temp1["subTopics"] = subtopiclist
+                    temp["topics"].append(temp1)
+
+                tags["subject"].append(temp)
+        count = 0
+        for i in serializer.data:
+            i["options"] = []
+            try:
+                options = i["option"].replace("'",'"')
+                options = json.loads(options)
+            except:
+                options = i["option"]
+            temp=[]
+            if(options is not None):
+                for i in options:
+                    temp.append(options[i])
+                serializer.data[count]["option"] = temp
+                count+=1
+        response = {"questions": serializer.data, "tags": tags}
+        return Response(response)
 
 
 

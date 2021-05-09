@@ -1,4 +1,4 @@
-# Separate Quiz Platform
+# Separate Quiz Platform for progressive minds
 
 ### Added CI Workflow (Testing Runserver)
 

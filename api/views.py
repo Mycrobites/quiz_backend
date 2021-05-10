@@ -344,7 +344,7 @@ class AssignStudent(GenericAPIView):
         try:
             data = request.data
             try:
-                AssignQuiz.objects.get(quiz_id=data["quiz"], user_id=data["user"])
+                AssignQuiz.objects.get(quiz_id=data["quiz"], user=data["user"])
                 return Response({"Student already added"})
             except ObjectDoesNotExist:
                 serializer = self.serializer_class(data=data)

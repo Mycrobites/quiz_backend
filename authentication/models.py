@@ -113,7 +113,10 @@ class UserFromFile(models.Model):
             else:
                 username = gen_username(data.iloc[i]["Email"])
                 first_name = data.iloc[i]["First Name"]
-                last_name = data.iloc[i]["Last Name"]
+                try:
+                    first_name,last_name = first_name.split()
+                except:
+                    last_name = data.iloc[i]["Last Name"]
                 random_password = get_random_string(length=10)
                 User.objects.create_user(email=email, username=username, first_name=first_name,
                                          last_name=last_name, password=random_password)

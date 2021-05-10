@@ -47,7 +47,7 @@ class QuizView(GenericAPIView):
             quiz = Quiz.objects.get(id=quiz_id)
             if quiz.is_active(timezone.now()):
                 serializer = self.serializer_class(quiz)
-                questions = quiz.question
+                questions = quiz.question.distinct()
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
                 for i in range(len(questions)):
@@ -65,7 +65,7 @@ class QuizView(GenericAPIView):
                         questions[i]['option'] = json.loads(options)
                         options = []
                         for j in range(len(questions[i]['option'])):
-                            options.append({'key': j + 1, 'option': questions[i]['option'][str(j + 1)]})
+                            options.append(questions[i]['option'])
                         questions[i]['option'] = options
                     except:
                         if questions[i]['option'] == "":

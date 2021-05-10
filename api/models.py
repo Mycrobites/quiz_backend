@@ -16,10 +16,11 @@ class Quiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
     desc = models.TextField()
+    instruction = models.TextField()
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
-    question = models.ManyToManyField("Question")
+    question = models.ManyToManyField("Question",null=True,blank=True)
 
 
     def __str__(self):

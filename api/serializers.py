@@ -6,7 +6,7 @@ import jsonfield
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ["id","title","creator","starttime","endtime","duration","desc"]
+        fields = ["id","title","creator","instruction","starttime","endtime","duration","desc"]
 
     def validate(self, attrs):
         return attrs

@@ -1015,7 +1015,7 @@ class QuestionBankListView(GenericAPIView):
             try:
                 options = i["option"].replace("'",'"')
                 options = json.loads(options)
-            except:
+            except Exception as e:
                 options = i["option"]
             temp=[]
             if(options is not None):
@@ -1289,7 +1289,7 @@ def importQuestion(request):
                     count = 10
                     for j in range(len(i)-10):
                         temp = i[count].lstrip("[").rstrip("]")
-                        options[j] = temp.strip(" ' ")
+                        options[str(j+1)] = temp.strip(" ' ")
                         count+=1
                 print(i)
                 if(i[9]!='None'):

@@ -50,28 +50,22 @@ class QuizView(GenericAPIView):
                 questions = quiz.question.distinct()
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
-                for i in range(len(questions)):
-                    string = questions[i]["question"]
-                    for j in range(len(string)):
-                        if string[j] == "s" and string[j + 1] == "r" and string[j + 2] == "c" and string[j + 3] == "=":
-                            string = string[:j + 5] + string[j + 5:]
-                    questions[i]["question"] = string
+                count = 0
+                for i in questions:
+                    i["options"] = []
                     try:
-                        matched_strings = re.findall(r'\"(.+?)\"', questions[i]['option'])
-                        options = questions[i]['option'].replace("'", '"')
-                        for ms in matched_strings:
-                            new_str = ms.replace("'", '"')
-                            options = options.replace(new_str, ms)
-                        questions[i]['option'] = json.loads(options)
-                        options = []
-                        for j in range(len(questions[i]['option'])):
-                            options.append(questions[i]['option'])
-                        questions[i]['option'] = options
-                    except:
-                        if questions[i]['option'] == "":
-                            questions[i]['option'] = []
+                        options = i["option"].replace("'",'"')
+                        options = json.loads(options)
+                    except Exception as e:
+                        options = i["option"]
+                    temp=[]
+                    if(options is not None):
+                        for i in options:
+                            temp.append(options[i])
+                        questions[count]["option"] = temp
+                        count+=1
                 result['quiz_details'] = serializer.data
-                result['quiz_questions'] = ques_serializer.data
+                result['quiz_questions'] = questions
                 return Response(result)
             else:
                 return Response({"message": "This quiz is either closed now or is not opened yet"}, status=status.HTTP_404_NOT_FOUND)

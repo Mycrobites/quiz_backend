@@ -258,12 +258,21 @@ Documentation of our API endpoints starts here
 ### Response
 
     {
-        "id": 1,
-        "response": "{'c8215cfc-0d4e-48a0-8b98-5a8f5827f018': '1', '2513e723-15ed-4777-9a00-19bf214ce97f': 'Abhinay'}",
-        "marks": 1,
-        "quiz": "994245ef-4a78-40d6-8dcf-c2f1dfdff74f",
-        "user": 2
-    }
+    "id": "5127e884-af15-4816-84a9-9eb43d9939e1",
+    "response": [
+        {
+            "key": "cc774f93-abe2-40a3-8963-61cb83a3b3a1",
+            "answer": "10"
+        },
+        {
+            "key": "79ac1955-ed3b-4492-9b72-f841184091eb",
+            "answer": "2"
+        }
+    ],
+    "marks": 3,
+    "quiz": "00d57b23-d0cb-4c30-af27-d9f66d6e03f5",
+    "user": 17
+}
 
 ## To create response
 
@@ -272,20 +281,20 @@ Documentation of our API endpoints starts here
 `POST http://127.0.0.1:8000/api/create-response`
 
     {
-        "quiz": "24b3e35f-a0e2-45bb-9578-2e582e4ab0ce",
-        "user": 2,
-        "response": ""
-    }
+    "response": [
+        {
+            "key": "cc774f93-abe2-40a3-8963-61cb83a3b3a1",
+            "answer": "10"
+        },
+        {
+            "key": "79ac1955-ed3b-4492-9b72-f841184091eb",
+            "answer": "2"
+        }
+    ],
+    "quiz": "00d57b23-d0cb-4c30-af27-d9f66d6e03f5",
+    "user": 17
+}
 
-### Response
-
-    {
-        "id": 2,
-        "response": "",
-        "marks": 0,
-        "quiz": "24b3e35f-a0e2-45bb-9578-2e582e4ab0ce",
-        "user": 2
-    }
 
 ## To get quiz marks
 
@@ -294,7 +303,11 @@ Documentation of our API endpoints starts here
 `GET http://127.0.0.1:8000/api/get-quiz-marks/<slug:quiz_id>/<int:user_id>`
 
 ### Response
-
+    `{
+        "quiz": "00d57b23-d0cb-4c30-af27-d9f66d6e03f5",
+        "user": 17,
+        "marks": 3
+    }`
  
     
 ## To add student

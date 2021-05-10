@@ -527,5 +527,65 @@ Documentation of our API endpoints starts here
     {
     "message": "added successfully"
     }
+    
+### to get questions from question bank
+### Request
 
+    `GET https://api.progressiveminds.in/api/getQuestionsFromQB`
 
+### Response
+    `{
+        "questions": [
+            {
+                "id": "bb1a369e-5c6d-4360-9392-b3f3bd5fbcf0",
+                "question": "<figure class=\"image\"><img src=\"https://lab.progressiveminds.in/media/uploads/2021/05/03/1.PNG\"></figure>",
+                "correct_marks": 4,
+                "negative_marks": 1,
+                "option": [
+                    "<p>A</p>",
+                    "<p>B</p>",
+                    "<p>C</p>",
+                    "<p>D</p>"
+                ],
+                "answer": 1,
+                "text": "",
+                "subject_tag": "Chemistry",
+                "topic_tag": "d-Block",
+                "subtopic_tag": "Magnetic Properties",
+                "dificulty_tag": "Easy",
+                "skill": "Calculation",
+                "options": []
+            },
+            {
+                "id": "9a424b6c-40ec-4f76-b021-20774e777863",
+                "question": "<figure class=\"image\"><img src=\"https://lab.progressiveminds.in/media/uploads/2021/05/03/2.PNG\"></figure>",
+                "correct_marks": 4,
+                "negative_marks": 1,
+                "option": [
+                    "<p>A</p>",
+                    "<p>B</p>",
+                    "<p>C</p>",
+                    "<p>D</p>"
+                ],
+                "answer": 1,
+                "text": "",
+                "subject_tag": "Chemistry",
+                "topic_tag": "d-Block",
+                "subtopic_tag": "Electrode Potential",
+                "dificulty_tag": "Easy",
+                "skill": "Calculation",
+                "options": []
+            }
+        ]
+    }`
+    
+    
+### to delete questions from quiz
+### Request
+
+    `DELETE https://api.progressiveminds.in/api/deleteQuestionsFromQuiz/<quiz_id>/<quest_id>`
+
+### Response
+    `{
+    "message": "Question removed from the quiz successfully"
+    }`

@@ -209,24 +209,24 @@ class QuizCreateResponseView(GenericAPIView):
             quiz = Quiz.objects.get(id=quiz_id)
             questions = quiz.question
             marks = 0
-            for i in range(len(questions)):
-                if questions[i].answer is None:
-                    if res_dict[str(questions[i].id)] == "":
+            for i in quiz.question.all():
+                if i.answer is None:
+                    if res_dict[str(i.id)] == "":
                         marks += 0
                     else:
-                        if questions[i].text == res_dict[str(questions[i].id)]:
-                            marks += questions[i].correct_marks
+                        if i.text == res_dict[str(i.id)]:
+                            marks += i.correct_marks
                         else:
-                            marks -= questions[i].negative_marks
-                elif questions[i].text == "":
-                    if res_dict[str(questions[i].id)] == "":
+                            marks -= i.negative_marks
+                elif i.text == "":
+                    if res_dict[str(i.id)] == "":
                         marks += 0
                     else:
-                        if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                            marks += questions[i].correct_marks
+                        if str(i.answer) == res_dict[str(i.id)]:
+                            marks += i.correct_marks
                         else:
-                            marks -= questions[i].negative_marks
-                elif questions[i].answer == "" and questions[i].text == "":
+                            marks -= i.negative_marks
+                elif i.answer == "" and i.text == "":
                     marks += 0
             QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
             response_id = response["id"]
@@ -288,7 +288,7 @@ class QuizMarksView(GenericAPIView):
 
     def get(self, request, quiz_id, user_id):
         try:
-            Quiz.objects.get(id=quiz_id)
+            quizobj = Quiz.objects.get(id=quiz_id)
             try:
                 User.objects.get(id=user_id)
                 try:
@@ -300,24 +300,24 @@ class QuizMarksView(GenericAPIView):
                     quiz = quiz_assign.quiz
                     questions = quiz.question
                     marks = 0
-                    for i in range(len(questions)):
-                        if questions[i].answer is None:
-                            if res_dict[str(questions[i].id)] == "":
+                    for i in quizobj.question.all():
+                        if i.answer is None:
+                            if res_dict[str(i.id)] == "":
                                 marks += 0
                             else:
-                                if questions[i].text == res_dict[str(questions[i].id)]:
-                                    marks += questions[i].correct_marks
+                                if i.text == res_dict[str(i.id)]:
+                                    marks += i.correct_marks
                                 else:
-                                    marks -= questions[i].negative_marks
-                        elif questions[i].text == "":
-                            if res_dict[str(questions[i].id)] == "":
+                                    marks -= i.negative_marks
+                        elif i.text == "":
+                            if res_dict[str(i.id)] == "":
                                 marks += 0
                             else:
-                                if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                                    marks += questions[i].correct_marks
+                                if str(i.answer) == res_dict[str(i.id)]:
+                                    marks += i.correct_marks
                                 else:
-                                    marks -= questions[i].negative_marks
-                        elif questions[i].answer == "" and questions[i].text == "":
+                                    marks -= i.negative_marks
+                        elif i.answer == "" and i.text == "":
                             marks += 0
                     QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
                     return Response({"quiz": quiz.id, "user": user_id, "marks": marks})

@@ -1233,3 +1233,69 @@ def uploadimage(request):
     path = str(obj.file)
     url = "https://lab.progressiveminds.in/media/" + path
     return HttpResponse(json.dumps({"url": url, "uploaded": True}))
+
+def lmsBank(request):
+    try:
+        subject = request.GET["subject_tag"]
+        subject_filter=subject
+    except:       
+        subject_filter=""
+    try:
+        subject = request.GET["topic_tag"]
+        topic_filter = subject
+    except:       
+        topic_filter=""
+    try:
+        subject = request.GET["subtopic_tag"]
+        subtopic_filter = subject
+    except:       
+        subtopic_filter=""
+    try:
+        subject = request.GET["dificulty"]
+        dificulty_filter = subject
+    except:       
+        dificulty_filter=""
+    try:
+        subject = request.GET["skill"]
+        skill_filter = subject
+    except:       
+        skill_filter=""
+    questions = requests.get("https://lab.progressiveminds.in/teacher/getQuestionsFromQB")
+    questions = questions.json()
+    skill = questions["tags"]["skill"]
+    dificulty = [("Easy"),("Medium"),("Hard")] 
+    subject = []
+    topic = []
+    subtopic = []
+    for i in questions["tags"]["subject"]:
+        subject.append(i["name"])
+        for j in i["topics"]:
+            topic.append(j["name"])
+            for k in j["subTopics"]:
+                    subtopic.append(k)
+    return render(request,"pmbank.html",{"questions":questions["questions"],"subjects":subject,"topics":topic,"subtopics":subtopic,"dificulty":dificulty,"skill":skill,"subject_filter":subject_filter,"topic_filter":topic_filter,"subtopic_filter":subtopic_filter,"dificulty_filter":dificulty_filter,"skill_filter":skill_filter})
+
+
+def importQuestion(request):
+    if(request.method=="POST"):
+        questionids = json.loads(request.POST["questions"])
+        for i in questionids:
+                i = i[1:-1]
+                i = i.split(",")
+                if(len(i)==11 and i[-1]=="[]"):
+                    options = ""
+                else:
+                    options = {}
+                    count = 10
+                    for j in range(len(i)-10):
+                        temp = i[count].lstrip("[").rstrip("]")
+                        options[j] = temp.strip(" ' ")
+                        count+=1
+                print(i)
+                if(i[9]!='None'):
+                    obj = Question.objects.create(option=str(options),text=i[8],question=i[0],answer=i[9],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
+                    obj.save()
+                else:
+                    obj = Question.objects.create(option=str(options),text=i[8],question=i[0],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
+                    obj.save()
+    return HttpResponse("nonne")

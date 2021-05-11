@@ -228,7 +228,8 @@ class QuizCreateResponseView(GenericAPIView):
                             marks -= i.negative_marks
                 elif i.answer == "" and i.text == "":
                     marks += 0
-            QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
+            quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
+            quizobject.update(marks=marks)
             response_id = response["id"]
             quiz_response = QuizResponse.objects.get(id=response_id)
             serializer = self.serializer_class(quiz_response)
@@ -319,7 +320,8 @@ class QuizMarksView(GenericAPIView):
                                     marks -= i.negative_marks
                         elif i.answer == "" and i.text == "":
                             marks += 0
-                    QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
+                    quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
+                    quizobject.update(marks=marks)
                     return Response({"quiz": quiz.id, "user": user_id, "marks": marks})
                 except ObjectDoesNotExist:
                     raise ValidationError({"message": "Quiz was not attempted by the student with given user id"})

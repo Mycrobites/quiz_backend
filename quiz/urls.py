@@ -28,6 +28,8 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('questionbank',getBank,name="bank"),
     path("questionbank/<slug:qid>/change/",editBank),
+    path("progressiveminds/questionbank",lmsBank),
+    path("exportquestions",importQuestion),
     path("addquestion",bank),
     path("tagquestion",tagquestion),
     path("addTags",Addtags),

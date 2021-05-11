@@ -19,7 +19,7 @@ class Quiz(models.Model):
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
-    question = models.ManyToManyField("Question")
+    question = models.ManyToManyField("Question",null=True,blank=True)
 
 
     def __str__(self):

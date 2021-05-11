@@ -47,31 +47,25 @@ class QuizView(GenericAPIView):
             quiz = Quiz.objects.get(id=quiz_id)
             if quiz.is_active(timezone.now()):
                 serializer = self.serializer_class(quiz)
-                questions = quiz.question
+                questions = quiz.question.distinct()
                 ques_serializer = QuestionSerializer(questions, many=True)
                 questions = ques_serializer.data
-                for i in range(len(questions)):
-                    string = questions[i]["question"]
-                    for j in range(len(string)):
-                        if string[j] == "s" and string[j + 1] == "r" and string[j + 2] == "c" and string[j + 3] == "=":
-                            string = string[:j + 5] + "http://18.222.104.46" + string[j + 5:]
-                    questions[i]["question"] = string
+                count = 0
+                for i in questions:
+                    i["options"] = []
                     try:
-                        matched_strings = re.findall(r'\"(.+?)\"', questions[i]['option'])
-                        options = questions[i]['option'].replace("'", '"')
-                        for ms in matched_strings:
-                            new_str = ms.replace("'", '"')
-                            options = options.replace(new_str, ms)
-                        questions[i]['option'] = json.loads(options)
-                        options = []
-                        for j in range(len(questions[i]['option'])):
-                            options.append({'key': j + 1, 'option': questions[i]['option'][str(j + 1)]})
-                        questions[i]['option'] = options
-                    except:
-                        if questions[i]['option'] == "":
-                            questions[i]['option'] = []
+                        options = i["option"].replace("'",'"')
+                        options = json.loads(options)
+                    except Exception as e:
+                        options = i["option"]
+                    temp=[]
+                    if(options is not None):
+                        for i in options:
+                            temp.append(options[i])
+                        questions[count]["option"] = temp
+                        count+=1
                 result['quiz_details'] = serializer.data
-                result['quiz_questions'] = ques_serializer.data
+                result['quiz_questions'] = questions
                 return Response(result)
             else:
                 return Response({"message": "This quiz is either closed now or is not opened yet"}, status=status.HTTP_404_NOT_FOUND)
@@ -215,24 +209,24 @@ class QuizCreateResponseView(GenericAPIView):
             quiz = Quiz.objects.get(id=quiz_id)
             questions = quiz.question
             marks = 0
-            for i in range(len(questions)):
-                if questions[i].answer is None:
-                    if res_dict[str(questions[i].id)] == "":
+            for i in quiz.question.all():
+                if i.answer is None:
+                    if res_dict[str(i.id)] == "":
                         marks += 0
                     else:
-                        if questions[i].text == res_dict[str(questions[i].id)]:
-                            marks += questions[i].correct_marks
+                        if i.text == res_dict[str(i.id)]:
+                            marks += i.correct_marks
                         else:
-                            marks -= questions[i].negative_marks
-                elif questions[i].text == "":
-                    if res_dict[str(questions[i].id)] == "":
+                            marks -= i.negative_marks
+                elif i.text == "":
+                    if res_dict[str(i.id)] == "":
                         marks += 0
                     else:
-                        if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                            marks += questions[i].correct_marks
+                        if str(i.answer) == res_dict[str(i.id)]:
+                            marks += i.correct_marks
                         else:
-                            marks -= questions[i].negative_marks
-                elif questions[i].answer == "" and questions[i].text == "":
+                            marks -= i.negative_marks
+                elif i.answer == "" and i.text == "":
                     marks += 0
             QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
             response_id = response["id"]
@@ -294,7 +288,7 @@ class QuizMarksView(GenericAPIView):
 
     def get(self, request, quiz_id, user_id):
         try:
-            Quiz.objects.get(id=quiz_id)
+            quizobj = Quiz.objects.get(id=quiz_id)
             try:
                 User.objects.get(id=user_id)
                 try:
@@ -306,24 +300,24 @@ class QuizMarksView(GenericAPIView):
                     quiz = quiz_assign.quiz
                     questions = quiz.question
                     marks = 0
-                    for i in range(len(questions)):
-                        if questions[i].answer is None:
-                            if res_dict[str(questions[i].id)] == "":
+                    for i in quizobj.question.all():
+                        if i.answer is None:
+                            if res_dict[str(i.id)] == "":
                                 marks += 0
                             else:
-                                if questions[i].text == res_dict[str(questions[i].id)]:
-                                    marks += questions[i].correct_marks
+                                if i.text == res_dict[str(i.id)]:
+                                    marks += i.correct_marks
                                 else:
-                                    marks -= questions[i].negative_marks
-                        elif questions[i].text == "":
-                            if res_dict[str(questions[i].id)] == "":
+                                    marks -= i.negative_marks
+                        elif i.text == "":
+                            if res_dict[str(i.id)] == "":
                                 marks += 0
                             else:
-                                if str(questions[i].answer) == res_dict[str(questions[i].id)]:
-                                    marks += questions[i].correct_marks
+                                if str(i.answer) == res_dict[str(i.id)]:
+                                    marks += i.correct_marks
                                 else:
-                                    marks -= questions[i].negative_marks
-                        elif questions[i].answer == "" and questions[i].text == "":
+                                    marks -= i.negative_marks
+                        elif i.answer == "" and i.text == "":
                             marks += 0
                     QuizResponse.objects.filter(quiz=quiz_id, user=user_id).update(marks=marks)
                     return Response({"quiz": quiz.id, "user": user_id, "marks": marks})
@@ -1015,7 +1009,7 @@ class QuestionBankListView(GenericAPIView):
             try:
                 options = i["option"].replace("'",'"')
                 options = json.loads(options)
-            except:
+            except Exception as e:
                 options = i["option"]
             temp=[]
             if(options is not None):
@@ -1233,3 +1227,69 @@ def uploadimage(request):
     path = str(obj.file)
     url = "https://lab.progressiveminds.in/media/" + path
     return HttpResponse(json.dumps({"url": url, "uploaded": True}))
+
+def lmsBank(request):
+    try:
+        subject = request.GET["subject_tag"]
+        subject_filter=subject
+    except:       
+        subject_filter=""
+    try:
+        subject = request.GET["topic_tag"]
+        topic_filter = subject
+    except:       
+        topic_filter=""
+    try:
+        subject = request.GET["subtopic_tag"]
+        subtopic_filter = subject
+    except:       
+        subtopic_filter=""
+    try:
+        subject = request.GET["dificulty"]
+        dificulty_filter = subject
+    except:       
+        dificulty_filter=""
+    try:
+        subject = request.GET["skill"]
+        skill_filter = subject
+    except:       
+        skill_filter=""
+    questions = requests.get("https://lab.progressiveminds.in/teacher/getQuestionsFromQB")
+    questions = questions.json()
+    skill = questions["tags"]["skill"]
+    dificulty = [("Easy"),("Medium"),("Hard")] 
+    subject = []
+    topic = []
+    subtopic = []
+    for i in questions["tags"]["subject"]:
+        subject.append(i["name"])
+        for j in i["topics"]:
+            topic.append(j["name"])
+            for k in j["subTopics"]:
+                    subtopic.append(k)
+    return render(request,"pmbank.html",{"questions":questions["questions"],"subjects":subject,"topics":topic,"subtopics":subtopic,"dificulty":dificulty,"skill":skill,"subject_filter":subject_filter,"topic_filter":topic_filter,"subtopic_filter":subtopic_filter,"dificulty_filter":dificulty_filter,"skill_filter":skill_filter})
+
+
+def importQuestion(request):
+    if(request.method=="POST"):
+        questionids = json.loads(request.POST["questions"])
+        for i in questionids:
+                i = i[1:-1]
+                i = i.split(",")
+                if(len(i)==11 and i[-1]=="[]"):
+                    options = ""
+                else:
+                    options = {}
+                    count = 10
+                    for j in range(len(i)-10):
+                        temp = i[count].lstrip("[").rstrip("]")
+                        options[str(j+1)] = temp.strip(" ' ")
+                        count+=1
+                print(i)
+                if(i[9]!='None'):
+                    obj = Question.objects.create(option=str(options),text=i[8],question=i[0],answer=i[9],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
+                    obj.save()
+                else:
+                    obj = Question.objects.create(option=str(options),text=i[8],question=i[0],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
+                    obj.save()
+    return HttpResponse("nonne")

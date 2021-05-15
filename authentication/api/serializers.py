@@ -35,6 +35,7 @@ class LoginSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         username = attrs.get('username', '')
         password = attrs.get('password', '')
+        username = username.lower()
         user = authenticate(username=username, password=password)
         if user:
             if not user.is_active:

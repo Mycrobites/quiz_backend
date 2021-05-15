@@ -69,9 +69,9 @@ class LoginView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        username = request.data['username'].lower()
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = str(request.data['username']).lower()
         try:
             user = User.objects.get(username=username)
             refresh = RefreshToken.for_user(user)

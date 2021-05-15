@@ -5,6 +5,7 @@ import jsonfield
 from ckeditor_uploader.fields import RichTextUploadingField
 from datetime import datetime
 from datetime import date
+from django.utils import timezone
 
 
 # Create your models here.
@@ -20,6 +21,7 @@ class Quiz(models.Model):
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
     question = models.ManyToManyField("Question",null=True,blank=True)
+    quesorder = models.CharField(max_length=1000000,blank=True,default="[]")
 
 
     def __str__(self):
@@ -35,6 +37,12 @@ class Quiz(models.Model):
 dificulty_choices = (
     ("Easy", "Easy"), ("Medium", "Medium"), ("Hard", "Hard")
 )
+
+class AddQuestion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
+    question = models.ForeignKey("Question", on_delete=models.CASCADE)
+    createdOn = models.DateTimeField(default=timezone.now())
 
 
 class Question(models.Model):

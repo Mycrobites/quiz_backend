@@ -40,7 +40,6 @@ class QuizView(GenericAPIView):
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-
     def get(self, request, quiz_id):
         result = {}
         try:
@@ -941,9 +940,16 @@ class DeleteQuestionFromQuiz(GenericAPIView):
     authentication_classes = [JWTAuthentication]
 
     def delete(self, request, quiz_id, question_id):
-        quiz = Quiz.objects.get(id=quiz_id)
-        quiz_questions = quiz.question
-        quiz_questions.remove(question_id)
+        try:
+
+            obj = AddQuestion.objects.get(quiz_id=quiz_id,question_id=question_id)
+            obj.delete()
+            quiz = Quiz.objects.get(id=quiz_id)
+            quiz_questions = quiz.question
+            quiz_questions.remove(question_id)
+        except Exception as e:
+            print(e)
+            return Response({"message": "Cannot delete the question"})
         # Quiz.objects.filter(id=quiz_id).update(questions=quiz_questions)
         return Response({"message": "Question removed from the quiz successfully"})
 
@@ -963,6 +969,8 @@ class AddQuestionToQuiz(APIView):
                 try:
                     quest = Question.objects.get(id=str(q))
                     quiz.question.add(quest)
+                    obj = AddQuestion.objects.create(quiz_id=quiz.id,question_id=quest.id)
+                    obj.save()
                     quiz.save()
                 except Exception:
                     return Response({"message": f"{q}, not valid"}, status=400)

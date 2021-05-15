@@ -47,8 +47,11 @@ class QuizView(GenericAPIView):
             if quiz.is_active(timezone.now()) or request.user.role=="Teacher":
                 serializer = self.serializer_class(quiz)
                 questions = quiz.question.distinct()
-                ques_serializer = QuestionSerializer(questions, many=True)
-                questions = ques_serializer.data
+                quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
+                questions = []
+                for i in quest:
+                    ques_serializer = QuestionSerializer(i.question)
+                    questions.append(ques_serializer.data)
                 count = 0
                 for i in questions:
                     i["options"] = []
@@ -465,7 +468,6 @@ class PostUserQuizSession(APIView):
             quiz = Quiz.objects.get(id=data['quiz_id'])
             data['start_time '] = timezone.now()
             data['remaining_duration'] = quiz.duration
-            print(data)
             ser = UserQuizSessionSerializer(data=data)
             if ser.is_valid():
                 ser.save()

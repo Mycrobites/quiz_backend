@@ -45,7 +45,7 @@ class QuizView(GenericAPIView):
         result = {}
         try:
             quiz = Quiz.objects.get(id=quiz_id)
-            if quiz.is_active(timezone.now()):
+            if quiz.is_active(timezone.now()) or request.user.role=="Teacher":
                 serializer = self.serializer_class(quiz)
                 questions = quiz.question.distinct()
                 ques_serializer = QuestionSerializer(questions, many=True)
@@ -575,10 +575,8 @@ def filterscore(request):
 
                     if temp == 1:
                         if str(value) == str(ques.answer) or str(value) == str(ques.text):
-                            print("sahi", value, ques.answer)
                             score += ques.correct_marks
                         else:
-                            print("galat", value, ques.answer)
                             score -= ques.negative_marks
         return render(request, "filterscore.html", {"score": score, "error": error})
     else:
@@ -762,7 +760,6 @@ class GetResult(GenericAPIView):
                                                                      "your answer": ""}
                 if res_dict[ques] != "":
                     attemptedquestion += 1
-                    print(obj.question)
                     if ((obj.answer is not None and str(obj.answer) == str(res_dict[ques])) or str(obj.text) == str(
                             res_dict[ques])):
                         correctquestion += 1
@@ -893,7 +890,7 @@ class CreateExcelForScore(APIView):
         for user in users:
             try:
                 user = User.objects.get(id=user).username
-                data = requests.get(f'https://api.progressiveminds.in/api/getResult/{user}').json()['data']
+                data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}').json()['data']
 
                 ## basic analysis
                 new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
@@ -913,7 +910,8 @@ class CreateExcelForScore(APIView):
                 sno += 1
 
 
-            except Exception:
+            except Exception as e:
+                print(e)
                 print('kx to gadbad hai')
 
         f_object.close()
@@ -1208,7 +1206,7 @@ def Addtags(request):
         subtopic = ""
     dificulty = request.POST["dificulty"]
     skill = request.POST["skill"]
-    print(queryset)
+
     for i in queryset:
         obj = Question.objects.get(id=i)
         obj.subject_tag = subject
@@ -1287,7 +1285,6 @@ def importQuestion(request):
                         temp = i[count].lstrip("[").rstrip("]")
                         options[str(j+1)] = temp.strip(" ' ")
                         count+=1
-                print(i)
                 if(i[9]!='None'):
                     obj = Question.objects.create(option=str(options),text=i[8],question=i[0],answer=i[9],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
                     obj.save()

@@ -774,7 +774,7 @@ class GetResult(GenericAPIView):
                     nonattempted += 1
                     flag = "Not attempted"
                 subjecttag = obj.subject_tag
-                if subjecttag.strip() != "":
+                if subjecttag is not None and subjecttag.strip() != "":
                     try:
                         dic["subject: " + subjecttag]["total_questions"] += 1
                         if flag == "True":
@@ -791,7 +791,7 @@ class GetResult(GenericAPIView):
                             dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 1
                             dic["subject: " + subjecttag]["correct_questions"] = 0
                 topictag = obj.subtopic_tag
-                if topictag.strip() != "":
+                if topictag is not None and topictag.strip() != "":
                     try:
                         dic["topic: " + topictag]["total_questions"] += 1
                         if flag == "True":
@@ -808,7 +808,7 @@ class GetResult(GenericAPIView):
                             dic["topic: " + topictag]["incorrect_or_not_attempted"] = 1
                             dic["topic: " + topictag]["correct_questions"] = 0
                 subtopictag = obj.topic_tag
-                if subtopictag.strip() != "":
+                if subtopictag is not None and subtopictag.strip() != "":
                     try:
                         dic["subtopic: " + subtopictag]["total_questions"] += 1
                         if flag == "True":
@@ -825,7 +825,7 @@ class GetResult(GenericAPIView):
                             dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 1
                             dic["subtopic: " + subtopictag]["correct_questions"] = 0
                 skilltag = obj.skill
-                if skilltag.strip() != "":
+                if skilltag is not None and skilltag.strip() != "":
                     try:
                         dic["skill: " + skilltag]["total_questions"] += 1
                         if flag == "True":
@@ -842,7 +842,7 @@ class GetResult(GenericAPIView):
                             dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 1
                             dic["skill: " + skilltag]["correct_questions"] = 0
                 dificultytag = obj.dificulty_tag
-                if dificultytag.strip() != "":
+                if  dificultytag is not None and dificultytag.strip() != "":
                     try:
                         dic["dificulty: " + dificultytag]["total_questions"] += 1
                         if flag == "True":
@@ -892,7 +892,6 @@ class CreateExcelForScore(APIView):
             try:
                 user = User.objects.get(id=user).username
                 data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
-
                 ## basic analysis
                 new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
                               data['incorrectquestion'],

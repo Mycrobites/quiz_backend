@@ -720,7 +720,7 @@ def resultanalysis(request):
 class GetResult(GenericAPIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, username):
+    def get(self, request, username,quizid):
         result = {}
         try:
             user = User.objects.get(username=username)
@@ -728,11 +728,11 @@ class GetResult(GenericAPIView):
             error = "user does not exist"
             return Response({"message": error})
         try:
-            quizes = QuizResponse.objects.get(user=user.id)
+            quizes = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
         except:
-            error = "The user has attempted no quiz"
+            error = "The user has attempted this quiz"
             return Response({"message": error})
-        quizes = QuizResponse.objects.filter(user=user.id)
+        quizes = QuizResponse.objects.filter(quiz_id=quizid,user=user.id)
         arr = []
         for q in quizes:
             quizobj = Quiz.objects.get(title=q.quiz)
@@ -869,8 +869,8 @@ class GetResult(GenericAPIView):
 class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request):
-        users = QuizResponse.objects.all().values_list('user', flat=True)
+    def get(self, request,quizid):
+        users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
 
         f_object = open('media/result_response/output_result.csv', 'w')
         writer_object = writer(f_object)
@@ -891,7 +891,7 @@ class CreateExcelForScore(APIView):
         for user in users:
             try:
                 user = User.objects.get(id=user).username
-                data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}').json()['data']
+                data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
 
                 ## basic analysis
                 new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],

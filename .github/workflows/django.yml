@@ -19,7 +19,6 @@ jobs:
     - name: Git Pull
       run: git pull
       working-directory: C:/actions-runner/_work/quiz_backend/quiz_backend
-    - uses: actions/checkout@v2
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip

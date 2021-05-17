@@ -1,3 +1,4 @@
+from django.views.generic.base import TemplateResponseMixin
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
@@ -750,14 +751,27 @@ class GetResult(GenericAPIView):
                 totalquestion += 1
                 obj = Question.objects.get(id=ques)
                 if obj.answer is None:
-                    quesdic["Question " + str(totalquestion)] = {"correct answer": obj.text,
+                    quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.text,
                                                                  "your answer": res_dict[ques]}
                 else:
+                    if(type(obj.option) is str):
+                        temp = obj.option.replace("'",'"')
+                        temp = json.loads(temp)
+                    else:
+                        temp = obj.option
                     if res_dict[ques] != "":
-                        quesdic["Question " + str(totalquestion)] = {"correct answer": "option " + str(obj.answer),
+                        try:
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer)],
+                                                                     "your answer":temp[str(res_dict[ques])]}
+                        except:
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer),
                                                                      "your answer": "option " + str(res_dict[ques])}
                     else:
-                        quesdic["Question " + str(totalquestion)] = {"correct answer": "option " + str(obj.answer),
+                        try:
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer)],
+                                                                     "your answer": ""}
+                        except:
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer),
                                                                      "your answer": ""}
                 if res_dict[ques] != "":
                     attemptedquestion += 1
@@ -880,7 +894,7 @@ class CreateExcelForScore(APIView):
 
         f_object_question = open('media/result_response/output_result_question.csv', 'w')
         writer_object_question = writer(f_object_question)
-        writer_object_question.writerow(['S No', 'User', 'Question No', 'Correct Answer', 'User Answer'])
+        writer_object_question.writerow(['S No', 'User', 'Question No',"Question", 'Correct Answer', 'User Answer'])
 
         f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
         writer_object_tag = writer(f_object_tag)
@@ -899,7 +913,7 @@ class CreateExcelForScore(APIView):
                 writer_object.writerow(new_result)
 
                 for quest, resp in data['responses'].items():
-                    new_result_question = [sno, user, quest, resp['correct answer'], resp['your answer']]
+                    new_result_question = [sno, user, quest,resp["question"], resp['correct answer'], resp['your answer']]
                     writer_object_question.writerow(new_result_question)
 
                 for tag, resp in data['analysis'].items():

@@ -1,4 +1,5 @@
 # Separate Quiz Platform for progressive minds
+[![Django CI](https://github.com/Mycrobites/quiz_backend/actions/workflows/django.yml/badge.svg)](https://github.com/Mycrobites/quiz_backend/actions/workflows/django.yml)
 
 ### Added CI Workflow (Testing Runserver)
 

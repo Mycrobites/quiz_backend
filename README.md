@@ -3,6 +3,69 @@
 
 ### Added CI Workflow (Testing Runserver)
 
+
+Follow the below instruction to correctly setup and run the project.
+
+## Pre-requisites
+
+<ol>
+    <li>Python 3.x installed. Download it from <a href="https://www.python.org/downloads/">here</a>.</li>
+    <li>Mongo DB community edition installed and running a local mongo host at the time of testing the project. Download it from <a href="https://www.mongodb.com/try/download/community">here</a>.</li>
+    <li> MongoDB database tools. Download it from <a href="https://www.mongodb.com/try/download/tools">here</a> .</li>
+    <li> Git CLI installed and setup properly. Get it from <a href="https://git-scm.com/downloads">here</a>.</li>
+   </ol>
+    
+## Cloning the project
+
+Run the following command to clone the project
+
+```
+git clone https://github.com/Mycrobites/quiz_backend
+```
+
+## Setup mongodb
+- Install the MongoDB community server and MongoDB database tools. Refer the pre - requisites step for this. Now create a new entry for environment path variable for both
+   mongodb community server and mongodb database tools.
+- Run the community server using the following command.
+```
+    mongod
+```
+- This should start a mongodb local server. Keep this running in development.
+
+
+## Setting up the project
+
+- In the folder ./quiz, make a new file called <strong> .env </strong>.
+- Copy the code from sample.env into your .env file.
+- Create a new secret for your project by visiting <a href="https://djecrety.ir/">this website.</a>
+- Paste the secret in you .env file. Fill all the other details also. Leave the value of already set keys to default ones.
+- Now install the dependencies required for the project. From the root of the project run the following command.
+
+    ```
+        pip install -r requirements.txt
+    ```
+- Now to migrate all the models to database run the following command from root of the project.
+
+    ```
+        python manage.py makemigrations
+        python manage.py migrate
+    ```
+- Get the database dump file from the project admin.
+- Run the following command to restore the database.
+```
+    python manage.py dbrestore
+```
+
+- Make sure the mongo community server is running while you perform these steps. (Mandatory before performing step 6 ).
+    
+## Running the project
+
+To run and test the project, run the following command from root of the project.
+
+```
+python manage.py runserver
+```
+
 ## REST API DOCUMENTATION
 
 Documentation of our API endpoints starts here

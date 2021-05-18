@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'api',
     'ckeditor',
     'ckeditor_uploader',
+    'dbbackup'
 ]
 
 MIDDLEWARE = [
@@ -183,12 +184,16 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
 
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR,"backup")}
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'quiz.mailsender@gmail.com'
-EMAIL_HOST_PASSWORD = 'mapple1205'
+EMAIL_HOST_USER = env('EID')
+EMAIL_HOST_PASSWORD = env('EPASS')
 
 
 

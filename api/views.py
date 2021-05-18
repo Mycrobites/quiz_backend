@@ -905,7 +905,7 @@ class CreateExcelForScore(APIView):
         for user in users:
             try:
                 user = User.objects.get(id=user).username
-                data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
+                data = requests.get(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}').json()['data']
                 ## basic analysis
                 new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
                               data['incorrectquestion'],

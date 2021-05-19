@@ -51,6 +51,7 @@ git clone https://github.com/Mycrobites/quiz_backend
         python manage.py migrate
     ```
 - Get the database dump file from the project admin.
+- Make a new folder named backup in root of the project and copy that dump file in it.
 - Run the following command to restore the database.
 ```
     python manage.py dbrestore

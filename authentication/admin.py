@@ -2,8 +2,9 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import GroupAdmin as GroupAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from authentication.models import User, UserFromFile
+from authentication.models import User, UserFromFile, UserGroup
 
 
 # Register your models here.
@@ -38,7 +39,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'username', 'first_name', 'last_name','role', 'is_active', 'is_admin')
+        fields = ('email', 'password', 'username', 'first_name', 'last_name','role', 'is_active', 'is_admin','groups')
 
     def clean_password(self):
         return self.initial["password"]
@@ -52,13 +53,13 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('role',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('username', 'first_name', 'last_name','role')}),
+        ('Personal info', {'fields': ('username', 'first_name', 'last_name','role','groups')}),
         ('Permissions', {'fields': ('is_admin', 'is_active', 'is_verified', 'is_staff', )}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'first_name', 'last_name','role', 'password1', 'password2')}
+            'fields': ('email', 'username', 'first_name', 'last_name','role', 'password1', 'password2','groups')}
          ),
     )
     search_fields = ('email', )
@@ -66,6 +67,19 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
+class UserGroupChangeForm(forms.ModelForm):
+    class Meta:
+        model = UserGroup
+        fields = ('name', 'description')
+
+
+class UserGroupAdmin(GroupAdmin):
+    form = UserGroupChangeForm
+
+    list_display = ('name', 'description')
+    ordering = ('-id','name')
+
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.register(UserFromFile)
+admin.site.register(UserGroup, UserGroupAdmin)

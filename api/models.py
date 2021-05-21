@@ -16,6 +16,7 @@ class Quiz(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
+    instructions = RichTextUploadingField()
     desc = RichTextUploadingField()
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)

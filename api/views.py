@@ -995,12 +995,18 @@ class AddQuestionToQuiz(APIView):
             return Response({"message": "something went wrong"}, status=400)
 
 class QuestionBankListView(GenericAPIView):
-    permission_classes = [IsAuthenticated,IsTeacher]
-    authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated,IsTeacher]
+    permission_classes = [AllowAny]
+    # authentication_classes = [JWTAuthentication]
     serializer_class = QuestionSerializer
 
-    def get(self, request):
-        self.queryset = Question.objects.all()
+    def get(self,request,quizid):
+        given_quiz=Quiz.objects.get(id=quizid)
+        qu=AddQuestion.objects.filter(quiz_id=quizid)
+        already=[]
+        for i in qu:
+            already.append(str(i.question.id))        
+        self.queryset = Question.objects.all().exclude(id__in=already)
         serializer = self.serializer_class(self.queryset, many=True)
         tags = {"subject": "", "dificulty": ["Easy", "Medium", "Hard"], "skill": ""}
         subjecttags = Question.objects.values_list("subject_tag").distinct()

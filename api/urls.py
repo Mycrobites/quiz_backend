@@ -23,7 +23,7 @@ urlpatterns = [
     path("resultanalysis",views.resultanalysis,name="resultanalysis"),
     path("getresult/<str:username>/<str:quizid>", views.GetResult.as_view()),
     path("getExcelForResult/<str:quizid>", views.CreateExcelForScore.as_view()),
-    path('getQuestionsFromQB', QuestionBankListView.as_view()),
+    path('getQuestionsFromQB/<str:quizid>', QuestionBankListView.as_view()),
     path('addQuestionToQuiz', AddQuestionToQuiz.as_view()),
     path('deleteQuestionFromQuiz/<slug:quiz_id>/<slug:question_id>', DeleteQuestionFromQuiz.as_view()),
 ]

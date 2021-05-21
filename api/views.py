@@ -995,9 +995,8 @@ class AddQuestionToQuiz(APIView):
             return Response({"message": "something went wrong"}, status=400)
 
 class QuestionBankListView(GenericAPIView):
-    # permission_classes = [IsAuthenticated,IsTeacher]
-    permission_classes = [AllowAny]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated,IsTeacher]
+    authentication_classes = [JWTAuthentication]
     serializer_class = QuestionSerializer
 
     def get(self,request,quizid):

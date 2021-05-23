@@ -354,6 +354,26 @@ class AssignStudent(GenericAPIView):
             return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class AssignGroup(GenericAPIView):
+    serializer_class = QuizResponseSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        try:
+            data = request.data
+            try:
+                aq = AssignQuiz.objects.get(quiz_id=data["quiz"], group=data["group"])
+                return Response({"Group already added"})
+            except ObjectDoesNotExist:
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response({"message": "Group has been added to the quiz"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class QuizCollection(GenericAPIView):
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
@@ -376,7 +396,7 @@ class QuizCollection(GenericAPIView):
                 return Response(quizzes)
             else:
                 resp = []
-                self.queryset = AssignQuiz.objects.filter(user=user)
+                self.queryset = AssignQuiz.objects.filter(group=User.objects.get(id=userid).group.id)
                 for i in self.queryset:
                     obj = Quiz.objects.get(id=i.quiz_id)
                     serializer = self.serializer_class(obj)

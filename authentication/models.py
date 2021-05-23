@@ -2,6 +2,7 @@ from djongo import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Group
 from django.utils.crypto import get_random_string
 import pandas as pd
+import uuid
 
 
 # Create your models here.
@@ -65,7 +66,9 @@ class UserAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class UserGroup(Group):
+class UserGroup(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=20)
     description = models.TextField(max_length=100, blank=True)
 
 class User(AbstractBaseUser):
@@ -84,7 +87,7 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    groups = models.ManyToManyField(UserGroup, blank=True)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE, blank=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name' ]
@@ -123,7 +126,7 @@ class UserFromFile(models.Model):
                 random_password = get_random_string(length=10)
                 u = User.objects.create_user(email=email, username=username, first_name=first_name,
                                             last_name=last_name, password=random_password)
-                u.groups.add(self.group)
+                u.group = self.group
                 u.save()
                 data.loc[i, 'Username'] = username
                 data.loc[i, 'Password'] = random_password

@@ -39,7 +39,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'username', 'first_name', 'last_name','role', 'is_active', 'is_admin','groups')
+        fields = ('email', 'password', 'username', 'first_name', 'last_name','role', 'is_active', 'is_admin','group')
 
     def clean_password(self):
         return self.initial["password"]
@@ -53,13 +53,13 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('role',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('username', 'first_name', 'last_name','role','groups')}),
+        ('Personal info', {'fields': ('username', 'first_name', 'last_name','role','group')}),
         ('Permissions', {'fields': ('is_admin', 'is_active', 'is_verified', 'is_staff', )}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'first_name', 'last_name','role', 'password1', 'password2','groups')}
+            'fields': ('email', 'username', 'first_name', 'last_name','role', 'password1', 'password2','group')}
          ),
     )
     search_fields = ('email', )
@@ -73,7 +73,7 @@ class UserGroupChangeForm(forms.ModelForm):
         fields = ('name', 'description')
 
 
-class UserGroupAdmin(GroupAdmin):
+class UserGroupAdmin(admin.ModelAdmin):
     form = UserGroupChangeForm
 
     list_display = ('name', 'description')

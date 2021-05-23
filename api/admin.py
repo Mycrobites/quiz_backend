@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import *
+from django import forms
 # Register your models here.
 
 @admin.register(AddQuestion)
@@ -29,7 +30,14 @@ class QuestionAdmin(admin.ModelAdmin):
     get_answer.short_description = 'Answer'
 
 
+class AssignChangeForm(forms.ModelForm):
+
+    class Meta:
+        model= AssignQuiz
+        fields = ('quiz','group')
+
 class AssignAdmin(admin.ModelAdmin):
+    form = AssignChangeForm
     model = AssignQuiz
     list_display = ["get_quiz"]
     list_filter = ["quiz__title"]

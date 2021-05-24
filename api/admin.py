@@ -34,7 +34,7 @@ class AssignChangeForm(forms.ModelForm):
 
     class Meta:
         model= AssignQuiz
-        fields = ('quiz','group')
+        fields = ('quiz','group','user')
 
 class AssignAdmin(admin.ModelAdmin):
     form = AssignChangeForm

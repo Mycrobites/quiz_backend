@@ -335,7 +335,7 @@ class QuizMarksView(GenericAPIView):
 
 
 class AssignStudent(GenericAPIView):
-    serializer_class = QuizResponseSerializer
+    serializer_class = AssignQuizSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -343,8 +343,15 @@ class AssignStudent(GenericAPIView):
         try:
             data = request.data
             try:
-                AssignQuiz.objects.get(quiz_id=data["quiz"], user=data["user"])
-                return Response({"Student already added"})
+                aq = AssignQuiz.objects.get(quiz_id=data["quiz"])
+                for u in aq.user.all():
+                    if data["user"] == str(u.id):
+                        return Response({"Student already added"})
+                        break
+                else:
+                    aq.user.add(data['user'])
+                    aq.save()
+                    return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
             except ObjectDoesNotExist:
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
@@ -355,7 +362,7 @@ class AssignStudent(GenericAPIView):
 
 
 class AssignGroup(GenericAPIView):
-    serializer_class = QuizResponseSerializer
+    serializer_class = AssignQuizSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -363,8 +370,13 @@ class AssignGroup(GenericAPIView):
         try:
             data = request.data
             try:
-                aq = AssignQuiz.objects.get(quiz_id=data["quiz"], group=data["group"])
-                return Response({"Group already added"})
+                aq = AssignQuiz.objects.get(quiz_id=data["quiz"])
+                if data["group"] in aq.group.all():
+                    return Response({"Group already added"})
+                else:
+                    aq.group.add(data['group'])
+                    aq.save()
+                    return Response({"message": "Group has been added to the quiz"}, status=status.HTTP_200_OK)
             except ObjectDoesNotExist:
                 serializer = self.serializer_class(data=data)
                 serializer.is_valid(raise_exception=True)
@@ -460,7 +472,7 @@ class CheckQuizAssigned(GenericAPIView):
                 try:
                     user = User.objects.get(id=data['user'])
                     try:
-                        assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
+                        assign_quiz = AssignQuiz.objects.get(quiz=quiz, group=user.group)
                         try:
                             quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
                             return Response({"message": "You have already attempted the test"},

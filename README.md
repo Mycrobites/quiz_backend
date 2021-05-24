@@ -381,9 +381,30 @@ Documentation of our API endpoints starts here
 
 `POST http://127.0.0.1:8000/api/add-student`
 
-### Response
+    {
+        "quiz":"1a070413-94d6-4993-9098-2336ce9a65fa",
+        "user":"889"
+    }
 
+### Response
+    {
+        "message":"Student has been added to the quiz"
+    }
+
+## To add group
+
+### Request
+
+`POST http://127.0.0.1:8000/api/add-group`
     
+    {
+        "quiz":"1a070413-94d6-4993-9098-2336ce9a65fa",
+        "group":"7cadedd9-7874-46c1-ad1e-576a560239b3"
+    }
+### Response
+    {
+        "message":"Group has been added to the quiz"
+    }
 
 ## To get all quizzes
 
@@ -654,3 +675,21 @@ Documentation of our API endpoints starts here
     `{
     "message": "Question removed from the quiz successfully"
     }`
+
+
+## To Create New User Group
+
+### Request
+`POST http://127.0.0.1:8000/api/auth/create-group`
+
+    {
+        "name": "Test 2",
+        "description": "This is test 2 group."
+    }
+
+### Response
+    {
+        "id": "cb9368ea-d8c8-4e5c-852e-792de470a02e",
+        "name": "Test 2",
+        "description": "This is test 2 group."
+    }

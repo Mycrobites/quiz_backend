@@ -6,9 +6,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from authentication.models import User
+from authentication.models import User, UserGroup
 from authentication.utils import Util
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserGroupSerializer
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 import jwt
@@ -81,3 +81,14 @@ class LoginView(GenericAPIView):
                              'last_name': user.last_name, 'is_verified': user.is_verified, 'role':user.role}, status=status.HTTP_200_OK) 
         except ObjectDoesNotExist:
             raise ValidationError({"message": "User not found with the given email."})
+
+class CreateGroupView(GenericAPIView):
+    serializer_class = UserGroupSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        group = request.data
+        serializer = self.serializer_class(data=group)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

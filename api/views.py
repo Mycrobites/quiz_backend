@@ -992,55 +992,6 @@ class AddQuestionToQuiz(APIView):
 			return Response({"message": "something went wrong"}, status=400)
 
 class QuestionBankListView(GenericAPIView):
-<<<<<<< HEAD
-	permission_classes = [IsAuthenticated,IsTeacher]
-	authentication_classes = [JWTAuthentication]
-	serializer_class = QuestionSerializer
-
-	def get(self, request):
-		self.queryset = Question.objects.all()
-		serializer = self.serializer_class(self.queryset, many=True)
-		tags = {"subject": "", "dificulty": ["Easy", "Medium", "Hard"], "skill": ""}
-		subjecttags = Question.objects.values_list("subject_tag").distinct()
-		skill = Question.objects.values_list("skill").distinct()
-		tags["skill"]=[i[0].strip() for i in skill if i is not None ]
-		tags["subject"] = []
-		for i in subjecttags:
-			if (i[0] and i[0].strip() != ""):
-				temp = {}
-				subject = i[0]
-				temp['name']=subject
-				temp["topics"] = []
-				temp1={}
-				topictags = Question.objects.filter(subject_tag=subject).values_list("topic_tag").distinct()
-				for j in topictags:
-					if (j[0] and j[0].strip() != ""):
-						topic = j[0]
-						temp1["name"]=j[0]
-						subtopicstags = Question.objects.filter(subject_tag=subject, topic_tag=topic).values_list(
-							"subtopic_tag").distinct()
-						subtopiclist = [k[0] for k in subtopicstags if k[0].strip() != ""]
-						temp1["subTopics"] = subtopiclist
-					temp["topics"].append(temp1)
-
-				tags["subject"].append(temp)
-		count = 0
-		for i in serializer.data:
-			i["options"] = []
-			try:
-				options = i["option"].replace("'",'"')
-				options = json.loads(options)
-			except Exception as e:
-				options = i["option"]
-			temp=[]
-			if(options is not None):
-				for i in options:
-					temp.append(options[i])
-				serializer.data[count]["option"] = temp
-				count+=1
-		response = {"questions": serializer.data, "tags": tags}
-		return Response(response)
-=======
     permission_classes = [IsAuthenticated,IsTeacher]
     authentication_classes = [JWTAuthentication]
     serializer_class = QuestionSerializer
@@ -1093,7 +1044,6 @@ class QuestionBankListView(GenericAPIView):
                 count+=1
         response = {"questions": serializer.data, "tags": tags}
         return Response(response)
->>>>>>> 3e6cf889b351492b98532d7ca664122f1db70cf1
 
 
 

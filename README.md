@@ -51,6 +51,7 @@ git clone https://github.com/Mycrobites/quiz_backend
         python manage.py migrate
     ```
 - Get the database dump file from the project admin.
+- Make a new folder named backup in root of the project and copy that dump file in it.
 - Run the following command to restore the database.
 ```
     python manage.py dbrestore
@@ -82,6 +83,7 @@ Documentation of our API endpoints starts here
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
         "duration": "00:45:00",
+        "instructions":"<b>This is instructions field.</b>",
         "desc": "This quiz is being created solely for documentation purpose"
     }
 
@@ -93,6 +95,7 @@ Documentation of our API endpoints starts here
         "creator": 566,
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
+        "instructions":"<b>This is instructions field.</b>",
         "duration": "00:45:00",
         "desc": "This quiz is being created solely for documentation purpose"
     }
@@ -113,6 +116,7 @@ Documentation of our API endpoints starts here
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
         "duration": "00:45:00",
+        "instructions":"<b>This is instructions field.</b>",
         "desc": "This quiz is being created solely for testing purpose"
     },
     "quiz_questions": [
@@ -174,6 +178,7 @@ Documentation of our API endpoints starts here
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
         "duration": "00:45:00",
+        "instructions":"<b>This is instructions field.</b>",
         "desc": "This quiz is being created solely for documentation purpose(rename)"
     }
     
@@ -400,6 +405,7 @@ Documentation of our API endpoints starts here
             "starttime": "2020-03-16T00:00:00+05:30",
             "endtime": "2021-06-16T05:30:00+05:30",
             "duration": "00:45:00",
+            "instructions":"<b>This is instructions field.</b>",
             "desc": "This quiz is being created solely for testing purpose",
             "creator_username": "administrator"
         },
@@ -410,6 +416,7 @@ Documentation of our API endpoints starts here
             "starttime": "2020-03-16T00:00:00+05:30",
             "endtime": "2021-07-16T05:30:00+05:30",
             "duration": "00:45:00",
+            "instructions":"<b>This is instructions field.</b>",
             "desc": "This quiz is being created solely for testing purpose",
             "creator_username": "administrator"
         }
@@ -595,7 +602,7 @@ Documentation of our API endpoints starts here
 ### to get questions from question bank
 ### Request
 
-    `GET https://api.progressiveminds.in/api/getQuestionsFromQB`
+    `GET https://api.progressiveminds.in/api/getQuestionsFromQB/<quizid>`
 
 ### Response
     `{

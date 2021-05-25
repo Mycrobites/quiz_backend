@@ -14,7 +14,7 @@ urlpatterns = [
     path("get-quiz-marks/<slug:quiz_id>/<int:user_id>", QuizMarksView.as_view(), name="get-quiz-marks"),
     path("add-student", AssignStudent.as_view(), name="assign-quiz"),
     path("get-all-quizzes/<slug:userid>", QuizCollection.as_view(), name="all-quizzes"),
-    path("postFeedback/", PostFeedback.as_view(), name="postfeedback"),
+    path("Feedback/", createFeedback.as_view(), name="createFeedback"),
     path("check-quiz-assigned", CheckQuizAssigned.as_view(), name="check-quiz-assigned"),
     path("userSession/", PostUserQuizSession.as_view(), name="userquizsesion"),
     path("getUserSession/<slug:pk>", GetUserQuizSession.as_view(), name="getuserquizsesion"),
@@ -23,7 +23,11 @@ urlpatterns = [
     path("resultanalysis",views.resultanalysis,name="resultanalysis"),
     path("getresult/<str:username>/<str:quizid>", views.GetResult.as_view()),
     path("getExcelForResult/<str:quizid>", views.CreateExcelForScore.as_view()),
-    path('getQuestionsFromQB', QuestionBankListView.as_view()),
+    path('getQuestionsFromQB/<str:quizid>', QuestionBankListView.as_view()),
     path('addQuestionToQuiz', AddQuestionToQuiz.as_view()),
     path('deleteQuestionFromQuiz/<slug:quiz_id>/<slug:question_id>', DeleteQuestionFromQuiz.as_view()),
+    path('FeedbackQs/post',feedbackQuestionsapi().as_view()),
+    path('FeedbackQs/<slug:quiz_id>/get',feedbackQuestionsapi().as_view()),
+    path('FeedbackQs/<slug:question_id>/patch',feedbackQuestionsapi().as_view())
+
 ]

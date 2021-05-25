@@ -389,7 +389,7 @@ class QuizCollection(GenericAPIView):
 						quizzes[i]['creator_username'] = user.username
 					except ObjectDoesNotExist:
 						raise ValidationError({"message": "User do not found"})
-				return Response(quizzes)
+					return Response(quizzes)
 		except ObjectDoesNotExist:
 			return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -411,7 +411,10 @@ class feedbackQuestionsapi(APIView):
 	def get(self,request,quiz_id,format=None):
 		ques=feedbackQuestions.objects.get(quiz_id=quiz_id)
 		serializer=FeedbackQuesSerializer(ques)
-		return Response(serializer.data, status=status.HTTP_200_OK)
+		temp = list(ques.question.values())
+		data = serializer.data
+		data["question"] = temp
+		return Response(data, status=status.HTTP_200_OK)
 
 
 	def patch(self,request,question_id,format=None):

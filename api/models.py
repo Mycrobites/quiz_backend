@@ -83,40 +83,24 @@ class QuizResponse(models.Model):
     def __str__(self):
         return f"{self.user}'s response on {self.quiz}"
 
-
-choice = (
-    ("yes", "yes"),
-    ("no", "no"),
-)
-
-choice_contest = (
-    ("Puzzle Solving", "Puzzle Solving"),
-    ("Problem solving strategies", "Problem solving strategies"),
-    ("Mental Maths", "Mental Maths"),
-    ("Mathematics to entertain your spirit", "Mathematics to entertain your spirit"),
-)
-
+class feedbackQuestions(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)#created by ..
+    quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
+    question=jsonfield.JSONField(blank=True, null=True)
+    def __str__(self):
+        return f"{self.user}'s Question for{self.quiz_id}"
 
 class FeedBackForm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
-    learn_new = models.PositiveIntegerField()
-    like_participating = models.PositiveIntegerField()
-    difficulty = models.PositiveSmallIntegerField()
-    participate_again = models.CharField(max_length=5, choices=choice)
-    time_sufficient = models.CharField(max_length=5, choices=choice)
-    attend_webinar = models.CharField(max_length=5, choices=choice)
-    language_english = models.CharField(max_length=5, choices=choice)
-    mini_course = models.CharField(max_length=5, choices=choice)
-    next_contest = models.CharField(max_length=150, choices=choice_contest)
-    suggestions = models.CharField(max_length=200, default="")
-    username = models.CharField(max_length=60, default="")
+    answer=jsonfield.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.user}'s feedback"
 
-
+  
 class UserQuizSession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

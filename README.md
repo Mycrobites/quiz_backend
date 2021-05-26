@@ -646,7 +646,7 @@ Documentation of our API endpoints starts here
 
     {
     'quiz_id': ['2c798d50-6539-42b0-a0f4-20a073110523'], 
-    'question': ['{"1":"did you..?","2":"give your opinion"}'], 
+    'question': ['{"1":{"type":"yes/no","ques":"liked quiz"},"2":{"type":"slider","ques":"liked quiz"}}'] 
     'user': ['1']
     }
 
@@ -660,7 +660,7 @@ Documentation of our API endpoints starts here
     {
     'id':'262ca456-ba56-470d-b428-8a77fa87536e'
     'quiz_id': ['2c798d50-6539-42b0-a0f4-20a073110523'], 
-    'question': ['{"1":"did you..?","2":"give your opinion"}'], 
+    'question': ['{"1":{"type":"yes/no","ques":"liked quiz"},"2":{"type":"slider","ques":"liked quiz"}}'],
     'user': ['1']
     }
 
@@ -668,7 +668,7 @@ Documentation of our API endpoints starts here
     https://api.progressiveminds.in/api/FeedbackQs/<slug:question_id>/patch ##here question is id you'll get in previous hit
 
     {
-    'question': ['{"1":"did you..?","2":"give your opinion"}'] 
+    'question': ['{"1":{"type":"yes/no","ques":"liked quiz"},"2":{"type":"slider","ques":"liked quiz"}}'] 
     }
 
 ### response

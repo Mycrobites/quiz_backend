@@ -428,41 +428,21 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/postFeedback/`
+`POST http://127.0.0.1:8000/api/Feedback/`
 
     {
-        "learn_new": 3,
-        "like_participating": 3,
-        "difficulty": 4,
-        "participate_again": "yes",
-        "time_sufficient": "yes",
-        "attend_webinar": "yes",
-        "language_english": "yes",
-        "mini_course": "yes",
-        "next_contest": "Puzzle Solving",
-        "suggestions": "amazing work, add some esy questions too",
-        "user": 77,
-        "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88",
-        "username":"abhishek-st"
+    "quiz_id":"6a5e18db-e7d9-49fc-b38b-b79ee8e2d19a",
+    "answer":"{"1":"answer1","2":"answer2"}"
+    "user":1,
     }
 
 ### Response
 
     {
-        "id": "ebfdc10d-e24a-4da6-a688-a95adfc94414",
-        "learn_new": 3,
-        "like_participating": 3,
-        "difficulty": 4,
-        "participate_again": "yes",
-        "time_sufficient": "yes",
-        "attend_webinar": "yes",
-        "language_english": "yes",
-        "mini_course": "yes",
-        "next_contest": "Puzzle Solving",
-        "suggestions": "amazing work, add some esy questions too",
-        "username": "abhishek-st",
-        "user": 77,
-        "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88"
+    "id": "94ab8acd-ee2d-4a8a-8ce0-73fcd962b5f0",
+    "answer": null,
+    "user": 1,
+    "quiz_id": "6a5e18db-e7d9-49fc-b38b-b79ee8e2d19a"
     }
     
 ## To check quiz assigned
@@ -660,3 +640,38 @@ Documentation of our API endpoints starts here
     `{
     "message": "Question removed from the quiz successfully"
     }`
+
+### for creating feedbaack question by teacher
+    https://api.progressiveminds.in/api/FeedbackQs/post/
+
+    {
+    'quiz_id': ['2c798d50-6539-42b0-a0f4-20a073110523'], 
+    'question': ['{"1":"did you..?","2":"give your opinion"}'], 
+    'user': ['1']
+    }
+
+### Response
+    {'msg':"created"}
+
+### for geting the question correspondind to quiz
+    https://api.progressiveminds.in/api/FeedbackQs/<slug:quiz_id>/get
+
+### response
+    {
+    'id':'262ca456-ba56-470d-b428-8a77fa87536e'
+    'quiz_id': ['2c798d50-6539-42b0-a0f4-20a073110523'], 
+    'question': ['{"1":"did you..?","2":"give your opinion"}'], 
+    'user': ['1']
+    }
+
+### for geting the question correspondind to quiz
+    https://api.progressiveminds.in/api/FeedbackQs/<slug:question_id>/patch ##here question is id you'll get in previous hit
+
+    {
+    'question': ['{"1":"did you..?","2":"give your opinion"}'] 
+    }
+
+### response
+    {
+    "msg": "questions updated"
+    }

@@ -412,7 +412,7 @@ class feedbackQuestionsapi(APIView):
 	
 	def get(self,request,quiz_id,format=None):
 		ques=feedbackQuestions.objects.get(quiz_id=quiz_id)
-		serializer=FeedbackQuesSerializer(ques)
+		serializer=FeedbackQuesSerializer(ques,many=True)
 		temp = list(ques.question.values())
 		data = serializer.data
 		data["question"] = temp

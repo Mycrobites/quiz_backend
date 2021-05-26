@@ -402,7 +402,9 @@ class feedbackQuestionsapi(APIView):
 	authentication_classes = [JWTAuthentication]
 
 	def post(self,request,format=None):
+		data=request.data
 		serializer=FeedbackQuesSerializer(data=request.data)
+		print(data)
 		if serializer.is_valid():
 			serializer.save()
 			return Response({'msg':"created"},status=status.HTTP_201_CREATED)
@@ -410,7 +412,7 @@ class feedbackQuestionsapi(APIView):
 	
 	def get(self,request,quiz_id,format=None):
 		ques=feedbackQuestions.objects.get(quiz_id=quiz_id)
-		serializer=FeedbackQuesSerializer(ques)
+		serializer=FeedbackQuesSerializer(ques,many=True)
 		temp = list(ques.question.values())
 		data = serializer.data
 		data["question"] = temp

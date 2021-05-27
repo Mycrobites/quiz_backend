@@ -404,7 +404,9 @@ class feedbackQuestionsapi(APIView):
 	def post(self,request,format=None):
 		data=request.data
 		serializer=FeedbackQuesSerializer(data=request.data)
-		print(data)
+		query=feedbackQuestions.objects.filter(quiz_id=data['quiz_id'])
+		if query.exists():
+			query.delete()
 		if serializer.is_valid():
 			serializer.save()
 			return Response({'msg':"created"},status=status.HTTP_201_CREATED)
@@ -412,10 +414,8 @@ class feedbackQuestionsapi(APIView):
 	
 	def get(self,request,quiz_id,format=None):
 		ques=feedbackQuestions.objects.get(quiz_id=quiz_id)
-		serializer=FeedbackQuesSerializer(ques,many=True)
-		temp = list(ques.question.values())
+		serializer=FeedbackQuesSerializer(ques)
 		data = serializer.data
-		data["question"] = temp
 		return Response(data, status=status.HTTP_200_OK)
 
 
@@ -424,7 +424,7 @@ class feedbackQuestionsapi(APIView):
 		serializer=FeedbackQuesSerializer(ques,data=request.data,partial=True)
 		if serializer.is_valid():
 			serializer.save()
-			return Response({"msg":"questions updated"})
+			return Response({"msg":"question updated"})
 		return Response(serializer.errors)
 	
 

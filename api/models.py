@@ -120,3 +120,8 @@ def upload_and_Rename(instance,filename):
 class upload_image(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.ImageField(upload_to=upload_and_Rename, height_field=None, width_field=None, max_length=None)
+
+class run_excel_task(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    quizid=models.CharField(max_length=150,null=False)
+    email_send=models.EmailField(max_length=254,null=False)

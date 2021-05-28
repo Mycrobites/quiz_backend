@@ -23,10 +23,9 @@ import pandas as pd
 from csv import writer
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, HttpResponse, redirect,Http404
-
+from rest_framework.decorators import api_view
 import requests
-
-
+from django.core.mail import EmailMessage
 # Create your views here.
 
 
@@ -881,7 +880,6 @@ class GetResult(GenericAPIView):
 			arr.append(result)
 		return Response({"data": result})
 
-
 class CreateExcelForScore(APIView):
 	permission_classes = [AllowAny]
 
@@ -1051,7 +1049,18 @@ class QuestionBankListView(GenericAPIView):
         return Response(response)
 
 
+class RunExcelCreateView(GenericAPIView):
+    serializer_class = RunExcelTaskSerializer
+    permission_classes = [IsAuthenticated,IsTeacher]
+    authentication_classes = [JWTAuthentication]
 
+    def post(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
+    
 
 
 ################################ functions for question bank

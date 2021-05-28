@@ -23,10 +23,9 @@ import pandas as pd
 from csv import writer
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, HttpResponse, redirect,Http404
-
+from rest_framework.decorators import api_view
 import requests
-
-
+from django.core.mail import EmailMessage
 # Create your views here.
 
 
@@ -879,10 +878,9 @@ class GetResult(GenericAPIView):
             arr.append(result)
         return Response({"data": result})
 
-
 class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
-
+    
     def get(self, request,quizid):
         users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
 
@@ -905,7 +903,8 @@ class CreateExcelForScore(APIView):
         for user in users:
             try:
                 user = User.objects.get(id=user).username
-                data = requests.get(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}').json()['data']
+                print(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}')
+                data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
                 ## basic analysis
                 new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
                               data['incorrectquestion'],
@@ -945,7 +944,13 @@ class CreateExcelForScore(APIView):
             content = excel.read()
         response = HttpResponse(content=content, content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
-        return response
+
+        email = EmailMessage('... Subject ...', '... Body ...', 'info.svastik@gmail.com',
+            ['priyanshu.arora93@gmail.com'])
+        email.attach('Result.xlsx',content,'application/ms-excel')
+        email.send(fail_silently=False)
+        
+        return HttpResponse("Done")
 
 
 class DeleteQuestionFromQuiz(GenericAPIView):
@@ -1049,7 +1054,18 @@ class QuestionBankListView(GenericAPIView):
         return Response(response)
 
 
+class RunExcelCreateView(GenericAPIView):
+    serializer_class = RunExcelTaskSerializer
+    permission_classes = [IsAuthenticated,IsTeacher]
+    authentication_classes = [JWTAuthentication]
 
+    def post(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
+    
 
 
 ################################ functions for question bank

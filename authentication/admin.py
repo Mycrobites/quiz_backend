@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as GroupAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from authentication.models import User, UserFromFile, UserGroup
+from authentication.models import User, UserFromFile, UserGroup, GroupMembership
 
 
 # Register your models here.
@@ -39,7 +39,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'username', 'first_name', 'last_name','role', 'is_active', 'is_admin','group')
+        fields = ('email', 'password', 'username', 'first_name', 'last_name','role', 'is_active', 'is_admin')
 
     def clean_password(self):
         return self.initial["password"]
@@ -53,29 +53,20 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('role',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('username', 'first_name', 'last_name','role','group')}),
-        ('Permissions', {'fields': ('is_admin', 'is_active', 'is_verified', 'is_staff', )}),
+        ('Personal info', {'fields': ('username', 'first_name', 'last_name','role')}),
+        ('Permissions', {'fields': ('is_admin', 'is_active', 'is_verified', 'is_staff' )}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'first_name', 'last_name','role', 'password1', 'password2','group')}
+            'fields': ('email', 'username', 'first_name', 'last_name','role', 'password1', 'password2')}
          ),
     )
     search_fields = ('email', )
     ordering = ('-id', )
     filter_horizontal = ()
 
-
-class UserGroupChangeForm(forms.ModelForm):
-    class Meta:
-        model = UserGroup
-        fields = ('name', 'description')
-
-
 class UserGroupAdmin(admin.ModelAdmin):
-    form = UserGroupChangeForm
-
     list_display = ('name', 'description')
     ordering = ('-id','name')
 
@@ -83,3 +74,4 @@ admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.register(UserFromFile)
 admin.site.register(UserGroup, UserGroupAdmin)
+#admin.site.register(GroupMembership)

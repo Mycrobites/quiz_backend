@@ -408,11 +408,26 @@ class QuizCollection(GenericAPIView):
                 return Response(quizzes)
             else:
                 resp = []
-                self.queryset = AssignQuiz.objects.filter(group=User.objects.get(id=userid).group.id)
-                for i in self.queryset:
-                    obj = Quiz.objects.get(id=i.quiz_id)
-                    serializer = self.serializer_class(obj)
-                    resp.append(serializer.data)
+                quiz_set = set()
+                usergroups = UserGroup.objects.filter(user=userid)
+                for grp in usergroups:
+                    self.queryset = AssignQuiz.objects.filter(group=grp)
+                    for i in self.queryset:
+                        if i.quiz_id not in quiz_set:
+                            quiz_set.add(i.quiz_id)
+                            obj = Quiz.objects.get(id=i.quiz_id)
+                            serializer = self.serializer_class(obj)
+                            if serializer.data not in resp:
+                                resp.append(serializer.data)
+                else:
+                    self.queryset = AssignQuiz.objects.filter(user=userid)
+                    for i in self.queryset:
+                        if i.quiz_id not in quiz_set:
+                            quiz_set.add(i.quiz_id)
+                            obj = Quiz.objects.get(id=i.quiz_id)
+                            serializer = self.serializer_class(obj)
+                            if serializer.data not in resp:
+                                resp.append(serializer.data)
                 quizzes = resp
                 for i in range(len(quizzes)):
                     user_id = quizzes[i]['creator']
@@ -471,21 +486,34 @@ class CheckQuizAssigned(GenericAPIView):
             if(quiz.is_active(timezone.now())):
                 try:
                     user = User.objects.get(id=data['user'])
-                    try:
-                        assign_quiz = AssignQuiz.objects.get(quiz=quiz, group=user.group)
+                    grps = UserGroup.objects.filter(user=user)
+                    for grp in grps:
                         try:
-                            quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                            return Response({"message": "You have already attempted the test"},
-                                            status=status.HTTP_400_BAD_REQUEST)
+                            assign_quiz = AssignQuiz.objects.get(quiz=quiz, group=grp.id)
+                            try:
+                                quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
+                                return Response({"message": "You have already attempted the test"},
+                                                status=status.HTTP_400_BAD_REQUEST)
+                            except:
+                                return Response({"message": "Success"}, status=status.HTTP_200_OK)
+                        except:
+                            pass
+                    else:
+                        try:
+                            assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
+                            try:
+                                quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
+                                return Response({"message": "You have already attempted the test"},
+                                                status=status.HTTP_400_BAD_REQUEST)
+                            except:
+                                return Response({"message": "Success"}, status=status.HTTP_200_OK)
                         except ObjectDoesNotExist:
-                            return Response({"message": "Success"}, status=status.HTTP_200_OK)
-                    except ObjectDoesNotExist:
-                        return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
-                except ObjectDoesNotExist:
+                            return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
+                except:
                     return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
             else:
                 return Response({"message": "This quiz is either not open yet or is now closed"}, status=status.HTTP_200_OK)
-        except ObjectDoesNotExist:
+        except:
             return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
 
 

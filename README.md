@@ -691,5 +691,6 @@ Documentation of our API endpoints starts here
     {
         "id": "cb9368ea-d8c8-4e5c-852e-792de470a02e",
         "name": "Test 2",
-        "description": "This is test 2 group."
+        "description": "This is test 2 group.",
+        "user": []
     }

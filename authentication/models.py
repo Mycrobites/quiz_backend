@@ -1,5 +1,5 @@
 from djongo import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Group
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.crypto import get_random_string
 import pandas as pd
 import uuid
@@ -66,11 +66,6 @@ class UserAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class UserGroup(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=20)
-    description = models.TextField(max_length=100, blank=True)
-
 class User(AbstractBaseUser):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     first_name = models.CharField(max_length=100, default="first_name")
@@ -87,7 +82,6 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE, blank=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name' ]
@@ -102,6 +96,19 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+class UserGroup(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=20)
+    description = models.TextField(max_length=100, blank=True)
+    user = models.ManyToManyField(User, through='GroupMembership', through_fields=('group','user'))
+
+    def __str__(self):
+        return self.name
+
+class GroupMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
 
 class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)
@@ -126,8 +133,9 @@ class UserFromFile(models.Model):
                 random_password = get_random_string(length=10)
                 u = User.objects.create_user(email=email, username=username, first_name=first_name,
                                             last_name=last_name, password=random_password)
-                u.group = self.group
                 u.save()
+                gm = GroupMembership.objects.create(user=u,group=self.group)
+                gm.save()
                 data.loc[i, 'Username'] = username
                 data.loc[i, 'Password'] = random_password
         self.filename = "media/users/" + "generated_user_details" + str(get_random_string(length=5)) + ".csv"

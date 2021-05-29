@@ -946,7 +946,99 @@ class CreateExcelForScore(APIView):
 		response = HttpResponse(content=content, content_type='application/ms-excel')
 		response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
 		return response
+class RunExcelCreateView(GenericAPIView):
+    serializer_class = RunExcelTaskSerializer
+    # permission_classes = [IsAuthenticated,IsTeacher]
+    # authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+    def post(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
+    
 
+class CreateExcelForScore(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        is_request=run_excel_task.objects.all()
+        while is_request:
+            run_excel_model=is_request[0]
+            quizid=run_excel_model.quizid
+            email=run_excel_model.email_send
+            users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
+
+            f_object = open('media/result_response/output_result.csv', 'w')
+            writer_object = writer(f_object)
+            writer_object.writerow(
+                ['S No', 'User', 'Quiz Name', 'Total Question', 'Correct', 'Incorrect', 'Attempted', 'Not Attempted',
+                'Marks'])
+
+            f_object_question = open('media/result_response/output_result_question.csv', 'w')
+            writer_object_question = writer(f_object_question)
+            writer_object_question.writerow(['S No', 'User', 'Question No',"Question", 'Correct Answer', 'User Answer'])
+
+            f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
+            writer_object_tag = writer(f_object_tag)
+            writer_object_tag.writerow(
+                ['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect Or Not Attempted'])
+
+            sno = 1
+            for user in users:
+                try:
+                    user = User.objects.get(id=user).username
+                    print(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}')
+                    data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
+                    ## basic analysis
+                    new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
+                                data['incorrectquestion'],
+                                data['attempted'], data['not_attempted'], data['marks_obtained']]
+                    writer_object.writerow(new_result)
+
+                    for quest, resp in data['responses'].items():
+                        new_result_question = [sno, user, quest,resp["question"], resp['correct answer'], resp['your answer']]
+                        writer_object_question.writerow(new_result_question)
+
+                    for tag, resp in data['analysis'].items():
+                        new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],
+                                        resp['incorrect_or_not_attempted']]
+                        writer_object_tag.writerow(new_result_tag)
+
+                    sno += 1
+
+
+                except Exception as e:
+                    print(e)
+                    print('kx to gadbad hai')
+
+            f_object.close()
+            f_object_question.close()
+            f_object_tag.close()
+            
+            df1 = pd.read_csv('media/result_response/output_result_question.csv')
+            df2 = pd.read_csv('media/result_response/output_result_tag.csv')
+            df3 = pd.read_csv('media/result_response/output_result.csv')
+
+            with pd.ExcelWriter('media/result_response/Result.xlsx') as Main:
+                df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
+                df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
+                df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
+            print('************************ bas khatam ***************************')
+            with open("media/result_response/Result.xlsx", "rb") as excel:
+                content = excel.read()
+            response = HttpResponse(content=content, content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
+            q=Quiz.objects.get(id=quizid)
+            email = EmailMessage('Result For Quiz '+q.title, 'Your Excel sheet is ready.', 'info.svastik@gmail.com',
+                [email])
+            email.attach('Result.xlsx',content,'application/ms-excel')
+            email.send(fail_silently=False)
+            run_excel_model.delete()
+            is_request=run_excel_task.objects.all()
+            return HttpResponse("Done")
+        return HttpResponse("No Task")
 
 class DeleteQuestionFromQuiz(GenericAPIView):
 
@@ -1049,18 +1141,7 @@ class QuestionBankListView(GenericAPIView):
         return Response(response)
 
 
-class RunExcelCreateView(GenericAPIView):
-    serializer_class = RunExcelTaskSerializer
-    permission_classes = [IsAuthenticated,IsTeacher]
-    authentication_classes = [JWTAuthentication]
 
-    def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
-    
 
 
 ################################ functions for question bank

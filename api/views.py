@@ -1178,6 +1178,85 @@ def bank(request):
 	topictags = Question.objects.all().values_list("topic_tag").distinct()
 	return render(request,"Questionbank.html",{"form":form,"subjects":subjecttags,"topics":topictags,"subtopics":subtopicstags,"dificulty":dificulty,"skill":skill})
 
+def newaddquestion(request):
+	if request.method == "POST":
+		print(request.POST)
+		post_data = request.POST
+		data = {}
+		if post_data['questiontype'] != 'Input Type':
+			data['totaloption'] = post_data['totaloption']
+			data['options'] = dict()
+			for i in range(1,int(data['totaloption'])+1):
+				data['options'][str(i)] = post_data['option'+str(i)]
+
+		if post_data['questiontype'] in ['Input Type','Multiple Correct']:
+			pass
+		
+		for i in range(1, int(post_data['totalquestion'])+1):
+			print('QuestionCreated')
+			j=1
+			data['answer'] = {}
+			for ans in post_data['answer'+str(i)].split(','):
+				data['answer'][str(j)] = ans
+				j = j + 1
+			obj = Question.objects.create(question_type = post_data["questiontype"], question=post_data["question"+str(i)],
+										correct_marks=post_data['positive_score'],negative_marks=post_data['negative_score'],
+										subject_tag=post_data['subject_tag'], topic_tag=post_data['topic_tag'],subtopic_tag=post_data['subtopic_tag'],
+										dificulty_tag=post_data['dificulty_tag'+str(i)],skill=post_data['skill_tag'+str(i)])
+
+			if post_data['questiontype'] != 'Input Type':
+				obj.option = data['options']
+			obj.answer = data['answer']
+			if post_data['questiontype'] == 'Assertion Reason':
+				obj.passage = post_data['passage']
+			obj.save()
+	dificulty = [("Easy"),("Medium"),("Hard")]
+	return render(request,"addQuestions.html",{"dificulty":dificulty})
+
+
+def editquestion(request,qid):
+
+	if request.method == "POST":
+		option = {}
+		for i in range(1,int(request.POST['totaloption'])+1):
+			option[str(i)] = request.POST['option'+str(i)]
+		answer = request.POST['answer'].split(',')
+		a= {}
+		for i in range(1,len(answer)+1):
+			a[str(i)] = answer[i-1]
+		answer = a
+
+		id =  request.POST["id"]
+		questionobj = Question.objects.get(id=id)
+		questionobj.answer = answer
+		questionobj.subject_tag = request.POST['subject_tag']
+		questionobj.topic_tag = request.POST['topic_tag']
+		questionobj.subtopic_tag = request.POST['subtopic_tag']
+		questionobj.dificulty_tag = request.POST['dificulty_tag']
+		questionobj.skill = request.POST['skill_tag']
+		questionobj.question = request.POST['question']
+		questionobj.option = option
+		questionobj.correct_marks = request.POST['positive_score']
+		questionobj.negative_marks = request.POST['negative_score']
+		questionobj.save()
+		return redirect("/questionbank")
+	try:
+		question = Question.objects.get(id=qid)
+	except:
+		raise Http404
+	options = []
+	noinputs = len(question.answer)
+	try:
+		for v in question.option.values():
+			options.append(v)
+
+	except:
+		pass
+	answer = ','.join(question.answer.values())
+	dificulty = [("Easy"),("Medium"),("Hard")]
+	questiontypes = ["Multiple Correct","True False","Input Type","Single Correct","Assertion Reason"]
+	return render(request,"editQuestion.html",{'question':question,"questiontypes":questiontypes,'options':options,'answers':answer,'dificulty':dificulty, 'noinputs':noinputs})
+
 
 def editBank(request,qid):
 	try:

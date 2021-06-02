@@ -15,7 +15,7 @@ Follow the below instruction to correctly setup and run the project successfully
     <li> Git CLI installed and setup properly. Get it from <a href="https://git-scm.com/downloads">here</a>.</li>
    </ol>
     
-## Cloning the project
+## Cloning project
 
 Run the following command to clone the project
 

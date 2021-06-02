@@ -16,9 +16,9 @@ jobs:
         python-version: [3.9]
 
     steps:
-    - name: Git Pull
-      run: git pull
-      working-directory: C:/actions-runner/_work/quiz_backend/quiz_backend
+    # - name: Git Pull
+    #   run: git pull
+    #   working-directory: C:/actions-runner/_work/quiz_backend/quiz_backend
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip

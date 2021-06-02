@@ -4,7 +4,7 @@
 ### Added CI Workflow (Testing Runserver)
 
 
-Follow the below instruction to correctly setup and run the project.
+Follow the below instruction to correctly setup and run the project successfully.
 
 ## Pre-requisites
 

@@ -23,7 +23,7 @@ Run the following command to clone the project
 git clone https://github.com/Mycrobites/quiz_backend
 ```
 
-## Setup mongoDB
+## Setup mongodb
 - Install the MongoDB community server and MongoDB database tools. Refer the pre - requisites step for this. Now create a new entry for environment path variable for both
    mongodb community server and mongodb database tools.
 - Run the community server using the following command.

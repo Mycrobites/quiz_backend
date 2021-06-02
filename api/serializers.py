@@ -48,3 +48,8 @@ class UserQuizSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuizSession
         fields = "__all__"
+
+class RunExcelTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = run_excel_task
+        fields = "__all__"

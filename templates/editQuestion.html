@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://cdn.ckeditor.com/ckeditor5/27.0.0/classic/ckeditor.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/questionbank/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: antiquewhite;
+            line-height: 1.7;
+        }
+
+        button {
+            outline: none;
+        }
+
+        .header {
+            /* height: 10vh;*/
+            font-size: 24px;
+        }
+
+        .main button:hover {
+            background-color: antiquewhite;
+        }
+
+        input[type="number"] {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            margin-left: 13px;
+            outline: none;
+            transition: all 0.5s ease;
+        }
+
+        input[type="text"] {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            outline: none;
+            transition: all 0.5s ease;
+        }
+
+        input[type="text"]:focus {
+            transform: scale(1.1);
+        }
+
+        input[type="number"]:focus {
+            transform: scale(1.1);
+        }
+
+        select {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            width: 200px;
+            outline: none;
+            height: 30px;
+            transform: translateX(-45px);
+        }
+
+        label[for="id_text"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_answer"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_negative_marks"] {            
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_correct_marks"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[ for="id_dificulty_tag"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_skill"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        .editInput {
+            text-decoration: underline;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .editInput:hover {
+            color: blue;
+            font-size: 16px;
+        }
+
+        .tab-pane{
+            text-align: left;
+            padding: 4px;
+        }
+
+        .heading{
+            margin: 3px 0px 3px 0px;
+            padding: 5px 0px 5px 0px;
+        }
+        
+        .form-fields-div{
+            margin: 3px 0px 3px 0px;
+            padding: 5px 0px 5px 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">
+        <div id="branding">
+
+            <h1 id="site-name"><a href="/admin/" style="margin-top: 7px;font-weight: 500;">Django administration</a>
+            </h1>
+
+        </div>
+
+
+        <div id="user-tools">
+
+            Welcome,
+            <strong>{{request.user.username}}</strong>.
+
+
+
+            <a href="/questionbank">Home</a>
+
+            <a href="/admin/logout/">Log out</a>
+
+        </div>
+
+
+
+    </div>
+    <div class="header w3-card w3-white w3-border w3-margin w3-padding"
+        style="text-align: center; line-height: 1.8; font-family: sans-serif;font-weight: 700; margin-left: 30px;"><span
+            style="box-shadow: 2px 12px 13px antiquewhite;">Edit Question</span>
+    </div>
+    
+    <div class="main w3-card w3-white w3-border w3-margin w3-padding " style="padding: 13px 16px!important;">
+        <div class="tab-content" id="myTabContent">
+            <form action="/editquestion/{{ question.id }}" method="post" id="newform0">
+                {% csrf_token %}
+                <input hidden type="text" value="{{ question.id }}" name="id">
+                <h4 class="heading"><u>Question Type</u></h4>
+                <div class="form-fields-div">
+                    <select name="questiontype" id="questiontype" style="margin-left:60px" onchange="updatefields()">
+                        {% for i in questiontypes %}
+                        {% if i == question.question_type %}
+                            <option value="{{i}}" selected>{{i}}</option>
+                        {% else %}
+                            <option value="{{i}}" >{{i}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <h4 class="heading" id="op-heading"><u>Options</u></h4>
+                <div class="optionarr row form-fields-div" id="listofoption0">
+                    {% for op in options %}
+                    <p class="col-1">
+                        <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        id="option{{forloop.counter}}" value="{{ op }}" name="option{{forloop.counter}}">
+                    </p>
+                    {% endfor %}
+                    
+                    <p class="col" id="addOption0">
+                        <button class="btn" onclick="createOption(document.querySelector('#listofoption0').id)" type="button">
+                        ➕ Add more option
+                        </button>
+                    </p>
+                </div>
+                <h4 class="heading" id="ip-heading"><u>Input Fields</u></h4>
+                <div class="row form-fields-div" id="numinput">
+                    <p class="col-3">
+                        <label for="" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                            Number of Input Fields
+                        </label>
+                        <input type="number" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;" value="{{ noinputs }}"
+                        id="" value="1" name="totalinput">
+                    </p>
+                </div>
+                <h4 class="heading"><u>Marks</u></h4>
+                <div class="row form-fields-div" id="marks">
+                    <p class="col-3">
+                        <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        id="positive_score" value="4" name="positive_score">
+                        <label for="positive_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                            Positive Score
+                        </label>
+                    </p>
+                    <p class="col-3">
+                        <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        id="negative_score" value="1" name="negative_score">
+                        <label for="negative_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                            Negative Score
+                        </label>
+                    </p>
+                </div>
+                <h4 class="heading"><u>Tags</u></h4>
+                <div class="row form-fields-div" id="subjective">
+                    <p class="col-3">
+                        <label for="subject_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                            Subject
+                        </label>
+                        <input type="text" value="{{question.subject_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        name="subject_tag" id="subject_tag">
+                    </p>
+                    <p class="col-3">
+                        <label for="topic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                            Topic
+                        </label>
+                        <input type="text" value="{{question.topic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        name="topic_tag" id="topic_tag">
+                    </p>
+                    <p class="col-3">
+                        <label for="subtopic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                            Subtopic
+                        </label>
+                        <input type="text" value="{{question.subtopic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                        name="subtopic_tag" id="subtopic_tag">
+                    </p>
+                </div>
+                <h4 class="heading" id="pg-heading"><u>Instructions</u></h4>
+                <div class="row form-fields-div" id="passage">
+                    <p class="col-5">
+                        <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;" value="{{ question.passage }}"
+                        id="instruction" name="passage" readonly required>
+                        <a class="editInput" onclick="editinput('instruction')">Edit Input</a>
+                    </p>
+                </div>
+                <h4 class="heading"><u>Questions</u></h4>
+                <div class="container form-fields-div" id="questionlist0">
+                    <div class="row question" style="text-align: left;">
+                        <p class="col-3">
+                            <label for="question0-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.1</label>
+
+                            <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;" value="{{question.question}}"
+                            id="question0-1" name="question" readonly required>
+                            <a class="editInput" onclick="editinput('question0-1')">Edit Input</a>
+                        </p>
+                        <p class="col-2">
+                            <label for="answer0-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Answer
+                            </label>
+                            <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 60px;" value="{{ answers }}"
+                            name="answer" id="answer0-1">
+                        </p>
+                        <p class="col">
+                            <label for="skill_tag0-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Skill Tag
+                            </label>
+                            <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;" value="{{ question.skill }}"
+                            name="skill_tag" id="skill_tag0-1">
+                        </p>
+                        <p class="col-4">
+                            <label for="dificulty_tag0-1" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Dificulty Tag
+                            </label>
+                            <select name="dificulty_tag" id="dificulty0-1">
+                                {% for i in dificulty %}
+                                {% if i == question.dificulty_tag %}
+                                    <option value="{{i}}" selected>{{i}}</option>
+                                {% else %}
+                                    <option value="{{i}}">{{i}}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </p>
+                    </div>
+                </div>
+                <input type="hidden" name="totaloption" id="totaloption">
+                <a href="/questionbank"
+                style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                onclick="">Cancel</a>
+                <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform()">
+                    Save Form
+                </button>
+                <button type="submit" id="submitbtn" style="display: none;"> Submit Form </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content w3-card-4">
+            <header class="w3-container w3-teal">
+                <span onclick="document.getElementById('id01').style.display='none'"
+                    class="w3-button w3-display-topright">&times;</span>
+                <h2>Input Content</h2>
+            </header>
+            <div class="w3-container w3-margin w3-padding">
+                <textarea name="content" id="ckeditor"></textarea>
+            </div>
+            <footer class="w3-container w3-teal">
+                <button class="w3-btn w3-shadow w3-blue w3-margin w3-right w3-round-large"
+                    onclick="getText()">Apply</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+</body>
+<!-- <script src="https://cdn.ckeditor.com/4.15.1/standard/ckeditor.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#ckeditor'), {
+            ckfinder: {
+                options: {
+                    resourceType: 'Images'
+                },
+                credentials: "include",
+                headers: {
+                    "X-CSRF-TOKEN":"{{csrf_token}}",
+                    csrftoken: "{{csrf_token}}",
+                    csrfmiddlewaretoken: "{{csrf_token}}",
+                },
+                uploadUrl: "https://lab.progressiveminds.in/uploadimages?command=QuickUpload&type=Images&responseType=json",
+            },
+            images: {
+                // Configure the available styles.
+                styles: [
+                    'alignLeft', 'alignCenter', 'alignRight'
+                ],
+
+                // Configure the available image resize options.
+                resizeOptions: [
+                    {
+                        name: 'resizeImage:original',
+                        label: 'Original',
+                        value: null
+                    },
+                    {
+                        name: 'resizeImage:50',
+                        label: '50%',
+                        value: '50'
+                    },
+                    {
+                        name: 'resizeImage:75',
+                        label: '75%',
+                        value: '75'
+                    }
+                ],
+
+                // You need to configure the image toolbar, too, so it shows the new style
+                // buttons as well as the resize buttons.
+                toolbar: [
+                    'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight',
+                    '|',
+                    'resizeImage',
+                    '|',
+                    'imageTextAlternative'
+                ]
+            }
+        })
+        .then(newEditor => {
+            editor = newEditor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    var option = parseInt("{{options | length}}");
+    var option_values = ['A','B','C','D','E','F','G','H','I']
+    var currentid = "";
+    const crop = (one) => {
+        one = one.replace("<p>", "");
+        one = one.replace("</p>", "");
+        one = one.trim();
+        return one;
+    };
+
+    qtype = document.querySelector('#questiontype').value;
+    if(qtype != 'Input Type'){
+        document.querySelector('#ip-heading').style.display = 'none';
+        document.querySelector('#numinput').style.display = 'none';
+    }
+    else{
+        document.querySelector('#op-heading').style.display = 'none';
+        document.querySelector('#listofoption0').style.display = 'none';
+    }
+
+    if(qtype != 'Assertion Reason'){
+        document.querySelector('#pg-heading').style.display = 'none';
+        document.querySelector('#passage').style.display = 'none';
+    }
+
+    if(qtype == 'True False'){
+        document.querySelector('#addOption0').style.display = 'none';
+    }
+
+    const deleteOption = (current_option) => {
+        $("#pfor"+ current_option).remove();
+        option = option - 1;
+    }
+
+    const createOption = () => {
+        option += 1;
+        document.querySelector('#addOption0').remove()
+        temp = `
+        <p class="col-1" id="pfor${option}">
+            <span class="w3-right w3-large" style="cursor:pointer" onclick="deleteOption('${option}')">&times;</span>
+            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+            id="option${option}" value="${option_values[option-1]}" name="option${option}">
+        </p>
+        <p class="col" id="addOption0">
+            <button class="btn" onclick="createOption(document.querySelector('#listofoption0').id)" type="button">
+            ➕ Add more option
+            </button>
+        </p>`;
+        $("#listofoption0").append(temp);
+    }
+
+    const updatefields = () => {
+        current_type = document.querySelector('#questiontype').value;
+        ip_heading = document.querySelector('#ip-heading');
+        numinput = document.querySelector('#numinput');
+        op_heading = document.querySelector('#op-heading');
+        listoption = document.querySelector('#listofoption0');
+        pg_heading = document.querySelector('#pg-heading');
+        passage =document.querySelector('#passage');
+        addOption = document.querySelector('#addOption0');
+        if (current_type == 'Input Type'){
+            op_heading.style.display = 'none';
+            listoption.style.display = 'none';
+            ip_heading.style.display = 'block';
+            numinput.style.display = 'block';
+            addOption.style.display = 'block';
+            pg_heading.style.display = 'none';
+            passage.style.display = 'none';
+        }
+        else if (current_type == 'Assertion Reason'){
+            op_heading.style.display = 'block';
+            listoption.style.display = 'flex';
+            ip_heading.style.display = 'none';
+            numinput.style.display = 'none';
+            addOption.style.display = 'block';
+            pg_heading.style.display = 'block';
+            passage.style.display = 'block';
+        }
+        else{
+            op_heading.style.display = 'block';
+            listoption.style.display = 'flex';
+            ip_heading.style.display = 'none';
+            numinput.style.display = 'none';
+            pg_heading.style.display = 'none';
+            passage.style.display = 'none';
+            if(current_type == 'True False'){
+                addOption.style.display = 'none';
+            }
+            else{
+                addOption.style.display = 'block';
+            }
+        }
+    }
+
+    const editinput = (id) => {
+        value = $("#" + id).val();
+        currentid = id;
+        editor.setData(value);
+        $("#id01").show();
+
+    }
+
+    const getText = () => {
+        value = editor.getData();
+        $("#" + currentid).val(value);
+        $("#id01").hide();
+        editor.setData("");
+    }
+
+    const submitform = () => {
+        $("#totaloption").val(option);
+        $("#submitbtn").click();
+    }
+
+</script>
+
+</html>

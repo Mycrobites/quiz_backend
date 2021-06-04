@@ -45,15 +45,24 @@ class AddQuestion(models.Model):
     question = models.ForeignKey("Question", on_delete=models.CASCADE)
     createdOn = models.DateTimeField(default=timezone.now())
 
+question_type_Choices = (
+    ("Multiple Correct","Multiple Correct"),
+    ( "True False","True False"),
+    ("Matching","Matching"),
+    ("Input Type","Input Type"),
+    ("Single Correct","Single Correct"),
+    ("Assertion Reason","Assertion Reason"))
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question_type=models.CharField(choices=question_type_Choices, blank=True, default="", max_length=100)
+    passage= RichTextUploadingField()#to be used for assertion/and reason type
     question = RichTextUploadingField()
     correct_marks = models.PositiveSmallIntegerField()
     negative_marks = models.PositiveSmallIntegerField()
     option = jsonfield.JSONField(blank=True, null=True)
-    answer = models.PositiveSmallIntegerField(null=True, blank=True)
-    text = models.TextField(blank=True)
+    answer = jsonfield.JSONField(blank=True, null=True)
+    text = jsonfield.JSONField(blank=True, null=True)
     subject_tag = models.CharField(max_length=100, blank=True, default="")
     topic_tag = models.CharField(max_length=100, blank=True, default="")
     subtopic_tag = models.CharField(max_length=100, blank=True, default="")

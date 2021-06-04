@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://cdn.ckeditor.com/ckeditor5/27.0.0/classic/ckeditor.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/questionbank/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: antiquewhite;
+            line-height: 1.7;
+        }
+
+        button {
+            outline: none;
+        }
+
+        .header {
+            /* height: 10vh;*/
+            font-size: 24px;
+        }
+
+        .main button:hover {
+            background-color: antiquewhite;
+        }
+
+        input[type="number"] {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            margin-left: 13px;
+            outline: none;
+            transition: all 0.5s ease;
+        }
+
+        input[type="text"] {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            outline: none;
+            transition: all 0.5s ease;
+        }
+
+        input[type="text"]:focus {
+            transform: scale(1.1);
+        }
+
+        input[type="number"]:focus {
+            transform: scale(1.1);
+        }
+
+        select {
+            box-shadow: 0px 11px 20px antiquewhite;
+            border-radius: 10px;
+            border-color: #0cf;
+            width: 200px;
+            outline: none;
+            height: 30px;
+            transform: translateX(-45px);
+        }
+
+        label[for="id_text"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_answer"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_negative_marks"] {            
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_correct_marks"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[ for="id_dificulty_tag"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        label[for="id_skill"] {
+            box-shadow: 0px 5px 16px antiquewhite;
+            font-size: 17px;
+        }
+
+        .editInput {
+            text-decoration: underline;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .editInput:hover {
+            color: blue;
+            font-size: 16px;
+        }
+
+        .tab-pane{
+            text-align: left;
+            padding: 4px;
+        }
+
+        .heading{
+            margin: 3px 0px 3px 0px;
+            padding: 5px 0px 5px 0px;
+        }
+        
+        .form-fields-div{
+            margin: 3px 0px 3px 0px;
+            padding: 5px 0px 5px 0px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div id="header">
+        <div id="branding">
+
+            <h1 id="site-name"><a href="/admin/" style="margin-top: 7px;font-weight: 500;">Django administration</a>
+            </h1>
+
+        </div>
+
+
+        <div id="user-tools">
+
+            Welcome,
+            <strong>{{request.user.username}}</strong>.
+
+
+
+            <a href="/questionbank">Home</a>
+
+            <a href="/admin/logout/">Log out</a>
+
+        </div>
+
+
+
+    </div>
+    <div class="header w3-card w3-white w3-border w3-margin w3-padding"
+        style="text-align: center; line-height: 1.8; font-family: sans-serif;font-weight: 700; margin-left: 30px;"><span
+            style="box-shadow: 2px 12px 13px antiquewhite;">Add Question to Question Bank</span>
+    </div>
+    
+    <div class="main w3-card w3-white w3-border w3-margin w3-padding " style="padding: 13px 16px!important;">
+        <ul class="nav nav-tabs">
+            <li class="nav-item" role="presentation" style="list-style-type: none; font-size: larger;">
+                <button class="nav-link active" id="single-correct-tab" data-bs-toggle="tab" data-bs-target="#single-correct" type="button" role="tab" aria-controls="single-correct" aria-selected="true">Single Correct MCQ</button>
+            </li>
+            <li class="nav-item" role="presentation" style="list-style-type: none; font-size: larger;">
+                <button class="nav-link" id="true-false-tab" data-bs-toggle="tab" data-bs-target="#true-false" type="button" role="tab" aria-controls="true-false" aria-selected="false">True/False</button>
+            </li>
+            <li class="nav-item" role="presentation" style="list-style-type: none; font-size: larger;">
+                <button class="nav-link" id="input-tab" data-bs-toggle="tab" data-bs-target="#input" type="button" role="tab" aria-controls="input" aria-selected="false">Input</button>
+            </li>
+            <li class="nav-item" role="presentation" style="list-style-type: none; font-size: larger;">
+                <button class="nav-link" id="assertion-reason-tab" data-bs-toggle="tab" data-bs-target="#assertion-reason" type="button" role="tab" aria-controls="assertion-reason" aria-selected="false">Assertion/Reason</button>
+            </li>
+            <li class="nav-item" role="presentation" style="list-style-type: none; font-size: larger;">
+                <button class="nav-link" id="multiple-correct-tab" data-bs-toggle="tab" data-bs-target="#multiple-correct" type="button" role="tab" aria-controls="multiple-correct" aria-selected="false">Multiple Correct MCQ</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <!-- Single Correct -->  
+            <div class="tab-pane fade show active"id="single-correct" role="tabpanel" aria-labelledby="single-correct-tab">
+                <form action="/addquestion" method="post" id="newform0">
+                    {% csrf_token %}
+                    <input value="Single Correct" name="questiontype" hidden>
+                    <h4 class="heading"><u>Options</u></h4>
+                    <div class="optionarr row form-fields-div" id="listofoption0">
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option1" value="A" name="option1">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option2" value="B" name="option2">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option3" value="C" name="option3">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option4" value="D" name="option4">
+                        </p>
+                        <p class="col" id="addOption0">
+                            <button class="btn" onclick="createOption(document.querySelector('#listofoption0').id)" type="button">
+                            ➕ Add more option
+                            </button>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Marks</u></h4>
+                    <div class="row form-fields-div" id="marks">
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="positive_score" value="4" name="positive_score">
+                            <label for="positive_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Positive Score
+                            </label>
+                        </p>
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="negative_score" value="1" name="negative_score">
+                            <label for="negative_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Negative Score
+                            </label>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Tags</u></h4>
+                    <div class="row form-fields-div" id="subjective">
+                        <p class="col-3">
+                            <label for="subject_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subject
+                            </label>
+                            <input type="text" value="{{question.subject_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subject_tag" id="subject_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="topic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Topic
+                            </label>
+                            <input type="text" value="{{question.topic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="topic_tag" id="topic_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="subtopic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subtopic
+                            </label>
+                            <input type="text" value="{{question.subtopic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subtopic_tag" id="subtopic_tag">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Questions</u></h4>
+                    <div class="container form-fields-div" id="questionlist0">
+                        <div class="row question" style="text-align: left;">
+                            <p class="col-3">
+                                <label for="question0-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.1</label>
+
+                                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                                id="question0-1" name="question1" readonly required>
+                                <a class="editInput" onclick="editinput('question0-1')">Edit Input</a>
+                            </p>
+                            <p class="col-2">
+                                <label for="answer0-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Answer
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 60px;"
+                                name="answer1" id="answer0-1">
+                            </p>
+                            <p class="col">
+                                <label for="skill_tag0-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Skill Tag
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                                name="skill_tag1" id="skill_tag0-1">
+                            </p>
+                            <p class="col-4">
+                                <label for="dificulty_tag0-1" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Dificulty Tag
+                                </label>
+                                <select name="dificulty_tag1" id="dificulty0-1">
+                                    {% for i in dificulty %}
+                                    <option value="{{i}}">{{i}}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                        <p id="addQuestion0" style="text-align: left;">
+                            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist0').id)" type="button">
+                            ➕ Add more question
+                            </button>
+                        </p>
+                    </div>
+                    <input type="hidden" name="totaloption" id="totaloption0">
+                    <input type="hidden" name="totalquestion" id="totalquestion0">
+                    <a href="/questionbank"
+                    style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                    onclick="">Cancel</a>
+                    <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform(document.querySelector('#newform0').id)">
+                        Submit Form
+                    </button>
+                    <button type="submit" id="submitbtn0" style="display: none;"> Submit Form </button>
+                </form>
+            </div>
+                
+            <!-- True False -->
+            <div class="tab-pane fade" id="true-false" role="tabpanel" aria-labelledby="true-false-tab">
+                <form action="/addquestion" method="post" id="newform1">
+                    {% csrf_token %}
+                    <input value="True False" name="questiontype" hidden>
+                    <h4 class="heading"><u>Options</u></h4>
+                    <div class="optionarr row form-fields-div" id="listofoption1">
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option1" value="True" name="option1">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option2" value="False" name="option2">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Marks</u></h4>
+                    <div class="row form-fields-div" id="marks">
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="positive_score" value="4" name="positive_score">
+                            <label for="positive_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Positive Score
+                            </label>
+                        </p>
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="negative_score" value="1" name="negative_score">
+                            <label for="negative_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Negative Score
+                            </label>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Tags</u></h4>
+                    <div class="row form-fields-div" id="subjective">
+                        <p class="col-3">
+                            <label for="subject_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subject
+                            </label>
+                            <input type="text" value="{{question.subject_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subject_tag" id="subject_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="topic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Topic
+                            </label>
+                            <input type="text" value="{{question.topic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="topic_tag" id="topic_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="subtopic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subtopic
+                            </label>
+                            <input type="text" value="{{question.subtopic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subtopic_tag" id="subtopic_tag">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Questions</u></h4>
+                    <div class="container form-fields-div" id="questionlist1">
+                        <div class="row question" style="text-align: left;">
+                            <p class="col-3">
+                                <label for="question1-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.1</label>
+
+                                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                                id="question1-1" name="question1" readonly required>
+                                <a class="editInput" onclick="editinput('question1-1')">Edit Input</a>
+                            </p>
+                            <p class="col-2">
+                                <label for="answer1-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Answer
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 60px;"
+                                name="answer1" id="answer1-1">
+                            </p>
+                            <p class="col">
+                                <label for="skill_tag1-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Skill Tag
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                                name="skill_tag1" id="skill_tag1-1">
+                            </p>
+                            <p class="col-4">
+                                <label for="dificulty_tag1-1" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Dificulty Tag
+                                </label>
+                                <select name="dificulty_tag1" id="dificulty1-1">
+                                    {% for i in dificulty %}
+                                    <option value="{{i}}">{{i}}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                        <p id="addQuestion1" style="text-align: left;">
+                            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist1').id)" type="button">
+                            ➕ Add more question
+                            </button>
+                        </p>
+                    </div>
+                    <input type="hidden" name="totaloption" id="totaloption1">
+                    <input type="hidden" name="totalquestion" id="totalquestion1">
+                    <a href="/questionbank"
+                    style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                    onclick="">Cancel</a>
+                    <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform(document.querySelector('#newform1').id)">
+                        Submit Form
+                    </button>
+                    <button type="submit" id="submitbtn1" style="display: none;"> Submit Form </button>
+                </form>
+            </div>
+            
+            <!-- Input Type -->
+            <div class="tab-pane fade" id="input" role="tabpanel" aria-labelledby="input-tab">
+                <form action="/addquestion" method="post" id="newform2">
+                    {% csrf_token %}
+                    <input value="Input Type" name="questiontype" hidden>
+                    <h4 class="heading"><u>Input Fields</u></h4>
+                    <div class="row form-fields-div" id="numinput">
+                        <p class="col-3">
+                            <label for="" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Number of Input Fields
+                            </label>
+                            <input type="number" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="" value="1" name="totalinput">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Marks</u></h4>
+                    <div class="row form-fields-div" id="marks">
+                        <p class="col-3">
+                            <input type="number" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="positive_score" value="4" name="positive_score">
+                            <label for="positive_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Positive Score
+                            </label>
+                        </p>
+                        <p class="col-3">
+                            <input type="number" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="negative_score" value="1" name="negative_score">
+                            <label for="negative_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Negative Score
+                            </label>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Tags</u></h4>
+                    <div class="row form-fields-div" id="subjective">
+                        <p class="col-3">
+                            <label for="subject_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subject
+                            </label>
+                            <input type="text" value="{{question.subject_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subject_tag" id="subject_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="topic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Topic
+                            </label>
+                            <input type="text" value="{{question.topic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="topic_tag" id="topic_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="subtopic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subtopic
+                            </label>
+                            <input type="text" value="{{question.subtopic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subtopic_tag" id="subtopic_tag">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Questions</u></h4>
+                    <div class="container form-fields-div" id="questionlist2">
+                        <div class="row question" style="text-align: left;">
+                            <p class="col-3">
+                                <label for="question2-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.1</label>
+
+                                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                                id="question2-1" name="question1" readonly required>
+                                <a class="editInput" onclick="editinput('question2-1')">Edit Input</a>
+                            </p>
+                            <p class="col-2">
+                                <label for="answer2-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Answer
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 100px;"
+                                name="answer1" id="answer2-1">
+                            </p>
+                            <p class="col">
+                                <label for="skill_tag2-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Skill Tag
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                                name="skill_tag1" id="skill_tag2-1">
+                            </p>
+                            <p class="col-4">
+                                <label for="dificulty_tag2-1" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Dificulty Tag
+                                </label>
+                                <select name="dificulty_tag1" id="dificulty2-1">
+                                    {% for i in dificulty %}
+                                    <option value="{{i}}">{{i}}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                        <p id="addQuestion2" style="text-align: left;">
+                            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist2').id)" type="button">
+                            ➕ Add more question
+                            </button>
+                        </p>
+                    </div>
+                    <input type="hidden" name="totalquestion" id="totalquestion2">
+                    <a href="/questionbank"
+                    style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                    onclick="">Cancel</a>
+                    <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform(document.querySelector('#newform2').id)">
+                        Submit Form
+                    </button>
+                    <button type="submit" id="submitbtn2" style="display: none;"> Submit Form </button>
+                </form>
+            </div>
+            
+            <!-- Assertion Reason -->
+            <div class="tab-pane fade" id="assertion-reason" role="tabpanel" aria-labelledby="assertion-reason-tab">
+                <form action="/addquestion" method="post" id="newform3">
+                    {% csrf_token %}
+                    <input value="Assertion Reason" name="questiontype" hidden>
+                    <h4 class="heading"><u>Options</u></h4>
+                    <div class="optionarr row form-fields-div" id="listofoption2">
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option1" value="A" name="option1">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option2" value="B" name="option2">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option3" value="C" name="option3">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option4" value="D" name="option4">
+                        </p>
+                        <p class="col" id="addOption2">
+                            <button class="btn" onclick="createOption(document.querySelector('#listofoption2').id)" type="button">
+                            ➕ Add more option
+                            </button>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Marks</u></h4>
+                    <div class="row form-fields-div" id="marks">
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="positive_score" value="4" name="positive_score">
+                            <label for="positive_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Positive Score
+                            </label>
+                        </p>
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="negative_score" value="1" name="negative_score">
+                            <label for="negative_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Negative Score
+                            </label>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Tags</u></h4>
+                    <div class="row form-fields-div" id="subjective">
+                        <p class="col-3">
+                            <label for="subject_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subject
+                            </label>
+                            <input type="text" value="{{question.subject_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subject_tag" id="subject_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="topic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Topic
+                            </label>
+                            <input type="text" value="{{question.topic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="topic_tag" id="topic_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="subtopic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subtopic
+                            </label>
+                            <input type="text" value="{{question.subtopic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subtopic_tag" id="subtopic_tag">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Instructions</u></h4>
+                    <div class="row form-fields-div" id="passage">
+                        <p class="col-5">
+                            <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                            id="instruction" name="passage" readonly required>
+                            <a class="editInput" onclick="editinput('instruction')">Edit Input</a>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Questions</u></h4>
+                    <div class="container form-fields-div" id="questionlist3">
+                        <div class="row question" style="text-align: left;">
+                            <p class="col-3">
+                                <label for="question3-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.1</label>
+
+                                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                                id="question3-1" name="question1" readonly required>
+                                <a class="editInput" onclick="editinput('question3-1')">Edit Input</a>
+                            </p>
+                            <p class="col-2">
+                                <label for="answer3-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Answer
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 60px;"
+                                name="answer1" id="answer3-1">
+                            </p>
+                            <p class="col">
+                                <label for="skill_tag3-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Skill Tag
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                                name="skill_tag1" id="skill_tag3-1">
+                            </p>
+                            <p class="col-4">
+                                <label for="dificulty_tag3-1" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Dificulty Tag
+                                </label>
+                                <select name="dificulty_tag1" id="dificulty3-1">
+                                    {% for i in dificulty %}
+                                    <option value="{{i}}">{{i}}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                        <p id="addQuestion3" style="text-align: left;">
+                            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist3').id)" type="button">
+                            ➕ Add more question
+                            </button>
+                        </p>
+                    </div>
+                    <input type="hidden" name="totaloption" id="totaloption3">
+                    <input type="hidden" name="totalquestion" id="totalquestion3">
+                    <a href="/questionbank"
+                    style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                    onclick="">Cancel</a>
+                    <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform(document.querySelector('#newform3').id)">
+                        Submit Form
+                    </button>
+                    <button type="submit" id="submitbtn3" style="display: none;"> Submit Form </button>
+                </form>
+            </div>
+
+            <!-- Multiple Correct -->
+            <div class="tab-pane fade" id="multiple-correct" role="tabpanel" aria-labelledby="multiple-correct-tab">
+                <form action="/addquestion" method="post" id="newform4">
+                    {% csrf_token %}
+                    <input value="Multiple Correct" name="questiontype" hidden>
+                    <h4 class="heading"><u>Options</u></h4>
+                    <div class="optionarr row form-fields-div" id="listofoption3">
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option1" value="A" name="option1">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option2" value="B" name="option2">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option3" value="C" name="option3">
+                        </p>
+                        <p class="col-1">
+                            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="option4" value="D" name="option4">
+                        </p>
+                        <p class="col" id="addOption3">
+                            <button class="btn" onclick="createOption(document.querySelector('#listofoption3').id)" type="button">
+                            ➕ Add more option
+                            </button>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Marks</u></h4>
+                    <div class="row form-fields-div" id="marks">
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="positive_score" value="4" name="positive_score">
+                            <label for="positive_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Positive Score
+                            </label>
+                        </p>
+                        <p class="col-3">
+                            <input type="text" style="width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            id="negative_score" value="1" name="negative_score">
+                            <label for="negative_score" style="margin-right: 47px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Negative Score
+                            </label>
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Tags</u></h4>
+                    <div class="row form-fields-div" id="subjective">
+                        <p class="col-3">
+                            <label for="subject_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subject
+                            </label>
+                            <input type="text" value="{{question.subject_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subject_tag" id="subject_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="topic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Topic
+                            </label>
+                            <input type="text" value="{{question.topic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="topic_tag" id="topic_tag">
+                        </p>
+                        <p class="col-3">
+                            <label for="subtopic_tag" style="margin-right: 20px ; margin-left:18px;box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                Subtopic
+                            </label>
+                            <input type="text" value="{{question.subtopic_tag}}" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                            name="subtopic_tag" id="subtopic_tag">
+                        </p>
+                    </div>
+                    <h4 class="heading"><u>Questions</u></h4>
+                    <div class="container form-fields-div" id="questionlist4">
+                        <div class="row question" style="text-align: left;">
+                            <p class="col-3">
+                                <label for="question4-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.1</label>
+
+                                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                                id="question1" name="question1" readonly required>
+                                <a class="editInput" onclick="editinput('question1')">Edit Input</a>
+                            </p>
+                            <p class="col-2">
+                                <label for="answer4-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Answer
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 100px;"
+                                name="answer1" id="answer4-1">
+                            </p>
+                            <p class="col">
+                                <label for="skill_tag4-1" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Skill Tag
+                                </label>
+                                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                                name="skill_tag1" id="skill_tag4-1">
+                            </p>
+                            <p class="col-4">
+                                <label for="dificulty_tag4-1" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                                    Dificulty Tag
+                                </label>
+                                <select name="dificulty_tag1" id="dificulty4-1">
+                                    {% for i in dificulty %}
+                                    <option value="{{i}}">{{i}}</option>
+                                    {% endfor %}
+                                </select>
+                            </p>
+                        </div>
+                        <p id="addQuestion4" style="text-align: left;">
+                            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist4').id)" type="button">
+                            ➕ Add more question
+                            </button>
+                        </p>
+                    </div>
+                    <input type="hidden" name="totaloption" id="totaloption4">
+                    <input type="hidden" name="totalquestion" id="totalquestion4">
+                    <a href="/questionbank"
+                    style="border-radius:100px ;text-decoration: none; border:2px solid black;padding:20px;background:rgb(223, 48, 62);height: 35px; width: 175px;margin-right:50px; padding: 10px; color:#fff; margin-top: 18px; margin-left: 18px;"
+                    onclick="">Cancel</a>
+                    <button type="button" style="border-radius:100px ;height: 35px; width:175px; " onclick="submitform(document.querySelector('#newform4').id)">
+                        Submit Form
+                    </button>
+                    <button type="submit" id="submitbtn4" style="display: none;"> Submit Form </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content w3-card-4">
+            <header class="w3-container w3-teal">
+                <span onclick="document.getElementById('id01').style.display='none'"
+                    class="w3-button w3-display-topright">&times;</span>
+                <h2>Input Content</h2>
+            </header>
+            <div class="w3-container w3-margin w3-padding">
+                <textarea name="content" id="ckeditor"></textarea>
+            </div>
+            <footer class="w3-container w3-teal">
+                <button class="w3-btn w3-shadow w3-blue w3-margin w3-right w3-round-large"
+                    onclick="getText()">Apply</button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+</body>
+<!-- <script src="https://cdn.ckeditor.com/4.15.1/standard/ckeditor.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#ckeditor'), {
+            ckfinder: {
+                options: {
+                    resourceType: 'Images'
+                },
+                credentials: "include",
+                headers: {
+                    "X-CSRF-TOKEN":"{{csrf_token}}",
+                    csrftoken: "{{csrf_token}}",
+                    csrfmiddlewaretoken: "{{csrf_token}}",
+                },
+                uploadUrl: "https://lab.progressiveminds.in/uploadimages?command=QuickUpload&type=Images&responseType=json",
+            },
+            images: {
+                // Configure the available styles.
+                styles: [
+                    'alignLeft', 'alignCenter', 'alignRight'
+                ],
+
+                // Configure the available image resize options.
+                resizeOptions: [
+                    {
+                        name: 'resizeImage:original',
+                        label: 'Original',
+                        value: null
+                    },
+                    {
+                        name: 'resizeImage:50',
+                        label: '50%',
+                        value: '50'
+                    },
+                    {
+                        name: 'resizeImage:75',
+                        label: '75%',
+                        value: '75'
+                    }
+                ],
+
+                // You need to configure the image toolbar, too, so it shows the new style
+                // buttons as well as the resize buttons.
+                toolbar: [
+                    'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight',
+                    '|',
+                    'resizeImage',
+                    '|',
+                    'imageTextAlternative'
+                ]
+            }
+        })
+        .then(newEditor => {
+            editor = newEditor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    var option = [4,2,4,4];
+    var option_values = ['A','B','C','D','E','F','G','H','I']
+    var question = [1,1,1,1,1];
+    var currentid = "";
+    const crop = (one) => {
+        one = one.replace("<p>", "");
+        one = one.replace("</p>", "");
+        one = one.trim();
+        return one;
+    };
+
+    const deleteOption = (current_option) => {
+        $("#pfor"+ current_option[0] +"-"+ current_option[1]).remove();
+        option[current_option[0]] = option[current_option[0]] - 1;
+    }
+
+    const createOption = (opstr) => {
+        i = opstr[opstr.length-1]
+        option[i] += 1;
+        document.querySelector('#addOption'+i).remove()
+        temp = `
+        <p class="col-1" id="pfor${i}-${option[i]}">
+            <span class="w3-right w3-large" style="cursor:pointer" onclick="deleteOption('${i}${option[i]}')">&times;</span>
+            <input type="text" style="margin-right: 15px; width:50px; border-radius: 10px;border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+            id="option${option[i]}" value="${option_values[option[i]-1]}" name="option${option[i]}">
+        </p>
+        <p class="col" id="addOption${i}">
+            <button class="btn" onclick="createOption(document.querySelector('#listofoption${i}').id)" type="button">
+            ➕ Add more option
+            </button>
+        </p>`;
+        $("#listofoption"+i).append(temp);
+    }
+
+    const deleteQuestion = (current_question) => {
+        $("#pforquestion"+ current_question[0] +"-" + current_question[1]).remove();
+        question[current_question[0]] = question[current_question[0]] - 1;
+    }
+    
+    const createQuestion = (qstr) => {
+        i = qstr[qstr.length-1]
+        question[i] += 1;
+        document.querySelector('#addQuestion'+i).remove()
+        temp1 = `
+        <div class="row question" style="text-align: left;" id="pforquestion${i}-${question[i]}">
+            <p class="col-3">
+                <label for="question${i}-${question[i]}" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.${question[i]}</label>
+                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                id="question${i}-${question[i]}" name="question${question[i]}" readonly required>
+                <a class="editInput" onclick="editinput('question${i}-${question[i]}')">Edit Input</a>
+            </p>
+            <p class="col-2">
+                <label for="answer${i}-${question[i]}" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                    Answer
+                </label>
+                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 60px;"
+                name="answer${question[i]}" id="answer${i}-${question[i]}">
+            </p>
+            <p class="col">
+                <label for="skill_tag${i}-${question[i]}" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                    Skill Tag
+                </label>
+                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                name="skill_tag${question[i]}" id="skill_tag${i}-${question[i]}">
+            </p>
+            <p class="col-4">
+                <label for="dificulty_tag${i}-${question[i]}" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                    Dificulty Tag
+                </label>
+                <select name="dificulty_tag${question[i]}" id="dificulty${i}-${question[i]}">
+                    {% for i in dificulty %}
+                    <option value="{{i}}">{{i}}</option>
+                    {% endfor %}
+                </select>
+                <span class="w3-right w3-large" style="cursor:pointer" onclick="deleteQuestion('${i}${question[i]}')">&times;</span>
+            </p>
+        </div>
+        <p id="addQuestion${i}" style="text-align: left;">
+            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist${i}').id)" type="button">
+            ➕ Add more question
+            </button>
+        </p>`;
+        temp2 = `
+        <div class="row question" style="text-align: left;" id="pforquestion${i}-${question[i]}">
+            <p class="col-3">
+                <label for="question${i}-${question[i]}" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px; font-weight: 700;">Q.${question[i]}</label>
+                <input type="text" style="margin-right: 5px; border-radius: 10px; border-color: #0cf; box-shadow: 0px 11px 20px antiquewhite;"
+                id="question${i}-${question[i]}" name="question${question[i]}" readonly required>
+                <a class="editInput" onclick="editinput('question${i}-${question[i]}')">Edit Input</a>
+            </p>
+            <p class="col-2">
+                <label for="answer${i}-${question[i]}" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                    Answer
+                </label>
+                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite; width: 100px;"
+                name="answer${question[i]}" id="answer${i}-${question[i]}">
+            </p>
+            <p class="col">
+                <label for="skill_tag${i}-${question[i]}" style="box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                    Skill Tag
+                </label>
+                <input type="text" style="border-radius: 10px; border-color: #0cf;box-shadow: 0px 11px 20px antiquewhite;"
+                name="skill_tag${question[i]}" id="skill_tag${i}-${question[i]}">
+            </p>
+            <p class="col-4">
+                <label for="dificulty_tag${i}-${question[i]}" style="margin-right: 45px; box-shadow: 0px 5px 16px antiquewhite;font-size:17px;">
+                    Dificulty Tag
+                </label>
+                <select name="dificulty_tag${question[i]}" id="dificulty${i}-${question[i]}">
+                    {% for i in dificulty %}
+                    <option value="{{i}}">{{i}}</option>
+                    {% endfor %}
+                </select>
+                <span class="w3-right w3-large" style="cursor:pointer" onclick="deleteQuestion('${i}${question[i]}')">&times;</span>
+            </p>
+        </div>
+        <p id="addQuestion${i}" style="text-align: left;">
+            <button class="btn" onclick="createQuestion(document.querySelector('#questionlist${i}').id)" type="button">
+            ➕ Add more question
+            </button>
+        </p>`;
+        if(i=='2' || i=='4')
+            $("#questionlist"+i).append(temp2);
+        else
+            $("#questionlist"+i).append(temp1);
+    }
+
+    const editinput = (id) => {
+        value = $("#" + id).val();
+        currentid = id;
+        editor.setData(value);
+        $("#id01").show();
+
+    }
+
+    const getText = () => {
+        value = editor.getData();
+        $("#" + currentid).val(value);
+        $("#id01").hide();
+        editor.setData("");
+    }
+
+    const submitform = (fstr) => {
+        i = fstr[fstr.length-1]
+        if(i == '1' || i == '0')
+            $("#totaloption"+i).val(option[i]);
+        else if(i == '3' || i == '4')
+            $("#totaloption"+i).val(option[i-1]);
+        else{}
+        $("#totalquestion"+i).val(question[i]);
+        $("#submitbtn"+i).click();
+    }
+
+</script>
+
+</html>

@@ -176,7 +176,7 @@
         <div class="tab-content" id="myTabContent">
             <!-- Single Correct -->  
             <div class="tab-pane fade show active"id="single-correct" role="tabpanel" aria-labelledby="single-correct-tab">
-                <form action="/addquestionnew" method="post" id="newform0">
+                <form action="/addquestion" method="post" id="newform0">
                     {% csrf_token %}
                     <input value="Single Correct" name="questiontype" hidden>
                     <h4 class="heading"><u>Options</u></h4>
@@ -299,7 +299,7 @@
                 
             <!-- True False -->
             <div class="tab-pane fade" id="true-false" role="tabpanel" aria-labelledby="true-false-tab">
-                <form action="/addquestionnew" method="post" id="newform1">
+                <form action="/addquestion" method="post" id="newform1">
                     {% csrf_token %}
                     <input value="True False" name="questiontype" hidden>
                     <h4 class="heading"><u>Options</u></h4>
@@ -409,7 +409,7 @@
             
             <!-- Input Type -->
             <div class="tab-pane fade" id="input" role="tabpanel" aria-labelledby="input-tab">
-                <form action="/addquestionnew" method="post" id="newform2">
+                <form action="/addquestion" method="post" id="newform2">
                     {% csrf_token %}
                     <input value="Input Type" name="questiontype" hidden>
                     <h4 class="heading"><u>Input Fields</u></h4>
@@ -517,7 +517,7 @@
             
             <!-- Assertion Reason -->
             <div class="tab-pane fade" id="assertion-reason" role="tabpanel" aria-labelledby="assertion-reason-tab">
-                <form action="/addquestionnew" method="post" id="newform3">
+                <form action="/addquestion" method="post" id="newform3">
                     {% csrf_token %}
                     <input value="Assertion Reason" name="questiontype" hidden>
                     <h4 class="heading"><u>Options</u></h4>
@@ -648,7 +648,7 @@
 
             <!-- Multiple Correct -->
             <div class="tab-pane fade" id="multiple-correct" role="tabpanel" aria-labelledby="multiple-correct-tab">
-                <form action="/addquestionnew" method="post" id="newform4">
+                <form action="/addquestion" method="post" id="newform4">
                     {% csrf_token %}
                     <input value="Multiple Correct" name="questiontype" hidden>
                     <h4 class="heading"><u>Options</u></h4>

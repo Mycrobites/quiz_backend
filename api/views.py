@@ -1237,6 +1237,7 @@ def bank(request):
 			if post_data['questiontype'] == 'Assertion Reason':
 				obj.passage = post_data['passage']
 			obj.save()
+		return redirect("/questionbank")
 	dificulty = [("Easy"),("Medium"),("Hard")]
 	return render(request,"addQuestions.html",{"dificulty":dificulty})
 

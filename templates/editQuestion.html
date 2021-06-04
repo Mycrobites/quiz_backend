@@ -156,7 +156,7 @@
     
     <div class="main w3-card w3-white w3-border w3-margin w3-padding " style="padding: 13px 16px!important;">
         <div class="tab-content" id="myTabContent">
-            <form action="/editquestion/{{ question.id }}" method="post" id="newform0">
+            <form action="/question/{{ question.id }}/change" method="post" id="newform0">
                 {% csrf_token %}
                 <input hidden type="text" value="{{ question.id }}" name="id">
                 <h4 class="heading"><u>Question Type</u></h4>

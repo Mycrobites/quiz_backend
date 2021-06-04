@@ -48,10 +48,15 @@ class QuizView(GenericAPIView):
 				serializer = self.serializer_class(quiz)
 				questions = quiz.question.distinct()
 				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
+				print(questions)
 				questions = []
 				for i in quest:
+					print("1")
 					ques_serializer = QuestionSerializer(i.question)
+					print("2")
 					questions.append(ques_serializer.data)
+					print("3")
+					
 				count = 0
 				for i in questions:
 					i["options"] = []
@@ -192,6 +197,7 @@ class QuizCreateResponseView(GenericAPIView):
 
 	def post(self, request):
 		data = request.data
+		print(data)
 		user_id = request.data['user']
 		quiz_id = request.data['quiz']
 		try:
@@ -212,23 +218,23 @@ class QuizCreateResponseView(GenericAPIView):
 			questions = quiz.question
 			marks = 0
 			for i in quiz.question.all():
-				if i.answer is None:
+				if i.question_type == 'Single Correct':
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
-						if i.text == res_dict[str(i.id)]:
+						if i.option[str(res_dict[str(i.id)])] == i.answer['1']:
 							marks += i.correct_marks
 						else:
 							marks -= i.negative_marks
-				elif i.text == "":
+				elif i.question_type == 'Input Type':
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
-						if str(i.answer) == res_dict[str(i.id)]:
+						if res_dict[str(i.id)] == i.answer['1']:
 							marks += i.correct_marks
 						else:
 							marks -= i.negative_marks
-				elif i.answer == "" and i.text == "":
+				else:
 					marks += 0
 			quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
 			quizobject.update(marks=marks)
@@ -303,24 +309,25 @@ class QuizMarksView(GenericAPIView):
 					quiz = quiz_assign.quiz
 					questions = quiz.question
 					marks = 0
+					
 					for i in quizobj.question.all():
-						if i.answer is None:
+						if i.question_type == 'Single Correct':
 							if res_dict[str(i.id)] == "":
 								marks += 0
 							else:
-								if i.text == res_dict[str(i.id)]:
+								if i.option[str(res_dict[str(i.id)])] == i.answer['1']:
 									marks += i.correct_marks
 								else:
 									marks -= i.negative_marks
-						elif i.text == "":
+						elif i.question_type == 'Input Type':
 							if res_dict[str(i.id)] == "":
 								marks += 0
 							else:
-								if str(i.answer) == res_dict[str(i.id)]:
+								if res_dict[str(i.id)] == i.answer['1']:
 									marks += i.correct_marks
 								else:
 									marks -= i.negative_marks
-						elif i.answer == "" and i.text == "":
+						else:
 							marks += 0
 					quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
 					quizobject.update(marks=marks)

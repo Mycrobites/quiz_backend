@@ -724,7 +724,6 @@ def resultanalysis(request):
 
 		return render(request, "resultanalysis.html", {"username": username, "quizid": quizid, "details": details})
 
-
 class GetResult(GenericAPIView):
     permission_classes = [AllowAny]
 
@@ -757,8 +756,8 @@ class GetResult(GenericAPIView):
             for ques in res_dict:
                 totalquestion += 1
                 obj = Question.objects.get(id=ques)
-                if obj.answer is None:
-                    quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.text,
+                if obj.question_type == 'Input Type':
+                    quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.answer['1'],
                                                                  "your answer": res_dict[ques]}
                 else:
                     if(type(obj.option) is str):
@@ -768,22 +767,21 @@ class GetResult(GenericAPIView):
                         temp = obj.option
                     if res_dict[ques] != "":
                         try:
-                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer)],
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer['1'])],
                                                                      "your answer":temp[str(res_dict[ques])]}
                         except:
-                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer),
-                                                                     "your answer": "option " + str(res_dict[ques])}
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer['1']),
+                                                                     "your answer": "option " + str(obj.option[str(res_dict[ques])])}
                     else:
                         try:
-                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer)],
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],
                                                                      "your answer": ""}
                         except:
-                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer),
+                            quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer['1']),
                                                                      "your answer": ""}
                 if res_dict[ques] != "":
                     attemptedquestion += 1
-                    if ((obj.answer is not None and str(obj.answer) == str(res_dict[ques])) or str(obj.text) == str(
-                            res_dict[ques])):
+                    if (str(obj.answer['1']) == str(res_dict[ques])):
                         correctquestion += 1
                         totalmarks += int(obj.correct_marks)
                         flag = "True"
@@ -952,6 +950,7 @@ class CreateExcelForScore(APIView):
 		response = HttpResponse(content=content, content_type='application/ms-excel')
 		response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
 		return response
+
 class RunExcelCreateView(GenericAPIView):
     serializer_class = RunExcelTaskSerializer
     # permission_classes = [IsAuthenticated,IsTeacher]
@@ -964,7 +963,6 @@ class RunExcelCreateView(GenericAPIView):
         serializer.save()
         return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
     
-
 class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
     

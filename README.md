@@ -1,10 +1,10 @@
-# Separate Quiz Platform for progressive minds
+# Separate Quiz Platform for Progressive minds
 [![Django CI](https://github.com/Mycrobites/quiz_backend/actions/workflows/django.yml/badge.svg)](https://github.com/Mycrobites/quiz_backend/actions/workflows/django.yml)
 
-### Added CI Workflow (Testing Runserver)
+### Added the CI Workflow (Testing Runserver)
 
 
-Follow the below instruction to correctly setup and run the project.
+Follow the below instruction to correctly setup and run the project successfully.
 
 ## Pre-requisites
 
@@ -15,7 +15,7 @@ Follow the below instruction to correctly setup and run the project.
     <li> Git CLI installed and setup properly. Get it from <a href="https://git-scm.com/downloads">here</a>.</li>
    </ol>
     
-## Cloning the project
+## Cloning project
 
 Run the following command to clone the project
 

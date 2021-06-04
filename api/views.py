@@ -197,7 +197,6 @@ class QuizCreateResponseView(GenericAPIView):
 
 	def post(self, request):
 		data = request.data
-		print(data)
 		user_id = request.data['user']
 		quiz_id = request.data['quiz']
 		try:
@@ -222,7 +221,7 @@ class QuizCreateResponseView(GenericAPIView):
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
-						if i.option[str(res_dict[str(i.id)])] == i.answer['1']:
+						if i.option[str(res_dict[str(i.id)])].strip() == i.answer['1'].strip():
 							marks += i.correct_marks
 						else:
 							marks -= i.negative_marks
@@ -230,7 +229,7 @@ class QuizCreateResponseView(GenericAPIView):
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
-						if res_dict[str(i.id)] == i.answer['1']:
+						if res_dict[str(i.id)].strip() == i.answer['1'].strip():
 							marks += i.correct_marks
 						else:
 							marks -= i.negative_marks
@@ -315,7 +314,7 @@ class QuizMarksView(GenericAPIView):
 							if res_dict[str(i.id)] == "":
 								marks += 0
 							else:
-								if i.option[str(res_dict[str(i.id)])] == i.answer['1']:
+								if i.option[str(res_dict[str(i.id)])].strip() == i.answer['1'].strip():
 									marks += i.correct_marks
 								else:
 									marks -= i.negative_marks
@@ -323,7 +322,7 @@ class QuizMarksView(GenericAPIView):
 							if res_dict[str(i.id)] == "":
 								marks += 0
 							else:
-								if res_dict[str(i.id)] == i.answer['1']:
+								if res_dict[str(i.id)].strip() == i.answer['1'].strip():
 									marks += i.correct_marks
 								else:
 									marks -= i.negative_marks
@@ -1221,7 +1220,7 @@ def bank(request):
 			data['totaloption'] = post_data['totaloption']
 			data['options'] = dict()
 			for i in range(1,int(data['totaloption'])+1):
-				data['options'][str(i)] = post_data['option'+str(i)]
+				data['options'][str(i)] = post_data['option'+str(i)].strip()
 
 		if post_data['questiontype'] in ['Input Type','Multiple Correct']:
 			pass
@@ -1231,7 +1230,7 @@ def bank(request):
 			j=1
 			data['answer'] = {}
 			for ans in post_data['answer'+str(i)].split(','):
-				data['answer'][str(j)] = ans
+				data['answer'][str(j)] = ans.strip()
 				j = j + 1
 			obj = Question.objects.create(question_type = post_data["questiontype"], question=post_data["question"+str(i)],
 										correct_marks=post_data['positive_score'],negative_marks=post_data['negative_score'],

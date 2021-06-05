@@ -791,6 +791,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 </body>
 <!-- <script src="https://cdn.ckeditor.com/4.15.1/standard/ckeditor.js"></script> -->
+<script src="https://ckeditor.com/apps/ckfinder/3.5.0/ckfinder.js"></script>
 <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 <script>
@@ -806,7 +807,7 @@
                     csrftoken: "{{csrf_token}}",
                     csrfmiddlewaretoken: "{{csrf_token}}",
                 },
-                uploadUrl: "https://lab.progressiveminds.in/uploadimages?command=QuickUpload&type=Images&responseType=json",
+                uploadUrl: "http://127.0.0.1:8000/uploadimages?command=QuickUpload&type=Images&responseType=json",
             },
             images: {
                 // Configure the available styles.

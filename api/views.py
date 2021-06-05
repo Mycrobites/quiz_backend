@@ -1359,7 +1359,7 @@ def uploadimage(request):
 	obj = upload_image.objects.create(file=request.FILES["upload"])
 	obj.save()
 	path = str(obj.file)
-	url = "https://lab.progressiveminds.in/media/" + path
+	url = "https://api.progressiveminds.in/media/" + path
 	return HttpResponse(json.dumps({"url": url, "uploaded": True}))
 
 def lmsBank(request):

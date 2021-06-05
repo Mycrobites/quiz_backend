@@ -49,14 +49,14 @@ class QuizView(GenericAPIView):
 				serializer = self.serializer_class(quiz)
 				questions = quiz.question.distinct()
 				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
-				print(questions)
+				#print(questions)
 				questions = []
 				for i in quest:
-					print("1")
+					#print("1")
 					ques_serializer = QuestionSerializer(i.question)
-					print("2")
+					#print("2")
 					questions.append(ques_serializer.data)
-					print("3")
+					#print("3")
 					
 				count = 0
 				for i in questions:
@@ -778,7 +778,7 @@ class GetResult(GenericAPIView):
 							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
 					if res_dict[ques] != "":
 						attemptedquestion += 1
-						if (str(obj.answer['1']) == str(res_dict[ques])):
+						if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
 							correctquestion += 1
 							totalmarks += int(obj.correct_marks)
 							flag = "True"
@@ -1126,7 +1126,7 @@ def deleteQuestions(request):
 
 def bank(request):
 	if request.method == "POST":
-		print(request.POST)
+		#print(request.POST)
 		post_data = request.POST
 		data = {}
 		if post_data['questiontype'] != 'Input Type':
@@ -1411,6 +1411,7 @@ class get_student_result(GenericAPIView):
 		for i in re:
 			response[i.quizname]=i.id
 		return Response(response)
+		
 class get_student_report(GenericAPIView):
 	permission_classes = [AllowAny]
 	# authentication_classes = [JWTAuthentication]

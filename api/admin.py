@@ -78,5 +78,5 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(QuizResponse, ResponseAdmin)
 admin.site.register(FeedBackForm, FeedbackAdmin)
 admin.site.register(UserQuizSession)
-
+admin.site.register(save_result)
 admin.site.register(feedbackQuestions)

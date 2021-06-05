@@ -675,3 +675,143 @@ Documentation of our API endpoints starts here
     {
     "msg": "questions updated"
     }
+# To get student result for all quiz
+
+### Request
+
+`POST http://127.0.0.1:8000/api/getstudentresult`
+
+ `{
+     "user": "599"
+     }`
+### Response
+
+{
+    "Test Quiz by shrey": "33aa0bc3-bb2b-4678-bc0e-8696d726e694"
+}
+
+# To get student report for particular result
+
+### Request
+
+`POST http://127.0.0.1:8000/api/getstudentreport`
+
+ `{
+     "id": "33aa0bc3-bb2b-4678-bc0e-8696d726e694"
+     }`
+### Response
+
+{
+    "data": {
+        "Quiz Name": "Test Quiz by shrey",
+        "totalquestion": 1,
+        "correctquestion": 1,
+        "incorrectquestion": 0,
+        "attempted": 1,
+        "not_attempted": 0,
+        "marks_obtained": 4,
+        "responses": {
+            "Question 1": {
+                "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/BingWallpaper-2018-10-17.jpg\"></figure>",
+                "correct answer": "option D",
+                "your answer": "option D"
+            }
+        },
+        "analysis": {
+            "subject: Mathematics": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "topic: Differentiation": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "subtopic: Calculus": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "skill: Correct": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "dificulty: Easy": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            }
+        }
+    },
+    "rank": "1",
+    "topper": {
+        "Quiz Name": "Test Quiz by shrey",
+        "totalquestion": 1,
+        "correctquestion": 1,
+        "incorrectquestion": 0,
+        "attempted": 1,
+        "not_attempted": 0,
+        "marks_obtained": 4,
+        "responses": {
+            "Question 1": {
+                "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/BingWallpaper-2018-10-17.jpg\"></figure>",
+                "correct answer": "option D",
+                "your answer": "option D"
+            }
+        },
+        "analysis": {
+            "subject: Mathematics": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "topic: Differentiation": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "subtopic: Calculus": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "skill: Correct": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            },
+            "dificulty: Easy": {
+                "total_questions": 1,
+                "correct_questions": 1,
+                "incorrect_or_not_attempted": 0
+            }
+        }
+    },
+    "average": {
+        "data": {
+            "Quiz Name": "Class 12 MOT 1 by administrator",
+            "correctquestion": 1.0,
+            "incorrectquestion": 0.0,
+            "attempted": 1.0,
+            "not_attempted": 0.0,
+            "marks_obtained": 4.0
+        }
+    }
+}
+
+# Teacher request for response api
+
+### Request
+
+`POST http://127.0.0.1:8000/api/requestExcelForResult`
+
+ `{
+    "quizid": "",
+    "email_send": ""
+
+     }`
+### Response
+Your request is in process.You will be notified via email within 24 hours. If not please contact admin.
+

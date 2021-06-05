@@ -13,7 +13,7 @@ from authentication.models import User
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
-from django.http import HttpResponse
+from django.http import HttpResponse, response
 import json
 from django.contrib.auth.decorators import login_required
 import datetime
@@ -26,6 +26,7 @@ from django.shortcuts import render, HttpResponse, redirect,Http404
 from rest_framework.decorators import api_view
 import requests
 from django.core.mail import EmailMessage
+from datetime import datetime,timedelta
 # Create your views here.
 
 
@@ -755,7 +756,7 @@ class GetResult(GenericAPIView):
 			res_dict = json.loads(response)
 			for ques in res_dict:
 				totalquestion += 1
-				obj = Question.objects.get(id=ques)
+				obj = Question.objects.get(id=str(ques))
 				if obj.question_type == 'Input Type':
 					quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.answer['1'],
 								"your answer": res_dict[ques]}
@@ -769,12 +770,12 @@ class GetResult(GenericAPIView):
 						try:
 							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
 						except:
-							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer['1']),"your answer": "option " + str(obj.option[str(res_dict[ques])])}
+							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": "option-" + str(obj.option[str(res_dict[ques])])}
 					else:
 						try:
 							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
 						except:
-							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option " + str(obj.answer['1']),"your answer": ""}
+							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
 					if res_dict[ques] != "":
 						attemptedquestion += 1
 						if (str(obj.answer['1']) == str(res_dict[ques])):
@@ -878,85 +879,6 @@ class GetResult(GenericAPIView):
 			return Response({"data": result})
 
 class CreateExcelForScore(APIView):
-	permission_classes = [AllowAny]
-
-	def get(self, request,quizid):
-		users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
-
-		f_object = open('media/result_response/output_result.csv', 'w')
-		writer_object = writer(f_object)
-		writer_object.writerow(
-			['S No', 'User', 'Quiz Name', 'Total Question', 'Correct', 'Incorrect', 'Attempted', 'Not Attempted',
-			 'Marks'])
-
-		f_object_question = open('media/result_response/output_result_question.csv', 'w')
-		writer_object_question = writer(f_object_question)
-		writer_object_question.writerow(['S No', 'User', 'Question No',"Question", 'Correct Answer', 'User Answer'])
-
-		f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
-		writer_object_tag = writer(f_object_tag)
-		writer_object_tag.writerow(
-			['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect Or Not Attempted'])
-
-		sno = 1
-		for user in users:
-			try:
-				user = User.objects.get(id=user).username
-				data = requests.get(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}').json()['data']
-				## basic analysis
-				new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
-							  data['incorrectquestion'],
-							  data['attempted'], data['not_attempted'], data['marks_obtained']]
-				writer_object.writerow(new_result)
-
-				for quest, resp in data['responses'].items():
-					new_result_question = [sno, user, quest,resp["question"], resp['correct answer'], resp['your answer']]
-					writer_object_question.writerow(new_result_question)
-
-				for tag, resp in data['analysis'].items():
-					new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],
-									  resp['incorrect_or_not_attempted']]
-					writer_object_tag.writerow(new_result_tag)
-
-				sno += 1
-
-
-			except Exception as e:
-				print(e)
-				print('kx to gadbad hai')
-
-		f_object.close()
-		f_object_question.close()
-		f_object_tag.close()
-
-		df1 = pd.read_csv('media/result_response/output_result_question.csv')
-		df2 = pd.read_csv('media/result_response/output_result_tag.csv')
-		df3 = pd.read_csv('media/result_response/output_result.csv')
-
-		with pd.ExcelWriter('media/result_response/Result.xlsx') as Main:
-			df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
-			df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
-			df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
-		print('************************ bas khatam ***************************')
-		with open("media/result_response/Result.xlsx", "rb") as excel:
-			content = excel.read()
-		response = HttpResponse(content=content, content_type='application/ms-excel')
-		response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
-		return response
-
-class RunExcelCreateView(GenericAPIView):
-    serializer_class = RunExcelTaskSerializer
-    # permission_classes = [IsAuthenticated,IsTeacher]
-    # authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
-    
-class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
@@ -1022,7 +944,7 @@ class CreateExcelForScore(APIView):
                 df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
                 df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
                 df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
-            print('************************ bas khatam ***************************')
+            print('******** bas khatam *********')
             with open("media/result_response/Result.xlsx", "rb") as excel:
                 content = excel.read()
             response = HttpResponse(content=content, content_type='application/ms-excel')
@@ -1036,6 +958,19 @@ class CreateExcelForScore(APIView):
             is_request=run_excel_task.objects.all()
             return HttpResponse("Done")
         return HttpResponse("No Task")
+
+class RunExcelCreateView(GenericAPIView):
+    serializer_class = RunExcelTaskSerializer
+    permission_classes = [AllowAny]
+    # authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+    def post(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
+    
 
 class DeleteQuestionFromQuiz(GenericAPIView):
 
@@ -1137,19 +1072,6 @@ class QuestionBankListView(GenericAPIView):
         response = {"questions": serializer.data, "tags": tags}
         return Response(response)
 
-
-class RunExcelCreateView(GenericAPIView):
-    serializer_class = RunExcelTaskSerializer
-    permission_classes = [IsAuthenticated,IsTeacher]
-    authentication_classes = [JWTAuthentication]
-
-    def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
-    
 
 
 ################################ functions for question bank
@@ -1426,4 +1348,82 @@ def importQuestion(request):
 					obj = Question.objects.create(option=str(options),text=i[8],question=i[0],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
 					obj.save()
 	return HttpResponse("nonne")
+
+class getScorecard(APIView):
+	permission_classes = [AllowAny]
+
+	def get(self, request,quizid):
+			avscore=[]
+			avcorrect=[]
+			avincorrect=[]
+			avattempted=[]
+			avnotattempted=[]
+			users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
+			for user in users:
+				userobj = User.objects.get(id=user)
+				data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
+				avscore.append(int(data['marks_obtained']))
+				avcorrect.append(int(data['correctquestion']))
+				avincorrect.append(int(data['incorrectquestion']))
+				avattempted.append(int(data['attempted']))
+				avnotattempted.append(int(data['not_attempted']))
+				save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=data['Quiz Name'],score=data['marks_obtained'])
+			av_score=sum(avscore)/len(avscore)
+			av_correct=sum(avcorrect)/len(avcorrect)
+			av_incorrect=sum(avincorrect)/len(avincorrect)
+			av_attempted=sum(avattempted)/len(avattempted)
+			av_notattempted=sum(avnotattempted)/len(avnotattempted)
+			avscore=sorted(avscore)
+			for user in users:
+				userobj = User.objects.get(id=user)
+				obj=save_result.objects.get(quizid=quizid,user=userobj)
+				obj.rank=avscore.index(int(obj.score))+1
+				obj.save()
+				if str(obj.rank)=="1":
+					save_result.objects.create(name="Topper",data=obj.data,quizid=quizid,quizname=data['Quiz Name'],score=obj.score,rank='1')
+			avdata={"data": {
+        "Quiz Name": "Class 12 MOT 1 by administrator",
+        "correctquestion": av_correct,
+        "incorrectquestion": av_incorrect,
+        "attempted": av_attempted,
+        "not_attempted": av_notattempted,
+        "marks_obtained": av_score,}}
+			save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=obj.score,rank='N/A')
+			return HttpResponse("done")	
+
+def check_for_result(request):
+	quiz=Quiz.objects.all()
+	for a in quiz:
+		if datetime.now().date() - a.endtime.date() >= timedelta(days=0) and (datetime.now().date() - a.endtime.date() <= timedelta(days=1)):
+			q=save_result.objects.filter(quizid=a.id)
+			requests.get(f'https://api.progressiveminds.in/api/requestScoreForResult/{a.id}')
+		return HttpResponse("hua")
+
+class get_student_result(GenericAPIView):
+	permission_classes = [AllowAny]
+	# authentication_classes = [JWTAuthentication]
+	def get(self,request):
+		data=request.data
+		userid = data['user']
+		user=User.objects.get(id=userid)
+		re=save_result.objects.filter(user=user)
+		response={}
+		for i in re:
+			response[i.quizname]=i.id
+		return Response(response)
+class get_student_report(GenericAPIView):
+	permission_classes = [AllowAny]
+	# authentication_classes = [JWTAuthentication]
+	def get(self,request):
+		data=request.data
+		id=data['id']
+		re=save_result.objects.get(id=id)
+		response={'data':re.data,'rank':re.rank}
+		topper=save_result.objects.get(quizid=re.quizid,name="Topper")
+		response["topper"]=topper.data
+		topper=save_result.objects.get(quizid=re.quizid,name="Average")
+		response["average"]=topper.data
+		return Response(response)
+
+
 

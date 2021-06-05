@@ -134,3 +134,13 @@ class run_excel_task(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     quizid=models.CharField(max_length=150,null=False)
     email_send=models.EmailField(max_length=254,null=False)
+
+class save_result(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    quizid=models.CharField(max_length=150,null=False)
+    quizname=models.CharField(max_length=50,null=True)
+    name=models.CharField(max_length=50,null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    score=models.CharField(max_length=5,null=False)
+    rank=models.CharField(max_length=5,null=True)
+    data = jsonfield.JSONField(blank=True)

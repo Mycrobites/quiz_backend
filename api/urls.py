@@ -23,12 +23,16 @@ urlpatterns = [
     path("resultanalysis",views.resultanalysis,name="resultanalysis"),
     path("getresult/<str:username>/<str:quizid>", views.GetResult.as_view()),
     path("requestExcelForResult", views.RunExcelCreateView.as_view()),
+    path("requestScoreForResult/<str:quizid>", views.getScorecard.as_view()),
     path("getExcelForResult", views.CreateExcelForScore.as_view()),
     path('getQuestionsFromQB/<str:quizid>', QuestionBankListView.as_view()),
     path('addQuestionToQuiz', AddQuestionToQuiz.as_view()),
     path('deleteQuestionFromQuiz/<slug:quiz_id>/<slug:question_id>', DeleteQuestionFromQuiz.as_view()),
     path('FeedbackQs/post',feedbackQuestionsapi().as_view()),
     path('FeedbackQs/<slug:quiz_id>/get',feedbackQuestionsapi().as_view()),
-    path('FeedbackQs/<slug:question_id>/patch',feedbackQuestionsapi().as_view())
-
+    path('FeedbackQs/<slug:question_id>/patch',feedbackQuestionsapi().as_view()),
+    path('checkForResult',views.check_for_result,name="check_for_result"),
+    path('getstudentresult', get_student_result.as_view()),
+    path('getstudentreport', get_student_report.as_view())
+# get_student_result
 ]

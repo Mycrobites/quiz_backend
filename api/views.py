@@ -910,8 +910,8 @@ class CreateExcelForScore(APIView):
             for user in users:
                 try:
                     user = User.objects.get(id=user).username
-                    print(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}')
-                    data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
+                    print(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}')
+                    data = requests.get(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}').json()['data']
                     ## basic analysis
                     new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
                                 data['incorrectquestion'],
@@ -1365,7 +1365,7 @@ class getScorecard(APIView):
 			for user in users:
 				userobj = User.objects.get(id=user)
 				try:
-					data = requests.get(f'http://127.0.0.1:8000/api/getresult/{userobj.username}/{quizid}').json()['data']
+					data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
 				except:
 					return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
 				if quiz_name == "":

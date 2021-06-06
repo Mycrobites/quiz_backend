@@ -798,90 +798,178 @@ class GetResult(GenericAPIView):
 					nonattempted += 1
 					flag = "Not attempted"
 				subjecttag = obj.subject_tag
+				try:
+					if dic["subject: " + subjecttag]:
+						pass
+				except:
+					dic["subject: " + subjecttag] = {}
+				try:
+					if dic["subject: " + subjecttag]["total_questions"]:
+						pass
+				except:
+					dic["subject: " + subjecttag]["total_questions"] = 0
+				try:
+					if dic["subject: " + subjecttag]["correct_questions"]:
+						pass
+				except:
+					dic["subject: " + subjecttag]["correct_questions"] = 0
+				try:
+					if dic["subject: " + subjecttag]["incorrect"]:
+						pass
+				except:
+					dic["subject: " + subjecttag]["incorrect"] = 0
+				try:
+					if dic["subject: " + subjecttag]["not_attempted"] :
+						pass
+				except:
+					dic["subject: " + subjecttag]["not_attempted"] = 0
+				
+				
 				if subjecttag is not None and subjecttag.strip() != "":
-					try:
-						dic["subject: " + subjecttag]["total_questions"] += 1
-						if flag == "True":
-							dic["subject: " + subjecttag]["correct_questions"] += 1
-						else:
-							dic["subject: " + subjecttag]["incorrect_or_not_attempted"] += 1
-					except:
-						dic["subject: " + subjecttag] = {}
-						dic["subject: " + subjecttag]["total_questions"] = 1
-						if flag == "True":
-							dic["subject: " + subjecttag]["correct_questions"] = 1
-							dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 0
-						else:
-							dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 1
-							dic["subject: " + subjecttag]["correct_questions"] = 0
+					dic["subject: " + subjecttag]["total_questions"] += 1
+					if flag == "True":
+						dic["subject: " + subjecttag]["correct_questions"] += 1
+					elif flag == "False":
+						dic["subject: " + subjecttag]["incorrect"] += 1
+					else:
+						dic["subject: " + subjecttag]["not_attempted"] += 1
 				topictag = obj.subtopic_tag
+				try:
+					if dic["topic: " + topictag]:
+						pass
+				except:
+					dic["topic: " + topictag] = {}
+				try:
+					if dic["topic: " + topictag]["total_questions"]:
+						pass
+				except:
+					dic["topic: " + topictag]["total_questions"] = 0
+				try:
+					if dic["topic: " + topictag]["correct_questions"]:
+						pass
+				except:
+					dic["topic: " + topictag]["correct_questions"] = 0
+				try:
+					if dic["topic: " + topictag]["incorrect"]:
+						pass
+				except:
+					dic["topic: " + topictag]["incorrect"] = 0
+				try:
+					if dic["topic: " + topictag]["not_attempted"] :
+						pass
+				except:
+					dic["topic: " + topictag]["not_attempted"] = 0
 				if topictag is not None and topictag.strip() != "":
-					try:
 						dic["topic: " + topictag]["total_questions"] += 1
 						if flag == "True":
 							dic["topic: " + topictag]["correct_questions"] += 1
+						elif flag=="False":
+							dic["topic: " + topictag]["incorrect"] += 1
 						else:
-							dic["topic: " + topictag]["incorrect_or_not_attempted"] += 1
-					except:
-						dic["topic: " + topictag] = {}
-						dic["topic: " + topictag]["total_questions"] = 1
-						if flag == "True":
-							dic["topic: " + topictag]["correct_questions"] = 1
-							dic["topic: " + topictag]["incorrect_or_not_attempted"] = 0
-						else:
-							dic["topic: " + topictag]["incorrect_or_not_attempted"] = 1
-							dic["topic: " + topictag]["correct_questions"] = 0
+							dic["topic: " + topictag]["not_attempted"] += 1
 				subtopictag = obj.topic_tag
+				try:
+					if dic["subtopic: " + subtopictag]:
+						pass
+				except:
+					dic["subtopic: " + subtopictag] = {}
+				try:
+					if dic["subtopic: " + subtopictag]["total_questions"]:
+						pass
+				except:
+					dic["subtopic: " + subtopictag]["total_questions"] = 0
+				try:
+					if dic["subtopic: " + subtopictag]["correct_questions"]:
+						pass
+				except:
+					dic["subtopic: " + subtopictag]["correct_questions"] = 0
+				try:
+					if dic["subtopic: " + subtopictag]["incorrect"]:
+						pass
+				except:
+					dic["subtopic: " + subtopictag]["incorrect"] = 0
+				try:
+					if dic["subtopic: " + subtopictag]["not_attempted"] :
+						pass
+				except:
+					dic["subtopic: " + subtopictag]["not_attempted"] = 0
 				if subtopictag is not None and subtopictag.strip() != "":
-					try:
 						dic["subtopic: " + subtopictag]["total_questions"] += 1
 						if flag == "True":
 							dic["subtopic: " + subtopictag]["correct_questions"] += 1
+						elif flag=="False":
+							dic["subtopic: " + subtopictag]["incorrect"] += 1
 						else:
-							dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] += 1
-					except:
-						dic["subtopic: " + subtopictag] = {}
-						dic["subtopic: " + subtopictag]["total_questions"] = 1
-						if flag == "True":
-							dic["subtopic: " + subtopictag]["correct_questions"] = 1
-							dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 0
-						else:
-							dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 1
-							dic["subtopic: " + subtopictag]["correct_questions"] = 0
+							dic["subtopic: " + subtopictag]["not_attempted"] += 1
+
 				skilltag = obj.skill
+				try:
+					if dic["skill: " + skilltag]:
+						pass
+				except:
+					dic["skill: " + skilltag] = {}
+				try:
+					if dic["skill: " + skilltag]["total_questions"]:
+						pass
+				except:
+					dic["skill: " + skilltag]["total_questions"] = 0
+				try:
+					if dic["skill: " + skilltag]["correct_questions"]:
+						pass
+				except:
+					dic["skill: " + skilltag]["correct_questions"] = 0
+				try:
+					if dic["skill: " + skilltag]["incorrect"]:
+						pass
+				except:
+					dic["skill: " + skilltag]["incorrect"] = 0
+				try:
+					if dic["skill: " + skilltag]["not_attempted"] :
+						pass
+				except:
+					dic["skill: " + skilltag]["not_attempted"] = 0
 				if skilltag is not None and skilltag.strip() != "":
-					try:
 						dic["skill: " + skilltag]["total_questions"] += 1
 						if flag == "True":
 							dic["skill: " + skilltag]["correct_questions"] += 1
+						elif flag=="False":
+							dic["skill: " + skilltag]["incorrect"] += 1
 						else:
-							dic["skill: " + skilltag]["incorrect_or_not_attempted"] += 1
-					except:
-						dic["skill: " + skilltag] = {}
-						dic["skill: " + skilltag]["total_questions"] = 1
-						if flag == "True":
-							dic["skill: " + skilltag]["correct_questions"] = 1
-							dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 0
-						else:
-							dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 1
-							dic["skill: " + skilltag]["correct_questions"] = 0
+							dic["skill: " + skilltag]["not_attempted"] += 1
 				dificultytag = obj.dificulty_tag
+				try:
+					if dic["dificulty: " + dificultytag]:
+						pass
+				except:
+					dic["dificulty: " + dificultytag] = {}
+				try:
+					if dic["dificulty: " + dificultytag]["total_questions"]:
+						pass
+				except:
+					dic["dificulty: " + dificultytag]["total_questions"] = 0
+				try:
+					if dic["dificulty: " + dificultytag]["correct_questions"]:
+						pass
+				except:
+					dic["dificulty: " + dificultytag]["correct_questions"] = 0
+				try:
+					if dic["dificulty: " + dificultytag]["incorrect"]:
+						pass
+				except:
+					dic["dificulty: " + dificultytag]["incorrect"] = 0
+				try:
+					if dic["dificulty: " + dificultytag]["not_attempted"] :
+						pass
+				except:
+					dic["dificulty: " + dificultytag]["not_attempted"] = 0
 				if  dificultytag is not None and dificultytag.strip() != "":
-					try:
 						dic["dificulty: " + dificultytag]["total_questions"] += 1
 						if flag == "True":
 							dic["dificulty: " + dificultytag]["correct_questions"] += 1
+						elif flag=="False":
+							dic["dificulty: " + dificultytag]["incorrect"] += 1
 						else:
-							dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] += 1
-					except:
-						dic["dificulty: " + dificultytag] = {}
-						dic["dificulty: " + dificultytag]["total_questions"] = 1
-						if flag == "True":
-							dic["dificulty: " + dificultytag]["correct_questions"] = 1
-							dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 0
-						else:
-							dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 1
-							dic["dificulty: " + dificultytag]["correct_questions"] = 0
+							dic["dificulty: " + dificultytag]["not_attempted"] += 1
 		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic}
 		arr.append(result)
 		return Response({"data": result})
@@ -1414,6 +1502,7 @@ def check_for_result(request):
 	for a in quiz:
 		if datetime.now().date() - a.endtime.date() >= timedelta(days=0) and (datetime.now().date() - a.endtime.date() <= timedelta(days=1)):
 			q=save_result.objects.filter(quizid=a.id)
+			print(a.id)
 			requests.get(f'https://api.progressiveminds.in/api/requestScoreForResult/{a.id}')
 		return HttpResponse("hua")
 
@@ -1424,10 +1513,11 @@ class get_student_result(GenericAPIView):
 	def get(self,request, userid):
 		try:
 			user=User.objects.get(id=userid)
-			re=save_result.objects.filter(user=user)
+			self.queryset=save_result.objects.filter(user=user)
+			# queryset = ''
 			response=[]
-			for i in re:
-				response.append({'quizname':i.quizname,'id':i.id})
+			for i in self.queryset:
+				response.append({'quizname':i.quizname,'id':str(i.id)})
 			return Response(response, status=status.HTTP_200_OK)
 		except:
 			return Response({"message":"No quiz responses found"}, status=status.HTTP_404_NOT_FOUND)

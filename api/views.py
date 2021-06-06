@@ -47,13 +47,19 @@ class QuizView(GenericAPIView):
 			quiz = Quiz.objects.get(id=quiz_id)
 			if quiz.is_active(timezone.now()) or request.user.role=="Teacher":
 				serializer = self.serializer_class(quiz)
-				questions = quiz.question.distinct()
-				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
+				quiz_questions = quiz.question.distinct()
+				q_id_set = set()
 				questions = []
+				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
 				for i in quest:
+					q_id_set.add(str(i.question.id))
 					ques_serializer = QuestionSerializer(i.question)
 					questions.append(ques_serializer.data)
-					
+				for i in quiz_questions:
+					if str(i.id) not in q_id_set:
+						q_id_set.add(str(i.id))
+						ques_serializer = QuestionSerializer(i)
+						questions.append(ques_serializer.data)
 				count = 0
 				for i in questions:
 					i["options"] = []

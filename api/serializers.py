@@ -18,7 +18,7 @@ class QuizSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = "__all__"
+        exclude = ['answer']
 
 
 class QuizResponseSerializer(serializers.ModelSerializer):

@@ -988,12 +988,13 @@ class DeleteQuestionFromQuiz(GenericAPIView):
 
 	def delete(self, request, quiz_id, question_id):
 		try:
-
-			obj = AddQuestion.objects.get(quiz_id=quiz_id,question_id=question_id)
-			obj.delete()
-			quiz = Quiz.objects.get(id=quiz_id)
-			quiz_questions = quiz.question
-			quiz_questions.remove(question_id)
+			try:
+				obj = AddQuestion.objects.get(quiz_id=quiz_id,question_id=question_id)
+				obj.delete()
+			except:
+				quiz = Quiz.objects.get(id=quiz_id)
+				quiz_questions = quiz.question
+				quiz_questions.remove(Question.objects.get(id=question_id))
 		except Exception as e:
 			print(e)
 			return Response({"message": "Cannot delete the question"})
@@ -1034,9 +1035,12 @@ class QuestionBankListView(GenericAPIView):
     def get(self,request,quizid):
         given_quiz=Quiz.objects.get(id=quizid)
         qu=AddQuestion.objects.filter(quiz_id=quizid)
-        already=[]
+        already=set()
         for i in qu:
-            already.append(str(i.question.id))        
+            already.add(str(i.question.id))
+        for i in given_quiz.question.all():
+            already.add(i.id)
+        already = list(already)
         self.queryset = Question.objects.all().exclude(id__in=already)
         serializer = self.serializer_class(self.queryset, many=True)
         tags = {"subject": "", "dificulty": ["Easy", "Medium", "Hard"], "skill": ""}
@@ -1050,18 +1054,16 @@ class QuestionBankListView(GenericAPIView):
                 subject = i[0]
                 temp['name']=subject
                 temp["topics"] = []
-                temp1={}
                 topictags = Question.objects.filter(subject_tag=subject).values_list("topic_tag").distinct()
                 for j in topictags:
-                    if (j[0] and j[0].strip() != ""):
+                    if (j[0]!="" and j[0].strip() != ""):
                         topic = j[0]
+                        temp1={}
                         temp1["name"]=j[0]
-                        subtopicstags = Question.objects.filter(subject_tag=subject, topic_tag=topic).values_list(
-                            "subtopic_tag").distinct()
-                        subtopiclist = [k[0] for k in subtopicstags if k[0].strip() != ""]
+                        subtopicstags = Question.objects.filter(subject_tag=subject, topic_tag=topic).values_list("subtopic_tag").distinct()
+                        subtopiclist = [k[0] for k in subtopicstags if (k[0].strip() != "" and k[0]!="")]
                         temp1["subTopics"] = subtopiclist
-                    temp["topics"].append(temp1)
-
+                        temp["topics"].append(temp1)
                 tags["subject"].append(temp)
         count = 0
         for i in serializer.data:

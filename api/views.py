@@ -1384,7 +1384,7 @@ class getScorecard(APIView):
 			av_incorrect=sum(avincorrect)/len(avincorrect)
 			av_attempted=sum(avattempted)/len(avattempted)
 			av_notattempted=sum(avnotattempted)/len(avnotattempted)
-			avscore=sorted(avscore)
+			avscore=sorted(avscore, reverse=True)
 			for user in users:
 				userobj = User.objects.get(id=user)
 				obj=save_result.objects.get(quizid=quizid,user=userobj)

@@ -679,127 +679,134 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/getstudentresult`
+`GET http://127.0.0.1:8000/api/getstudentresult/599`
 
- `{
-     "user": "599"
-     }`
 ### Response
 
-{
-    "Test Quiz by shrey": "33aa0bc3-bb2b-4678-bc0e-8696d726e694"
-}
+    [
+        {
+            "quizname": "Shrey Test Quiz 1 by shrey",
+            "id": "37528fbb-e3f3-4fe0-8f0b-df2466ac73bb"
+        }
+    ]
 
 # To get student report for particular result
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/getstudentreport`
+`GET http://127.0.0.1:8000/api/getstudentreport/33aa0bc3-bb2b-4678-bc0e-8696d726e694`
 
- `{
-     "id": "33aa0bc3-bb2b-4678-bc0e-8696d726e694"
-     }`
 ### Response
 
-{
-    "data": {
-        "Quiz Name": "Test Quiz by shrey",
-        "totalquestion": 1,
-        "correctquestion": 1,
-        "incorrectquestion": 0,
-        "attempted": 1,
-        "not_attempted": 0,
-        "marks_obtained": 4,
-        "responses": {
-            "Question 1": {
-                "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/BingWallpaper-2018-10-17.jpg\"></figure>",
-                "correct answer": "option D",
-                "your answer": "option D"
-            }
-        },
-        "analysis": {
-            "subject: Mathematics": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "topic: Differentiation": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "subtopic: Calculus": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "skill: Correct": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "dificulty: Easy": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            }
-        }
-    },
-    "rank": "1",
-    "topper": {
-        "Quiz Name": "Test Quiz by shrey",
-        "totalquestion": 1,
-        "correctquestion": 1,
-        "incorrectquestion": 0,
-        "attempted": 1,
-        "not_attempted": 0,
-        "marks_obtained": 4,
-        "responses": {
-            "Question 1": {
-                "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/BingWallpaper-2018-10-17.jpg\"></figure>",
-                "correct answer": "option D",
-                "your answer": "option D"
-            }
-        },
-        "analysis": {
-            "subject: Mathematics": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "topic: Differentiation": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "subtopic: Calculus": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "skill: Correct": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            },
-            "dificulty: Easy": {
-                "total_questions": 1,
-                "correct_questions": 1,
-                "incorrect_or_not_attempted": 0
-            }
-        }
-    },
-    "average": {
+    {
         "data": {
-            "Quiz Name": "Class 12 MOT 1 by administrator",
-            "correctquestion": 1.0,
+            "Quiz Name": "Shrey Test Quiz 1 by shrey",
+            "totalquestion": 6,
+            "correctquestion": 3,
+            "incorrectquestion": 0,
+            "attempted": 3,
+            "not_attempted": 0,
+            "marks_obtained": 12,
+            "responses": {
+                "Question 1": {
+                    "question": "<p>Single Correct MCQ 1</p>",
+                    "correct answer": "option-B",
+                    "your answer": "option-B"
+                },
+                "Question 2": {
+                    "question": "<p>Single Correct MCQ 2</p>",
+                    "correct answer": "option-C",
+                    "your answer": "option-C"
+                },
+                "Question 3": {
+                    "question": "<p>Single Correct MCQ 3</p>",
+                    "correct answer": "option-D",
+                    "your answer": "option-D"
+                },
+                "Question 4": {
+                    "question": "<p>Input Type 1</p>",
+                    "correct answer": "3",
+                    "your answer": "3"
+                },
+                "Question 5": {
+                    "question": "<p>Input Type 2</p>",
+                    "correct answer": "4",
+                    "your answer": "4"
+                },
+                "Question 6": {
+                    "question": "<p>Input Type 3</p>",
+                    "correct answer": "5",
+                    "your answer": "5"
+                }
+            },
+            "analysis": {
+                "subject: Mathematics": { #Subject wise difficulty
+                    "total_questions": 3,
+                    "correct_questions": 3,
+                    "incorrect_or_not_attempted": 0
+                },
+                "topic: Integration": {
+                    "total_questions": 3,
+                    "correct_questions": 3,
+                    "incorrect_or_not_attempted": 0
+                },
+                "subtopic: or": {
+                    "total_questions": 3,
+                    "correct_questions": 3,
+                    "incorrect_or_not_attempted": 0
+                },
+                "skill: Integration": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "dificulty: Easy": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "skill: Incorrect": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "dificulty: Medium": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "skill: Correct": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "dificulty: Hard": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                }
+            },
+            "rank": "1"
+        },
+        "topper": {
+            "Quiz Name": "Shrey Test Quiz 1 by shrey",
+            "totalquestion": 6,
+            "correctquestion": 3,
+            "incorrectquestion": 0,
+            "attempted": 3,
+            "notattempted": 0,
+            "marks_obtained": 12
+        },
+        "average": {
+            "Quiz Name": "Shrey Test Quiz 1 by shrey",
+            "totalquestion": 6,
+            "correctquestion": 3.0,
             "incorrectquestion": 0.0,
-            "attempted": 1.0,
+            "attempted": 3.0,
             "not_attempted": 0.0,
-            "marks_obtained": 4.0
+            "marks_obtained": 12.0
         }
     }
-}
 
 # Teacher request for response api
 
@@ -807,11 +814,10 @@ Documentation of our API endpoints starts here
 
 `POST http://127.0.0.1:8000/api/requestExcelForResult`
 
- `{
-    "quizid": "",
-    "email_send": ""
-
-     }`
+    {
+        "quizid": "",
+        "email_send": ""
+    }
 ### Response
 Your request is in process.You will be notified via email within 24 hours. If not please contact admin.
 

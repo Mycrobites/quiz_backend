@@ -49,14 +49,10 @@ class QuizView(GenericAPIView):
 				serializer = self.serializer_class(quiz)
 				questions = quiz.question.distinct()
 				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
-				#print(questions)
 				questions = []
 				for i in quest:
-					#print("1")
 					ques_serializer = QuestionSerializer(i.question)
-					#print("2")
 					questions.append(ques_serializer.data)
-					#print("3")
 					
 				count = 0
 				for i in questions:
@@ -74,6 +70,13 @@ class QuizView(GenericAPIView):
 						count+=1
 				result['quiz_details'] = serializer.data
 				result['quiz_questions'] = questions
+				result['feedback'] = False
+				try:
+					ques=feedbackQuestions.objects.get(quiz_id=quiz_id)
+					if len(ques.question) != 0:
+						result['feedback'] = True
+				except:
+					pass
 				return Response(result)
 			else:
 				return Response({"message": "This quiz is either closed now or is not opened yet"}, status=status.HTTP_404_NOT_FOUND)
@@ -738,145 +741,144 @@ class GetResult(GenericAPIView):
 		try:
 			quizes = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
 		except:
-			error = "The user has attempted this quiz"
+			error = "The user has not attempted this quiz"
 			return Response({"message": error})
-		quizes = QuizResponse.objects.filter(quiz_id=quizid,user=user.id)
+		q = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
 		arr = []
-		for q in quizes:
-			quizobj = Quiz.objects.get(title=q.quiz)
-			totalquestion = 0
-			attemptedquestion = 0
-			nonattempted = 0
-			correctquestion = 0
-			wrongquestion = 0
-			totalmarks = 0
-			dic = {}
-			quesdic = {}
-			response = q.response.replace("'", '"')
-			res_dict = json.loads(response)
-			for ques in res_dict:
-				totalquestion += 1
-				obj = Question.objects.get(id=str(ques))
-				if obj.question_type == 'Input Type':
-					quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.answer['1'],
-								"your answer": res_dict[ques]}
+		quizobj = Quiz.objects.get(title=q.quiz)
+		totalquestion = 0
+		attemptedquestion = 0
+		nonattempted = 0
+		correctquestion = 0
+		wrongquestion = 0
+		totalmarks = 0
+		dic = {}
+		quesdic = {}
+		response = q.response.replace("'", '"')
+		res_dict = json.loads(response)
+		for ques in res_dict:
+			totalquestion += 1
+			obj = Question.objects.get(id=str(ques))
+			if obj.question_type == 'Input Type':
+				quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.answer['1'],
+							"your answer": res_dict[ques]}
+			else:
+				if(type(obj.option) is str):
+					temp = obj.option.replace("'",'"')
+					temp = json.loads(temp)
 				else:
-					if(type(obj.option) is str):
-						temp = obj.option.replace("'",'"')
-						temp = json.loads(temp)
+					temp = obj.option
+				if res_dict[ques] != "":
+					try:
+						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
+					except:
+						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": "option-" + str(obj.option[str(res_dict[ques])])}
+				else:
+					try:
+						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
+					except:
+						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
+				if res_dict[ques] != "":
+					attemptedquestion += 1
+					if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
+						correctquestion += 1
+						totalmarks += int(obj.correct_marks)
+						flag = "True"
 					else:
-						temp = obj.option
-					if res_dict[ques] != "":
-						try:
-							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
-						except:
-							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": "option-" + str(obj.option[str(res_dict[ques])])}
-					else:
-						try:
-							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
-						except:
-							quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
-					if res_dict[ques] != "":
-						attemptedquestion += 1
-						if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
-							correctquestion += 1
-							totalmarks += int(obj.correct_marks)
-							flag = "True"
+						wrongquestion += 1
+						totalmarks -= int(obj.negative_marks)
+						flag = "False"
+				else:
+					nonattempted += 1
+					flag = "Not attempted"
+				subjecttag = obj.subject_tag
+				if subjecttag is not None and subjecttag.strip() != "":
+					try:
+						dic["subject: " + subjecttag]["total_questions"] += 1
+						if flag == "True":
+							dic["subject: " + subjecttag]["correct_questions"] += 1
 						else:
-							wrongquestion += 1
-							totalmarks -= int(obj.negative_marks)
-							flag = "False"
-					else:
-						nonattempted += 1
-						flag = "Not attempted"
-					subjecttag = obj.subject_tag
-					if subjecttag is not None and subjecttag.strip() != "":
-						try:
-							dic["subject: " + subjecttag]["total_questions"] += 1
-							if flag == "True":
-								dic["subject: " + subjecttag]["correct_questions"] += 1
-							else:
-								dic["subject: " + subjecttag]["incorrect_or_not_attempted"] += 1
-						except:
-							dic["subject: " + subjecttag] = {}
-							dic["subject: " + subjecttag]["total_questions"] = 1
-							if flag == "True":
-								dic["subject: " + subjecttag]["correct_questions"] = 1
-								dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 0
-							else:
-								dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 1
-								dic["subject: " + subjecttag]["correct_questions"] = 0
-					topictag = obj.subtopic_tag
-					if topictag is not None and topictag.strip() != "":
-						try:
-							dic["topic: " + topictag]["total_questions"] += 1
-							if flag == "True":
-								dic["topic: " + topictag]["correct_questions"] += 1
-							else:
-								dic["topic: " + topictag]["incorrect_or_not_attempted"] += 1
-						except:
-							dic["topic: " + topictag] = {}
-							dic["topic: " + topictag]["total_questions"] = 1
-							if flag == "True":
-								dic["topic: " + topictag]["correct_questions"] = 1
-								dic["topic: " + topictag]["incorrect_or_not_attempted"] = 0
-							else:
-								dic["topic: " + topictag]["incorrect_or_not_attempted"] = 1
-								dic["topic: " + topictag]["correct_questions"] = 0
-					subtopictag = obj.topic_tag
-					if subtopictag is not None and subtopictag.strip() != "":
-						try:
-							dic["subtopic: " + subtopictag]["total_questions"] += 1
-							if flag == "True":
-								dic["subtopic: " + subtopictag]["correct_questions"] += 1
-							else:
-								dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] += 1
-						except:
-							dic["subtopic: " + subtopictag] = {}
-							dic["subtopic: " + subtopictag]["total_questions"] = 1
-							if flag == "True":
-								dic["subtopic: " + subtopictag]["correct_questions"] = 1
-								dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 0
-							else:
-								dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 1
-								dic["subtopic: " + subtopictag]["correct_questions"] = 0
-					skilltag = obj.skill
-					if skilltag is not None and skilltag.strip() != "":
-						try:
-							dic["skill: " + skilltag]["total_questions"] += 1
-							if flag == "True":
-								dic["skill: " + skilltag]["correct_questions"] += 1
-							else:
-								dic["skill: " + skilltag]["incorrect_or_not_attempted"] += 1
-						except:
-							dic["skill: " + skilltag] = {}
-							dic["skill: " + skilltag]["total_questions"] = 1
-							if flag == "True":
-								dic["skill: " + skilltag]["correct_questions"] = 1
-								dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 0
-							else:
-								dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 1
-								dic["skill: " + skilltag]["correct_questions"] = 0
-					dificultytag = obj.dificulty_tag
-					if  dificultytag is not None and dificultytag.strip() != "":
-						try:
-							dic["dificulty: " + dificultytag]["total_questions"] += 1
-							if flag == "True":
-								dic["dificulty: " + dificultytag]["correct_questions"] += 1
-							else:
-								dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] += 1
-						except:
-							dic["dificulty: " + dificultytag] = {}
-							dic["dificulty: " + dificultytag]["total_questions"] = 1
-							if flag == "True":
-								dic["dificulty: " + dificultytag]["correct_questions"] = 1
-								dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 0
-							else:
-								dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 1
-								dic["dificulty: " + dificultytag]["correct_questions"] = 0
-			result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic}
-			arr.append(result)
-			return Response({"data": result})
+							dic["subject: " + subjecttag]["incorrect_or_not_attempted"] += 1
+					except:
+						dic["subject: " + subjecttag] = {}
+						dic["subject: " + subjecttag]["total_questions"] = 1
+						if flag == "True":
+							dic["subject: " + subjecttag]["correct_questions"] = 1
+							dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 0
+						else:
+							dic["subject: " + subjecttag]["incorrect_or_not_attempted"] = 1
+							dic["subject: " + subjecttag]["correct_questions"] = 0
+				topictag = obj.subtopic_tag
+				if topictag is not None and topictag.strip() != "":
+					try:
+						dic["topic: " + topictag]["total_questions"] += 1
+						if flag == "True":
+							dic["topic: " + topictag]["correct_questions"] += 1
+						else:
+							dic["topic: " + topictag]["incorrect_or_not_attempted"] += 1
+					except:
+						dic["topic: " + topictag] = {}
+						dic["topic: " + topictag]["total_questions"] = 1
+						if flag == "True":
+							dic["topic: " + topictag]["correct_questions"] = 1
+							dic["topic: " + topictag]["incorrect_or_not_attempted"] = 0
+						else:
+							dic["topic: " + topictag]["incorrect_or_not_attempted"] = 1
+							dic["topic: " + topictag]["correct_questions"] = 0
+				subtopictag = obj.topic_tag
+				if subtopictag is not None and subtopictag.strip() != "":
+					try:
+						dic["subtopic: " + subtopictag]["total_questions"] += 1
+						if flag == "True":
+							dic["subtopic: " + subtopictag]["correct_questions"] += 1
+						else:
+							dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] += 1
+					except:
+						dic["subtopic: " + subtopictag] = {}
+						dic["subtopic: " + subtopictag]["total_questions"] = 1
+						if flag == "True":
+							dic["subtopic: " + subtopictag]["correct_questions"] = 1
+							dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 0
+						else:
+							dic["subtopic: " + subtopictag]["incorrect_or_not_attempted"] = 1
+							dic["subtopic: " + subtopictag]["correct_questions"] = 0
+				skilltag = obj.skill
+				if skilltag is not None and skilltag.strip() != "":
+					try:
+						dic["skill: " + skilltag]["total_questions"] += 1
+						if flag == "True":
+							dic["skill: " + skilltag]["correct_questions"] += 1
+						else:
+							dic["skill: " + skilltag]["incorrect_or_not_attempted"] += 1
+					except:
+						dic["skill: " + skilltag] = {}
+						dic["skill: " + skilltag]["total_questions"] = 1
+						if flag == "True":
+							dic["skill: " + skilltag]["correct_questions"] = 1
+							dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 0
+						else:
+							dic["skill: " + skilltag]["incorrect_or_not_attempted"] = 1
+							dic["skill: " + skilltag]["correct_questions"] = 0
+				dificultytag = obj.dificulty_tag
+				if  dificultytag is not None and dificultytag.strip() != "":
+					try:
+						dic["dificulty: " + dificultytag]["total_questions"] += 1
+						if flag == "True":
+							dic["dificulty: " + dificultytag]["correct_questions"] += 1
+						else:
+							dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] += 1
+					except:
+						dic["dificulty: " + dificultytag] = {}
+						dic["dificulty: " + dificultytag]["total_questions"] = 1
+						if flag == "True":
+							dic["dificulty: " + dificultytag]["correct_questions"] = 1
+							dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 0
+						else:
+							dic["dificulty: " + dificultytag]["incorrect_or_not_attempted"] = 1
+							dic["dificulty: " + dificultytag]["correct_questions"] = 0
+		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic}
+		arr.append(result)
+		return Response({"data": result})
 
 class CreateExcelForScore(APIView):
     permission_classes = [AllowAny]
@@ -1353,6 +1355,7 @@ class getScorecard(APIView):
 	permission_classes = [AllowAny]
 
 	def get(self, request,quizid):
+			quiz_name = ""
 			avscore=[]
 			avcorrect=[]
 			avincorrect=[]
@@ -1361,13 +1364,18 @@ class getScorecard(APIView):
 			users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
 			for user in users:
 				userobj = User.objects.get(id=user)
-				data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
+				try:
+					data = requests.get(f'http://127.0.0.1:8000/api/getresult/{userobj.username}/{quizid}').json()['data']
+				except:
+					return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
+				if quiz_name == "":
+					quiz_name = data['Quiz Name']
 				avscore.append(int(data['marks_obtained']))
 				avcorrect.append(int(data['correctquestion']))
 				avincorrect.append(int(data['incorrectquestion']))
 				avattempted.append(int(data['attempted']))
 				avnotattempted.append(int(data['not_attempted']))
-				save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=data['Quiz Name'],score=data['marks_obtained'])
+				save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=quiz_name,score=data['marks_obtained'])
 			av_score=sum(avscore)/len(avscore)
 			av_correct=sum(avcorrect)/len(avcorrect)
 			av_incorrect=sum(avincorrect)/len(avincorrect)
@@ -1380,15 +1388,17 @@ class getScorecard(APIView):
 				obj.rank=avscore.index(int(obj.score))+1
 				obj.save()
 				if str(obj.rank)=="1":
-					save_result.objects.create(name="Topper",data=obj.data,quizid=quizid,quizname=data['Quiz Name'],score=obj.score,rank='1')
-			avdata={"data": {
-        "Quiz Name": "Class 12 MOT 1 by administrator",
-        "correctquestion": av_correct,
-        "incorrectquestion": av_incorrect,
-        "attempted": av_attempted,
-        "not_attempted": av_notattempted,
-        "marks_obtained": av_score,}}
-			save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=obj.score,rank='N/A')
+					topper_data = {'Quiz Name': quiz_name,'totalquestion':obj.data['totalquestion'],'correctquestion':obj.data['correctquestion'],'incorrectquestion':obj.data['incorrectquestion'],
+									'attempted':obj.data['attempted'],'notattempted':obj.data['not_attempted'],'marks_obtained':obj.data['marks_obtained']}
+					save_result.objects.create(name="Topper",data=topper_data,quizid=quizid,quizname=quiz_name,score=obj.score,rank='1')
+			avdata={"Quiz Name": quiz_name ,
+					"totalquestion": data['totalquestion'],
+					"correctquestion": av_correct,
+					"incorrectquestion": av_incorrect,
+					"attempted": av_attempted,
+					"not_attempted": av_notattempted,
+					"marks_obtained": av_score}
+			save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=av_score,rank='N/A')
 			return HttpResponse("done")	
 
 def check_for_result(request):
@@ -1401,30 +1411,36 @@ def check_for_result(request):
 
 class get_student_result(GenericAPIView):
 	permission_classes = [AllowAny]
-	# authentication_classes = [JWTAuthentication]
-	def get(self,request):
-		data=request.data
-		userid = data['user']
-		user=User.objects.get(id=userid)
-		re=save_result.objects.filter(user=user)
-		response={}
-		for i in re:
-			response[i.quizname]=i.id
-		return Response(response)
+	authentication_classes = [JWTAuthentication]
+	
+	def get(self,request, userid):
+		try:
+			user=User.objects.get(id=userid)
+			re=save_result.objects.filter(user=user)
+			response=[]
+			for i in re:
+				response.append({'quizname':i.quizname,'id':i.id})
+			return Response(response, status=status.HTTP_200_OK)
+		except:
+			return Response({"message":"No quiz responses found"}, status=status.HTTP_404_NOT_FOUND)
 		
 class get_student_report(GenericAPIView):
 	permission_classes = [AllowAny]
-	# authentication_classes = [JWTAuthentication]
-	def get(self,request):
-		data=request.data
-		id=data['id']
-		re=save_result.objects.get(id=id)
-		response={'data':re.data,'rank':re.rank}
-		topper=save_result.objects.get(quizid=re.quizid,name="Topper")
-		response["topper"]=topper.data
-		topper=save_result.objects.get(quizid=re.quizid,name="Average")
-		response["average"]=topper.data
-		return Response(response)
+	authentication_classes = [JWTAuthentication]
+
+	def get(self,request,id):
+		try:
+			re=save_result.objects.get(id=id)
+			data = re.data
+			data['rank'] = re.rank
+			response={'data': data}
+			topper=save_result.objects.get(quizid=re.quizid,name="Topper")
+			response["topper"]=topper.data
+			topper=save_result.objects.get(quizid=re.quizid,name="Average")
+			response["average"]=topper.data
+			return Response(response, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
 
 
 

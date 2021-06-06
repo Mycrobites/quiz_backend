@@ -94,11 +94,11 @@ class QuizResponse(models.Model):
 
 class feedbackQuestions(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE) #Quiz Creator
     quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
     question=jsonfield.JSONField(blank=True, null=True)
     def __str__(self):
-        return f"{self.user}'s Question for{self.quiz_id}"
+        return f"{self.user}'s Feedback Question for {self.quiz_id}"
 
 class FeedBackForm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

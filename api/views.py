@@ -987,18 +987,15 @@ class DeleteQuestionFromQuiz(GenericAPIView):
 	authentication_classes = [JWTAuthentication]
 
 	def delete(self, request, quiz_id, question_id):
-		try:
-			try:
-				obj = AddQuestion.objects.get(quiz_id=quiz_id,question_id=question_id)
-				obj.delete()
-			except:
-				quiz = Quiz.objects.get(id=quiz_id)
-				quiz_questions = quiz.question
-				quiz_questions.remove(Question.objects.get(id=question_id))
+		try:		
+			obj = AddQuestion.objects.get(quiz_id=quiz_id,question_id=question_id)
+			obj.delete()
+			quiz = Quiz.objects.get(id=quiz_id)
+			quiz_questions = quiz.question
+			quiz_questions.remove(Question.objects.get(id=question_id))
 		except Exception as e:
 			print(e)
 			return Response({"message": "Cannot delete the question"})
-		# Quiz.objects.filter(id=quiz_id).update(questions=quiz_questions)
 		return Response({"message": "Question removed from the quiz successfully"})
 
 
@@ -1010,20 +1007,18 @@ class AddQuestionToQuiz(APIView):
 
 	def post(self, request):
 		try:
-			quiz = Quiz.objects.get(id=request.data['quiz_id'])
 			quest_ids = request.data['quest_id']
-
+			error_ids = []
+			i = 0
 			for q in quest_ids:
 				try:
-					quest = Question.objects.get(id=str(q))
-					quiz.question.add(quest)
-					obj = AddQuestion.objects.create(quiz_id=quiz.id,question_id=quest.id)
-					obj.save()
-					quiz.save()
+					AddQuestion.objects.create(quiz_id=request.data['quiz_id'],question_id=str(q))
+					i = i +1
 				except Exception:
-					return Response({"message": f"{q}, not valid"}, status=400)
-
-			return Response({"message": "added successfully"}, status=200)
+					error_ids.append(q)
+					#return Response({"message": f"{q}, not valid"}, status=400)
+			print("Error Question IDs ",error_ids)
+			return Response({"message": f"{i} Questions added successfully"}, status=200)
 		except Exception:
 			return Response({"message": "something went wrong"}, status=400)
 

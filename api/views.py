@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
 from .forms import *
-from authentication.models import User
+from authentication.models import User, UserGroup
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
@@ -350,63 +350,154 @@ class QuizMarksView(GenericAPIView):
 
 
 class AssignStudent(GenericAPIView):
-	serializer_class = QuizResponseSerializer
-	permission_classes = [IsAuthenticated]
-	authentication_classes = [JWTAuthentication]
 
-	def post(self, request):
-		try:
-			data = request.data
-			try:
-				AssignQuiz.objects.get(quiz_id=data["quiz"], user=data["user"])
-				return Response({"Student already added"})
-			except ObjectDoesNotExist:
-				serializer = self.serializer_class(data=data)
-				serializer.is_valid(raise_exception=True)
-				serializer.save()
-				return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    serializer_class = AssignQuizSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        try:
+            data = request.data
+            try:
+                aq = AssignQuiz.objects.get(quiz_id=data["quiz"])
+                for u in aq.user.all():
+                    if data["user"] == str(u.id):
+                        return Response({"Student already added"})
+                        break
+                else:
+                    aq.user.add(data['user'])
+                    aq.save()
+                    return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
+            except ObjectDoesNotExist:
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                            
+class AssignGroup(GenericAPIView):
+    serializer_class = AssignQuizSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        try:
+            data = request.data
+            try:
+                aq = AssignQuiz.objects.get(quiz_id=data["quiz"])
+                if data["group"] in aq.group.all():
+                    return Response({"Group already added"})
+                else:
+                    aq.group.add(data['group'])
+                    aq.save()
+                    return Response({"message": "Group has been added to the quiz"}, status=status.HTTP_200_OK)
+            except ObjectDoesNotExist:
+                serializer = self.serializer_class(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response({"message": "Group has been added to the quiz"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class QuizCollection(GenericAPIView):
-	serializer_class = QuizSerializer
-	permission_classes = [IsAuthenticated]
-	authentication_classes = [JWTAuthentication]
 
-	def get(self, request, userid):
-		try:
-			user = User.objects.get(id=userid)
-			if user.role == "Teacher":
-				self.queryset = Quiz.objects.filter(creator=user)
-				serializer = self.serializer_class(self.queryset, many=True)
-				quizzes = serializer.data
-				for i in range(len(quizzes)):
-					user_id = quizzes[i]['creator']
-					try:
-						user = User.objects.get(id=user_id)
-						quizzes[i]['creator_username'] = user.username
-					except ObjectDoesNotExist:
-						raise ValidationError({"message": "User do not found"})
-				return Response(quizzes)
-			else:
-				resp = []
-				self.queryset = AssignQuiz.objects.filter(user=user)
-				for i in self.queryset:
-					obj = Quiz.objects.get(id=i.quiz_id)
-					serializer = self.serializer_class(obj)
-					resp.append(serializer.data)
-				quizzes = resp
-				for i in range(len(quizzes)):
-					user_id = quizzes[i]['creator']
-					try:
-						user = User.objects.get(id=user_id)
-						quizzes[i]['creator_username'] = user.username
-					except ObjectDoesNotExist:
-						raise ValidationError({"message": "User do not found"})
-					return Response(quizzes)
-		except ObjectDoesNotExist:
-			return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    serializer_class = QuizSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request, userid):
+        try:
+            user = User.objects.get(id=userid)
+            if user.role == "Teacher":
+                self.queryset = Quiz.objects.filter(creator=user)
+                serializer = self.serializer_class(self.queryset, many=True)
+                quizzes = serializer.data
+                for i in range(len(quizzes)):
+                    user_id = quizzes[i]['creator']
+                    try:
+                        user = User.objects.get(id=user_id)
+                        quizzes[i]['creator_username'] = user.username
+                    except ObjectDoesNotExist:
+                        raise ValidationError({"message": "User do not found"})
+                return Response(quizzes)
+            else:
+                resp = []
+                quiz_set = set()
+                usergroups = UserGroup.objects.filter(user=userid)
+                for grp in usergroups:
+                    self.queryset = AssignQuiz.objects.filter(group=grp)
+                    for i in self.queryset:
+                        if i.quiz_id not in quiz_set:
+                            quiz_set.add(i.quiz_id)
+                            obj = Quiz.objects.get(id=i.quiz_id)
+                            serializer = self.serializer_class(obj)
+                            if serializer.data not in resp:
+                                resp.append(serializer.data)
+                else:
+                    self.queryset = AssignQuiz.objects.filter(user=userid)
+                    for i in self.queryset:
+                        if i.quiz_id not in quiz_set:
+                            quiz_set.add(i.quiz_id)
+                            obj = Quiz.objects.get(id=i.quiz_id)
+                            serializer = self.serializer_class(obj)
+                            if serializer.data not in resp:
+                                resp.append(serializer.data)
+                quizzes = resp
+                for i in range(len(quizzes)):
+                    user_id = quizzes[i]['creator']
+                    try:
+                        user = User.objects.get(id=user_id)
+                        quizzes[i]['creator_username'] = user.username
+                    except ObjectDoesNotExist:
+                        raise ValidationError({"message": "User do not found"})
+                return Response(quizzes)
+        except ObjectDoesNotExist:
+            return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+class CheckQuizAssigned(GenericAPIView):
+    serializer_class = AssignQuizSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request):
+        data = request.data
+        try:
+            quiz = Quiz.objects.get(id=data['quiz'])
+            if(quiz.is_active(timezone.now())):
+                try:
+                    user = User.objects.get(id=data['user'])
+                    grps = UserGroup.objects.filter(user=user)
+                    for grp in grps:
+                        try:
+                            assign_quiz = AssignQuiz.objects.get(quiz=quiz, group=grp.id)
+                            try:
+                                quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
+                                return Response({"message": "You have already attempted the test"},
+                                                status=status.HTTP_400_BAD_REQUEST)
+                            except:
+                                return Response({"message": "Success"}, status=status.HTTP_200_OK)
+                        except:
+                            pass
+                    else:
+                        try:
+                            assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
+                            try:
+                                quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
+                                return Response({"message": "You have already attempted the test"},
+                                                status=status.HTTP_400_BAD_REQUEST)
+                            except:
+                                return Response({"message": "Success"}, status=status.HTTP_200_OK)
+                        except ObjectDoesNotExist:
+                            return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
+                except:
+                    return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({"message": "This quiz is either not open yet or is now closed"}, status=status.HTTP_200_OK)
+        except:
+            return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
 
 class createFeedback(ListCreateAPIView):
 	serializer_class = FeedBackSerializer
@@ -442,37 +533,6 @@ class feedbackQuestionsapi(APIView):
 			return Response({"msg":"question updated"})
 		return Response(serializer.errors)
 	
-
-
-class CheckQuizAssigned(GenericAPIView):
-	serializer_class = AssignQuizSerializer
-	permission_classes = [IsAuthenticated]
-	authentication_classes = [JWTAuthentication]
-
-	def post(self, request):
-		data = request.data
-		try:
-			quiz = Quiz.objects.get(id=data['quiz'])
-			if(quiz.is_active(timezone.now())):
-				try:
-					user = User.objects.get(id=data['user'])
-					try:
-						assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
-						try:
-							quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-							return Response({"message": "You have already attempted the test"},
-											status=status.HTTP_400_BAD_REQUEST)
-						except ObjectDoesNotExist:
-							return Response({"message": "Success"}, status=status.HTTP_200_OK)
-					except ObjectDoesNotExist:
-						return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
-				except ObjectDoesNotExist:
-					return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
-			else:
-				return Response({"message": "This quiz is either not open yet or is now closed"}, status=status.HTTP_200_OK)
-		except ObjectDoesNotExist:
-			return Response({"message": "Quiz not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
-
 
 class PostUserQuizSession(APIView):
 	serializer_class = UserQuizSessionSerializer
@@ -1566,7 +1626,7 @@ class get_student_result(GenericAPIView):
 			# queryset = ''
 			response=[]
 			for i in self.queryset:
-				response.append({'quizname':i.quizname,'id':str(i.id)})
+				response.append({'quizname':i.quizname,'id':str(i.id),'rank':i.rank})
 			return Response(response, status=status.HTTP_200_OK)
 		except:
 			return Response({"message":"No quiz responses found"}, status=status.HTTP_404_NOT_FOUND)

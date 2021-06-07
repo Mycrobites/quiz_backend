@@ -1,10 +1,10 @@
-# Separate Quiz Platform for progressive minds
+# Separate Quiz Platform for Progressive minds
 [![Django CI](https://github.com/Mycrobites/quiz_backend/actions/workflows/django.yml/badge.svg)](https://github.com/Mycrobites/quiz_backend/actions/workflows/django.yml)
 
-### Added CI Workflow (Testing Runserver)
+### Added the CI Workflow (Testing Runserver)
 
 
-Follow the below instruction to correctly setup and run the project.
+Follow the below instruction to correctly setup and run the project successfully.
 
 ## Pre-requisites
 
@@ -15,7 +15,7 @@ Follow the below instruction to correctly setup and run the project.
     <li> Git CLI installed and setup properly. Get it from <a href="https://git-scm.com/downloads">here</a>.</li>
    </ol>
     
-## Cloning the project
+## Cloning project
 
 Run the following command to clone the project
 
@@ -83,6 +83,7 @@ Documentation of our API endpoints starts here
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
         "duration": "00:45:00",
+        "instructions":"<b>This is instructions field.</b>",
         "desc": "This quiz is being created solely for documentation purpose"
     }
 
@@ -94,6 +95,7 @@ Documentation of our API endpoints starts here
         "creator": 566,
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
+        "instructions":"<b>This is instructions field.</b>",
         "duration": "00:45:00",
         "desc": "This quiz is being created solely for documentation purpose"
     }
@@ -114,6 +116,7 @@ Documentation of our API endpoints starts here
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
         "duration": "00:45:00",
+        "instructions":"<b>This is instructions field.</b>",
         "desc": "This quiz is being created solely for testing purpose"
     },
     "quiz_questions": [
@@ -175,6 +178,7 @@ Documentation of our API endpoints starts here
         "starttime": "2020-03-16T00:00:00+05:30",
         "endtime": "2021-07-16T05:30:00+05:30",
         "duration": "00:45:00",
+        "instructions":"<b>This is instructions field.</b>",
         "desc": "This quiz is being created solely for documentation purpose(rename)"
     }
     
@@ -422,6 +426,7 @@ Documentation of our API endpoints starts here
             "starttime": "2020-03-16T00:00:00+05:30",
             "endtime": "2021-06-16T05:30:00+05:30",
             "duration": "00:45:00",
+            "instructions":"<b>This is instructions field.</b>",
             "desc": "This quiz is being created solely for testing purpose",
             "creator_username": "administrator"
         },
@@ -432,6 +437,7 @@ Documentation of our API endpoints starts here
             "starttime": "2020-03-16T00:00:00+05:30",
             "endtime": "2021-07-16T05:30:00+05:30",
             "duration": "00:45:00",
+            "instructions":"<b>This is instructions field.</b>",
             "desc": "This quiz is being created solely for testing purpose",
             "creator_username": "administrator"
         }
@@ -443,41 +449,21 @@ Documentation of our API endpoints starts here
 
 ### Request
 
-`POST http://127.0.0.1:8000/api/postFeedback/`
+`POST http://127.0.0.1:8000/api/Feedback/`
 
     {
-        "learn_new": 3,
-        "like_participating": 3,
-        "difficulty": 4,
-        "participate_again": "yes",
-        "time_sufficient": "yes",
-        "attend_webinar": "yes",
-        "language_english": "yes",
-        "mini_course": "yes",
-        "next_contest": "Puzzle Solving",
-        "suggestions": "amazing work, add some esy questions too",
-        "user": 77,
-        "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88",
-        "username":"abhishek-st"
+    "quiz_id":"6a5e18db-e7d9-49fc-b38b-b79ee8e2d19a",
+    "answer":"{"1":"answer1","2":"answer2"}"
+    "user":1,
     }
 
 ### Response
 
     {
-        "id": "ebfdc10d-e24a-4da6-a688-a95adfc94414",
-        "learn_new": 3,
-        "like_participating": 3,
-        "difficulty": 4,
-        "participate_again": "yes",
-        "time_sufficient": "yes",
-        "attend_webinar": "yes",
-        "language_english": "yes",
-        "mini_course": "yes",
-        "next_contest": "Puzzle Solving",
-        "suggestions": "amazing work, add some esy questions too",
-        "username": "abhishek-st",
-        "user": 77,
-        "quiz_id": "5fc3d69c-26d1-420c-92b0-1c20e372fb88"
+    "id": "94ab8acd-ee2d-4a8a-8ce0-73fcd962b5f0",
+    "answer": null,
+    "user": 1,
+    "quiz_id": "6a5e18db-e7d9-49fc-b38b-b79ee8e2d19a"
     }
     
 ## To check quiz assigned
@@ -617,7 +603,7 @@ Documentation of our API endpoints starts here
 ### to get questions from question bank
 ### Request
 
-    `GET https://api.progressiveminds.in/api/getQuestionsFromQB`
+    `GET https://api.progressiveminds.in/api/getQuestionsFromQB/<quizid>`
 
 ### Response
     `{
@@ -676,7 +662,6 @@ Documentation of our API endpoints starts here
     "message": "Question removed from the quiz successfully"
     }`
 
-
 ## To Create New User Group
 
 ### Request
@@ -694,3 +679,183 @@ Documentation of our API endpoints starts here
         "description": "This is test 2 group.",
         "user": []
     }
+    
+### for creating feedbaack question by teacher
+    https://api.progressiveminds.in/api/FeedbackQs/post/
+
+    {
+    'quiz_id': ['2c798d50-6539-42b0-a0f4-20a073110523'], 
+    'question': ['{"1":{"type":"yes/no","ques":"liked quiz"},"2":{"type":"slider","ques":"liked quiz"}}'] 
+    'user': ['1']
+    }
+
+### Response
+    {'msg':"created"}
+
+### for geting the question correspondind to quiz
+    https://api.progressiveminds.in/api/FeedbackQs/<slug:quiz_id>/get
+
+### response
+    {
+    'id':'262ca456-ba56-470d-b428-8a77fa87536e'
+    'quiz_id': ['2c798d50-6539-42b0-a0f4-20a073110523'], 
+    'question': ['{"1":{"type":"yes/no","ques":"liked quiz"},"2":{"type":"slider","ques":"liked quiz"}}'],
+    'user': ['1']
+    }
+
+### for geting the question correspondind to quiz
+    https://api.progressiveminds.in/api/FeedbackQs/<slug:question_id>/patch ##here question is id you'll get in previous hit
+
+    {
+    'question': ['{"1":{"type":"yes/no","ques":"liked quiz"},"2":{"type":"slider","ques":"liked quiz"}}'] 
+    }
+
+### response
+    {
+    "msg": "questions updated"
+    }
+# To get student result for all quiz
+
+### Request
+
+`GET http://127.0.0.1:8000/api/getstudentresult/599`
+
+### Response
+
+    [
+        {
+            "quizname": "Shrey Test Quiz 1 by shrey",
+            "id": "37528fbb-e3f3-4fe0-8f0b-df2466ac73bb"
+        }
+    ]
+
+# To get student report for particular result
+
+### Request
+
+`GET http://127.0.0.1:8000/api/getstudentreport/33aa0bc3-bb2b-4678-bc0e-8696d726e694`
+
+### Response
+
+    {
+        "data": {
+            "Quiz Name": "Shrey Test Quiz 1 by shrey",
+            "totalquestion": 6,
+            "correctquestion": 3,
+            "incorrectquestion": 0,
+            "attempted": 3,
+            "not_attempted": 0,
+            "marks_obtained": 12,
+            "responses": {
+                "Question 1": {
+                    "question": "<p>Single Correct MCQ 1</p>",
+                    "correct answer": "option-B",
+                    "your answer": "option-B"
+                },
+                "Question 2": {
+                    "question": "<p>Single Correct MCQ 2</p>",
+                    "correct answer": "option-C",
+                    "your answer": "option-C"
+                },
+                "Question 3": {
+                    "question": "<p>Single Correct MCQ 3</p>",
+                    "correct answer": "option-D",
+                    "your answer": "option-D"
+                },
+                "Question 4": {
+                    "question": "<p>Input Type 1</p>",
+                    "correct answer": "3",
+                    "your answer": "3"
+                },
+                "Question 5": {
+                    "question": "<p>Input Type 2</p>",
+                    "correct answer": "4",
+                    "your answer": "4"
+                },
+                "Question 6": {
+                    "question": "<p>Input Type 3</p>",
+                    "correct answer": "5",
+                    "your answer": "5"
+                }
+            },
+            "analysis": {
+                "subject: Mathematics": { #Subject wise difficulty
+                    "total_questions": 3,
+                    "correct_questions": 3,
+                    "incorrect_or_not_attempted": 0
+                },
+                "topic: Integration": {
+                    "total_questions": 3,
+                    "correct_questions": 3,
+                    "incorrect_or_not_attempted": 0
+                },
+                "subtopic: or": {
+                    "total_questions": 3,
+                    "correct_questions": 3,
+                    "incorrect_or_not_attempted": 0
+                },
+                "skill: Integration": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "dificulty: Easy": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "skill: Incorrect": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "dificulty: Medium": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "skill: Correct": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                },
+                "dificulty: Hard": {
+                    "total_questions": 1,
+                    "correct_questions": 1,
+                    "incorrect_or_not_attempted": 0
+                }
+            },
+            "rank": "1"
+        },
+        "topper": {
+            "Quiz Name": "Shrey Test Quiz 1 by shrey",
+            "totalquestion": 6,
+            "correctquestion": 3,
+            "incorrectquestion": 0,
+            "attempted": 3,
+            "notattempted": 0,
+            "marks_obtained": 12
+        },
+        "average": {
+            "Quiz Name": "Shrey Test Quiz 1 by shrey",
+            "totalquestion": 6,
+            "correctquestion": 3.0,
+            "incorrectquestion": 0.0,
+            "attempted": 3.0,
+            "not_attempted": 0.0,
+            "marks_obtained": 12.0
+        }
+    }
+
+# Teacher request for response api
+
+### Request
+
+`POST http://127.0.0.1:8000/api/requestExcelForResult`
+
+    {
+        "quizid": "",
+        "email_send": ""
+    }
+### Response
+Your request is in process.You will be notified via email within 24 hours. If not please contact admin.

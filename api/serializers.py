@@ -6,7 +6,7 @@ import jsonfield
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = ["id","title","creator","starttime","endtime","duration","desc"]
+        fields = ["id","title","creator","starttime","endtime","duration","instructions","desc"]
 
     def validate(self, attrs):
         return attrs
@@ -18,7 +18,7 @@ class QuizSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = "__all__"
+        exclude = ['answer']
 
 
 class QuizResponseSerializer(serializers.ModelSerializer):
@@ -38,8 +38,18 @@ class FeedBackSerializer(serializers.ModelSerializer):
         model = FeedBackForm
         fields = "__all__"
 
+class FeedbackQuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = feedbackQuestions
+        fields = "__all__"
+
 
 class UserQuizSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuizSession
+        fields = "__all__"
+
+class RunExcelTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = run_excel_task
         fields = "__all__"

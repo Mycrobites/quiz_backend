@@ -16,6 +16,7 @@ class Quiz(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
+    instructions = RichTextUploadingField()
     desc = RichTextUploadingField()
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)
@@ -44,15 +45,24 @@ class AddQuestion(models.Model):
     question = models.ForeignKey("Question", on_delete=models.CASCADE)
     createdOn = models.DateTimeField(default=timezone.now())
 
+question_type_Choices = (
+    ("Multiple Correct","Multiple Correct"),
+    ( "True False","True False"),
+    ("Matching","Matching"),
+    ("Input Type","Input Type"),
+    ("Single Correct","Single Correct"),
+    ("Assertion Reason","Assertion Reason"))
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question_type=models.CharField(choices=question_type_Choices, blank=True, default="", max_length=100)
+    passage= RichTextUploadingField()#to be used for assertion/and reason type
     question = RichTextUploadingField()
     correct_marks = models.PositiveSmallIntegerField()
     negative_marks = models.PositiveSmallIntegerField()
     option = jsonfield.JSONField(blank=True, null=True)
-    answer = models.PositiveSmallIntegerField(null=True, blank=True)
-    text = models.TextField(blank=True)
+    answer = jsonfield.JSONField(blank=True, null=True)
+    text = jsonfield.JSONField(blank=True, null=True)
     subject_tag = models.CharField(max_length=100, blank=True, default="")
     topic_tag = models.CharField(max_length=100, blank=True, default="")
     subtopic_tag = models.CharField(max_length=100, blank=True, default="")
@@ -83,40 +93,24 @@ class QuizResponse(models.Model):
     def __str__(self):
         return f"{self.user}'s response on {self.quiz}"
 
-
-choice = (
-    ("yes", "yes"),
-    ("no", "no"),
-)
-
-choice_contest = (
-    ("Puzzle Solving", "Puzzle Solving"),
-    ("Problem solving strategies", "Problem solving strategies"),
-    ("Mental Maths", "Mental Maths"),
-    ("Mathematics to entertain your spirit", "Mathematics to entertain your spirit"),
-)
-
+class feedbackQuestions(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE) #Quiz Creator
+    quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
+    question=jsonfield.JSONField(blank=True, null=True)
+    def __str__(self):
+        return f"{self.user}'s Feedback Question for {self.quiz_id}"
 
 class FeedBackForm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz_id = models.ForeignKey("Quiz", on_delete=models.CASCADE, default="4f3b3f6b-e1d0-4ca9-986b-1ec66aae968f")
-    learn_new = models.PositiveIntegerField()
-    like_participating = models.PositiveIntegerField()
-    difficulty = models.PositiveSmallIntegerField()
-    participate_again = models.CharField(max_length=5, choices=choice)
-    time_sufficient = models.CharField(max_length=5, choices=choice)
-    attend_webinar = models.CharField(max_length=5, choices=choice)
-    language_english = models.CharField(max_length=5, choices=choice)
-    mini_course = models.CharField(max_length=5, choices=choice)
-    next_contest = models.CharField(max_length=150, choices=choice_contest)
-    suggestions = models.CharField(max_length=200, default="")
-    username = models.CharField(max_length=60, default="")
+    answer=jsonfield.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.user}'s feedback"
 
-
+  
 class UserQuizSession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -136,3 +130,18 @@ def upload_and_Rename(instance,filename):
 class upload_image(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.ImageField(upload_to=upload_and_Rename, height_field=None, width_field=None, max_length=None)
+
+class run_excel_task(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    quizid=models.CharField(max_length=150,null=False)
+    email_send=models.EmailField(max_length=254,null=False)
+
+class save_result(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    quizid=models.CharField(max_length=150,null=False)
+    quizname=models.CharField(max_length=50,null=True)
+    name=models.CharField(max_length=50,null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    score=models.CharField(max_length=5,null=False)
+    rank=models.CharField(max_length=5,null=True)
+    data = jsonfield.JSONField(blank=True)

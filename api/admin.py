@@ -1,7 +1,9 @@
+from api.views import feedbackQuestionsapi
 from django.contrib import admin
 from .models import *
 from django import forms
 # Register your models here.
+
 
 @admin.register(AddQuestion)
 class AddQuestionAdmin(admin.ModelAdmin):
@@ -84,3 +86,5 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(QuizResponse, ResponseAdmin)
 admin.site.register(FeedBackForm, FeedbackAdmin)
 admin.site.register(UserQuizSession)
+admin.site.register(save_result)
+admin.site.register(feedbackQuestions)

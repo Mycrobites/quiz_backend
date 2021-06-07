@@ -1572,7 +1572,7 @@ class get_student_result(GenericAPIView):
 			# queryset = ''
 			response=[]
 			for i in self.queryset:
-				response.append({'quizname':i.quizname,'id':str(i.id)})
+				response.append({'quizname':i.quizname,'id':str(i.id),'rank':i.rank})
 			return Response(response, status=status.HTTP_200_OK)
 		except:
 			return Response({"message":"No quiz responses found"}, status=status.HTTP_404_NOT_FOUND)

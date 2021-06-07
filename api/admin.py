@@ -79,6 +79,9 @@ class FeedbackAdmin(admin.ModelAdmin):
     get_quiz.short_description = 'Quiz'
     get_user.short_description = 'Username'
 
+class SaveResultAdmin(admin.ModelAdmin):
+    list_display = ['user','name', 'quizname',]
+    list_filter = ['quizname',]
 
 admin.site.register(Quiz, QuizAdmin)
 admin.site.register(AssignQuiz, AssignAdmin)
@@ -86,5 +89,5 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(QuizResponse, ResponseAdmin)
 admin.site.register(FeedBackForm, FeedbackAdmin)
 admin.site.register(UserQuizSession)
-admin.site.register(save_result)
+admin.site.register(save_result, SaveResultAdmin)
 admin.site.register(feedbackQuestions)

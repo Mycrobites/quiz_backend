@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from authentication.models import User
+from authentication.models import User, UserGroup
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -43,3 +43,9 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user:
             raise AuthenticationFailed('Invalid credentials, try again')
         return attrs
+
+class UserGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserGroup
+        fields = '__all__'

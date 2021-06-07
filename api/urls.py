@@ -13,6 +13,7 @@ urlpatterns = [
     path("get-response/<slug:quiz_id>/<int:user_id>", QuizGetResponseView.as_view(), name="get-response"),
     path("get-quiz-marks/<slug:quiz_id>/<int:user_id>", QuizMarksView.as_view(), name="get-quiz-marks"),
     path("add-student", AssignStudent.as_view(), name="assign-quiz"),
+    path("add-group", AssignGroup.as_view(), name="assign-quiz-groups"),
     path("get-all-quizzes/<slug:userid>", QuizCollection.as_view(), name="all-quizzes"),
     path("Feedback/", createFeedback.as_view(), name="createFeedback"),
     path("check-quiz-assigned", CheckQuizAssigned.as_view(), name="check-quiz-assigned"),

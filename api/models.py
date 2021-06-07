@@ -1,5 +1,5 @@
 from djongo import models
-from authentication.models import User
+from authentication.models import User, UserGroup
 import uuid
 import jsonfield
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -76,8 +76,9 @@ class Question(models.Model):
 class AssignQuiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
-    user = models.ManyToManyField(User, )
-
+    group = models.ManyToManyField(UserGroup, blank=True)
+    user = models.ManyToManyField(User, blank=True)
+        
     def __str__(self):
         return str(self.quiz)
 

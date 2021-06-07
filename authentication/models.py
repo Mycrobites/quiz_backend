@@ -2,6 +2,7 @@ from djongo import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.crypto import get_random_string
 import pandas as pd
+import uuid
 
 
 # Create your models here.
@@ -65,7 +66,6 @@ class UserAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-
 class User(AbstractBaseUser):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     first_name = models.CharField(max_length=100, default="first_name")
@@ -97,11 +97,24 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
 
+class UserGroup(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=20)
+    description = models.TextField(max_length=100, blank=True)
+    user = models.ManyToManyField(User, through='GroupMembership', through_fields=('group','user'))
+
+    def __str__(self):
+        return self.name
+
+class GroupMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
 
 class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)
     userdata = models.FileField(upload_to="userdata", max_length=1000)
     filename = models.CharField(max_length=100, default="output.csv", blank=True)
+    group = models.ManyToManyField(UserGroup)
 
     def save(self, *args, **kwargs):
         data = pd.read_csv(self.userdata)
@@ -112,16 +125,19 @@ class UserFromFile(models.Model):
                 data.loc[i, 'Username'] = "The email is already in use"
             else:
                 username = gen_username(data.iloc[i]["Email"])
-                first_name = data.iloc[i]["First Name"]
-                try:
-                    first_name,last_name = first_name.split()
-                except:
-                    last_name = data.iloc[i]["Last Name"]
-                random_password = get_random_string(length=10)
-                User.objects.create_user(email=email, username=username, first_name=first_name,
-                                         last_name=last_name, password=random_password)
-                data.loc[i, 'Username'] = username
-                data.loc[i, 'Password'] = random_password
+            first_name = data.iloc[i]["First Name"]
+            try:
+                first_name,last_name = first_name.split()
+            except:
+                last_name = data.iloc[i]["Last Name"]
+            random_password = get_random_string(length=10)
+            u = User.objects.create_user(email=email, username=username, first_name=first_name,
+            last_name=last_name, password=random_password)
+            u.save()
+            for grp in self.group.all():
+                GroupMembership.objects.create(user=u,group=grp)
+            data.loc[i, 'Username'] = username
+            data.loc[i, 'Password'] = random_password
         self.filename = "media/users/" + "generated_user_details" + str(get_random_string(length=5)) + ".csv"
         data.to_csv(self.filename)
         super(UserFromFile, self).save(*args, **kwargs)

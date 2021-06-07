@@ -374,7 +374,7 @@ class AssignStudent(GenericAPIView):
                 serializer.save()
                 return Response({"message": "Student has been added to the quiz"}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            return Response({"message": "Some error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                             
 class AssignGroup(GenericAPIView):

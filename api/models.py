@@ -34,6 +34,14 @@ class Quiz(models.Model):
         else:
             return False
 
+class QuizGroup(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=30, null=False)
+    description = models.TextField(max_length=200, null=False)
+    quiz = models.ManyToManyField(Quiz)
+
+    def __str__(self):
+        return str(self.title)
 
 dificulty_choices = (
     ("Easy", "Easy"), ("Medium", "Medium"), ("Hard", "Hard")

@@ -14,7 +14,6 @@ class QuizAdmin(admin.ModelAdmin):
     list_display = ["title", "creator"]
     list_filter = ["title"]
 
-
 class QuestionAdmin(admin.ModelAdmin):
     model = Question
     list_display = ["question", "correct_marks", "negative_marks", "get_answer"]
@@ -84,6 +83,7 @@ class SaveResultAdmin(admin.ModelAdmin):
     list_filter = ['quizname',]
 
 admin.site.register(Quiz, QuizAdmin)
+admin.site.register(QuizGroup)
 admin.site.register(AssignQuiz, AssignAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(QuizResponse, ResponseAdmin)

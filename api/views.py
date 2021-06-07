@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from .models import *
 from .forms import *
-from authentication.models import User
+from authentication.models import User, UserGroup
 from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone

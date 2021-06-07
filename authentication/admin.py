@@ -70,8 +70,12 @@ class UserGroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     ordering = ('-id','name')
 
+class GroupMembershipAdmin(admin.ModelAdmin):
+    list_display = ('user', 'group')
+    ordering = ('id','group')
+
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.register(UserFromFile)
 admin.site.register(UserGroup, UserGroupAdmin)
-#admin.site.register(GroupMembership)
+admin.site.register(GroupMembership, GroupMembershipAdmin)

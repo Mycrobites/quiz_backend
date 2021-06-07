@@ -114,7 +114,7 @@ class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)
     userdata = models.FileField(upload_to="userdata", max_length=1000)
     filename = models.CharField(max_length=100, default="output.csv", blank=True)
-    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
+    group = models.ManyToManyField(UserGroup)
 
     def save(self, *args, **kwargs):
         data = pd.read_csv(self.userdata)
@@ -125,19 +125,19 @@ class UserFromFile(models.Model):
                 data.loc[i, 'Username'] = "The email is already in use"
             else:
                 username = gen_username(data.iloc[i]["Email"])
-                first_name = data.iloc[i]["First Name"]
-                try:
-                    first_name,last_name = first_name.split()
-                except:
-                    last_name = data.iloc[i]["Last Name"]
-                random_password = get_random_string(length=10)
-                u = User.objects.create_user(email=email, username=username, first_name=first_name,
-                                            last_name=last_name, password=random_password)
-                u.save()
-                gm = GroupMembership.objects.create(user=u,group=self.group)
-                gm.save()
-                data.loc[i, 'Username'] = username
-                data.loc[i, 'Password'] = random_password
+            first_name = data.iloc[i]["First Name"]
+            try:
+                first_name,last_name = first_name.split()
+            except:
+                last_name = data.iloc[i]["Last Name"]
+            random_password = get_random_string(length=10)
+            u = User.objects.create_user(email=email, username=username, first_name=first_name,
+            last_name=last_name, password=random_password)
+            u.save()
+            for grp in self.group.all():
+                GroupMembership.objects.create(user=u,group=grp)
+            data.loc[i, 'Username'] = username
+            data.loc[i, 'Password'] = random_password
         self.filename = "media/users/" + "generated_user_details" + str(get_random_string(length=5)) + ".csv"
         data.to_csv(self.filename)
         super(UserFromFile, self).save(*args, **kwargs)

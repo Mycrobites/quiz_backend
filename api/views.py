@@ -1602,6 +1602,7 @@ class getScorecard(APIView):
 			avincorrect=[]
 			avattempted=[]
 			avnotattempted=[]
+			topperDone = False
 			users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
 			for user in users:
 				userobj = User.objects.get(id=user)
@@ -1628,7 +1629,8 @@ class getScorecard(APIView):
 				obj=save_result.objects.get(quizid=quizid,user=userobj)
 				obj.rank=avscore.index(int(obj.score))+1
 				obj.save()
-				if str(obj.rank)=="1":
+				if str(obj.rank)=="1" and not topperDone:
+					topperDone = True
 					topper_data = {'Quiz Name': quiz_name,'totalquestion':obj.data['totalquestion'],'correctquestion':obj.data['correctquestion'],'incorrectquestion':obj.data['incorrectquestion'],
 									'attempted':obj.data['attempted'],'notattempted':obj.data['not_attempted'],'marks_obtained':obj.data['marks_obtained']}
 					save_result.objects.create(name="Topper",data=topper_data,quizid=quizid,quizname=quiz_name,score=obj.score,rank='1')

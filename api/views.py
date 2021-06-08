@@ -404,58 +404,87 @@ class AssignGroup(GenericAPIView):
 
 class QuizCollection(GenericAPIView):
 
-    serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+	serializer_class = QuizSerializer
+	permission_classes = [IsAuthenticated]
+	authentication_classes = [JWTAuthentication]
 
-    def get(self, request, userid):
-        try:
-            user = User.objects.get(id=userid)
-            if user.role == "Teacher":
-                self.queryset = Quiz.objects.filter(creator=user)
-                serializer = self.serializer_class(self.queryset, many=True)
-                quizzes = serializer.data
-                for i in range(len(quizzes)):
-                    user_id = quizzes[i]['creator']
-                    try:
-                        user = User.objects.get(id=user_id)
-                        quizzes[i]['creator_username'] = user.username
-                    except ObjectDoesNotExist:
-                        raise ValidationError({"message": "User do not found"})
-                return Response(quizzes)
-            else:
-                resp = []
-                quiz_set = set()
-                usergroups = UserGroup.objects.filter(user=userid)
-                for grp in usergroups:
-                    self.queryset = AssignQuiz.objects.filter(group=grp)
-                    for i in self.queryset:
-                        if i.quiz_id not in quiz_set:
-                            quiz_set.add(i.quiz_id)
-                            obj = Quiz.objects.get(id=i.quiz_id)
-                            serializer = self.serializer_class(obj)
-                            if serializer.data not in resp:
-                                resp.append(serializer.data)
-                else:
-                    self.queryset = AssignQuiz.objects.filter(user=userid)
-                    for i in self.queryset:
-                        if i.quiz_id not in quiz_set:
-                            quiz_set.add(i.quiz_id)
-                            obj = Quiz.objects.get(id=i.quiz_id)
-                            serializer = self.serializer_class(obj)
-                            if serializer.data not in resp:
-                                resp.append(serializer.data)
-                quizzes = resp
-                for i in range(len(quizzes)):
-                    user_id = quizzes[i]['creator']
-                    try:
-                        user = User.objects.get(id=user_id)
-                        quizzes[i]['creator_username'] = user.username
-                    except ObjectDoesNotExist:
-                        raise ValidationError({"message": "User do not found"})
-                return Response(quizzes)
-        except ObjectDoesNotExist:
-            return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+	def get(self, request, userid):
+		try:
+			user = User.objects.get(id=userid)
+			if user.role == "Teacher":
+				self.queryset = Quiz.objects.filter(creator=user)
+				serializer = self.serializer_class(self.queryset, many=True)
+				quizzes = serializer.data
+				for i in range(len(quizzes)):
+					user_id = quizzes[i]['creator']
+					try:
+						user = User.objects.get(id=user_id)
+						quizzes[i]['creator_username'] = user.username
+					except ObjectDoesNotExist:
+						raise ValidationError({"message": "User do not found"})
+				return Response(quizzes)
+			else:
+				quiz_groups = []
+				quizgroups = QuizGroup.objects.all()
+				usergroups = UserGroup.objects.filter(user=userid)
+				print(str(datetime.now()))
+				for qgrp in quizgroups:
+					resp = []
+					quiz_set = set()
+					quiz_list = []
+					for q in qgrp.quiz.all():
+						quiz_list.append(str(q.id))
+					for grp in usergroups:
+						self.queryset = AssignQuiz.objects.filter(group=grp)
+						for i in self.queryset:
+							if (i.quiz_id not in quiz_set) and (str(i.quiz_id) in quiz_list):
+								quiz_set.add(i.quiz_id)
+								obj = Quiz.objects.get(id=i.quiz_id)
+								serializer = self.serializer_class(obj)
+								if serializer.data not in resp:
+									resp.append(serializer.data)
+					else:
+						self.queryset = AssignQuiz.objects.filter(user=userid)
+						for i in self.queryset:
+							if (i.quiz_id not in quiz_set) and (str(i.quiz_id) in quiz_list):
+								quiz_set.add(i.quiz_id)
+								obj = Quiz.objects.get(id=i.quiz_id)
+								serializer = self.serializer_class(obj)
+								if serializer.data not in resp:
+									resp.append(serializer.data)
+					quizzes = resp
+					upcoming,active,attempted,missed = [],[],[],[]
+					for i in range(len(quizzes)):
+						starttime = datetime.strptime(quizzes[i]["starttime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
+						endtime = datetime.strptime(quizzes[i]["endtime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
+						currenttime = datetime.now().timestamp()
+						print(starttime, "-", currenttime, "-", endtime)
+						if starttime > currenttime:
+							upcoming.append(quizzes[i])
+						elif starttime < currenttime and endtime > currenttime:
+							try:
+								QuizResponse.objects.get(user=userid,quiz=quizzes[i]["id"])
+								attempted.append(quizzes[i])
+							except:
+								active.append(quizzes[i])
+						else:
+							try:
+								QuizResponse.objects.get(user=userid,quiz=quizzes[i]["id"])
+								attempted.append(quizzes[i])
+							except:
+								missed.append(quizzes[i])
+						creator_id = quizzes[i]['creator']
+						try:
+							user = User.objects.get(id=creator_id)
+							quizzes[i]['creator_username'] = user.username
+						except ObjectDoesNotExist:
+							raise ValidationError({"message": "User do not found"})
+					
+					group = {'name':qgrp.title,"upcoming":upcoming,"active":active,"attempted":attempted,"missed":missed}
+					quiz_groups.append(group)
+				return Response(quiz_groups)
+		except ObjectDoesNotExist:
+			return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
 class CheckQuizAssigned(GenericAPIView):
     serializer_class = AssignQuizSerializer

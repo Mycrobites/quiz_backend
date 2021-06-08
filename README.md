@@ -739,111 +739,94 @@ Documentation of our API endpoints starts here
 
     {
         "data": {
-            "Quiz Name": "Shrey Test Quiz 1 by shrey",
-            "totalquestion": 6,
-            "correctquestion": 3,
-            "incorrectquestion": 0,
+            "Quiz Name": "Quiz @6 by administrator",
+            "totalquestion": 3,
+            "correctquestion": 1,
+            "incorrectquestion": 2,
             "attempted": 3,
             "not_attempted": 0,
-            "marks_obtained": 12,
-            "responses": {
-                "Question 1": {
-                    "question": "<p>Single Correct MCQ 1</p>",
-                    "correct answer": "option-B",
-                    "your answer": "option-B"
-                },
-                "Question 2": {
-                    "question": "<p>Single Correct MCQ 2</p>",
-                    "correct answer": "option-C",
+            "marks_obtained": 2,
+            "responses": [
+                {
+                    "question_number": 1,
+                    "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/1_8q2rB3x.PNG\"></figure>",
+                    "correct answer": "option-D",
                     "your answer": "option-C"
                 },
-                "Question 3": {
-                    "question": "<p>Single Correct MCQ 3</p>",
+                {
+                    "question_number": 2,
+                    "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/2_Rm7TeeI.PNG\"></figure>",
+                    "correct answer": "option-D",
+                    "your answer": "option-A"
+                },
+                {
+                    "question_number": 3,
+                    "question": "<figure class=\"image\"><img src=\"https://api.progressiveminds.in/media/uploads/2021/06/05/3.PNG\"></figure>",
                     "correct answer": "option-D",
                     "your answer": "option-D"
-                },
-                "Question 4": {
-                    "question": "<p>Input Type 1</p>",
-                    "correct answer": "3",
-                    "your answer": "3"
-                },
-                "Question 5": {
-                    "question": "<p>Input Type 2</p>",
-                    "correct answer": "4",
-                    "your answer": "4"
-                },
-                "Question 6": {
-                    "question": "<p>Input Type 3</p>",
-                    "correct answer": "5",
-                    "your answer": "5"
                 }
-            },
+            ],
             "analysis": {
-                "subject: Mathematics": { #Subject wise difficulty
+                "subject: Chemistry": {
                     "total_questions": 3,
-                    "correct_questions": 3,
-                    "incorrect_or_not_attempted": 0
-                },
-                "topic: Integration": {
-                    "total_questions": 3,
-                    "correct_questions": 3,
-                    "incorrect_or_not_attempted": 0
-                },
-                "subtopic: or": {
-                    "total_questions": 3,
-                    "correct_questions": 3,
-                    "incorrect_or_not_attempted": 0
-                },
-                "skill: Integration": {
-                    "total_questions": 1,
                     "correct_questions": 1,
-                    "incorrect_or_not_attempted": 0
+                    "incorrect": 2,
+                    "not_attempted": 0
+                },
+                "topic: JEE MAINS": {
+                    "total_questions": 3,
+                    "correct_questions": 1,
+                    "incorrect": 2,
+                    "not_attempted": 0
+                },
+                "subtopic: Solid State": {
+                    "total_questions": 3,
+                    "correct_questions": 1,
+                    "incorrect": 2,
+                    "not_attempted": 0
+                },
+                "skill: ": {
+                    "total_questions": 0,
+                    "correct_questions": 0,
+                    "incorrect": 0,
+                    "not_attempted": 0
                 },
                 "dificulty: Easy": {
-                    "total_questions": 1,
+                    "total_questions": 3,
                     "correct_questions": 1,
-                    "incorrect_or_not_attempted": 0
-                },
-                "skill: Incorrect": {
-                    "total_questions": 1,
-                    "correct_questions": 1,
-                    "incorrect_or_not_attempted": 0
-                },
-                "dificulty: Medium": {
-                    "total_questions": 1,
-                    "correct_questions": 1,
-                    "incorrect_or_not_attempted": 0
-                },
-                "skill: Correct": {
-                    "total_questions": 1,
-                    "correct_questions": 1,
-                    "incorrect_or_not_attempted": 0
-                },
-                "dificulty: Hard": {
-                    "total_questions": 1,
-                    "correct_questions": 1,
-                    "incorrect_or_not_attempted": 0
+                    "incorrect": 2,
+                    "not_attempted": 0
+                }
+            },
+            "subjectwise_difficulty": {
+                "Chemistry": {
+                    "Easy": {
+                        "total_questions": 3,
+                        "correct": 1,
+                        "incorrect": 2,
+                        "not_attempted": 0
+                    }
                 }
             },
             "rank": "1"
         },
         "topper": {
-            "Quiz Name": "Shrey Test Quiz 1 by shrey",
-            "totalquestion": 6,
-            "correctquestion": 3,
-            "incorrectquestion": 0,
+            "Quiz Name": "Quiz @6 by administrator",
+            "totalquestion": 3,
+            "correctquestion": 1,
+            "incorrectquestion": 2,
             "attempted": 3,
             "notattempted": 0,
-            "marks_obtained": 12
+            "marks_obtained": 2
         },
         "average": {
-            "Quiz Name": "Shrey Test Quiz 1 by shrey",
-            "totalquestion": 6,
-            "correctquestion": 3.0,
-            "incorrectquestion": 0.0,
+            "Quiz Name": "Quiz @6 by administrator",
+            "totalquestion": 3,
+            "correctquestion": 0.6666666666666666,
+            "incorrectquestion": 2.3333333333333335,
             "attempted": 3.0,
             "not_attempted": 0.0,
-            "marks_obtained": 12.0
+            "marks_obtained": 0.3333333333333333
         }
     }
 

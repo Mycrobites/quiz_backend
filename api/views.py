@@ -846,6 +846,7 @@ class GetResult(GenericAPIView):
 		totalmarks = 0
 		dic = {}
 		quesdic = []
+		difiarr=[]
 		dificultydict={}
 		response = q.response.replace("'", '"')
 		res_dict = json.loads(response)
@@ -946,7 +947,6 @@ class GetResult(GenericAPIView):
 						dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
 					else:
 						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-
 			subjecttag = obj.subject_tag
 			try:
 				if dic["subject: " + subjecttag]:
@@ -1120,7 +1120,8 @@ class GetResult(GenericAPIView):
 						dic["dificulty: " + dificultytag]["incorrect"] += 1
 					else:
 						dic["dificulty: " + dificultytag]["not_attempted"] += 1
-		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic,"subjectwise_difficulty":dificultydict}
+		difiarr.append(dificultydict)
+		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic,"subjectwise_difficulty":difiarr}
 		arr.append(result)
 		return Response({"data": result})
 

@@ -692,16 +692,42 @@ def resultanalysis(request):
 		posscore = negscore = easyTot = easyPos = easyNeg = medTot = medPos = medNeg = hardTot = hardPos = hardNeg = 0
 		algebraTot = algebraPos = algebraNeg = calculusTot = calculusPos = calculusNeg = combinatoricsTot = combinatoricsPos = combinatoricsNeg = 0
 		geometryTot = geometryPos = geometryNeg = logicalThinkingTot = logicalThinkingPos = logicalThinkingNeg = numberTheoryTot = numberTheoryPos = numberTheoryNeg = 0
-
+		dificultydict={}
 		for key, value in res_dict.items():
 			ques = Question.objects.get(id=key)
 			if ques.dificulty_tag == "Easy":
 				easyTot += 1
 			elif ques.dificulty_tag == "Medium":
 				medTot += 1
+				try:
+					if ques.subject_tag:
+						try:
+							if dificultydict[ques.subject_tag]:
+								try:
+									if dificultydict[ques.subject_tag]["Medium"]:
+										dificultydict[ques.subject_tag]["Medium"]+=1
+								except:
+									dificultydict[ques.subject_tag]["Medium"]=1
+						except:
+							dificultydict[ques.subject_tag]={}
+							
+				except:
+					pass
 			elif ques.dificulty_tag == "Hard":
 				hardTot += 1
-
+				try:
+					if ques.subject_tag:
+						try:
+							if dificultydict[ques.subject_tag]:
+								try:
+									if dificultydict[ques.subject_tag]["Hard"]:
+										dificultydict[ques.subject_tag]["Hard"]+=1
+								except:
+									dificultydict[ques.subject_tag]["Hard"]=1
+						except:
+							dificultydict[ques.subject_tag]={}
+				except:
+					pass
 			if ques.topic_tag == "Algebra":
 				algebraTot += 1
 			elif ques.topic_tag == "Calculus":
@@ -820,6 +846,7 @@ class GetResult(GenericAPIView):
 		totalmarks = 0
 		dic = {}
 		quesdic = []
+		dificultydict={}
 		response = q.response.replace("'", '"')
 		res_dict = json.loads(response)
 		for ques in res_dict:
@@ -858,6 +885,31 @@ class GetResult(GenericAPIView):
 				else:
 					nonattempted += 1
 					flag = "Not attempted"
+
+				try:
+					if dificultydict[obj.subject_tag][obj.dificulty_tag]:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
+						if flag=="True":
+							dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+						elif flag=="False":
+							dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+						else:
+							dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+				except:
+					dificultydict[obj.subject_tag]={}
+					dificultydict[obj.subject_tag][obj.dificulty_tag]={}
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
+					if flag=="True":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+					elif flag=="False":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+					else:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+
+					
 				subjecttag = obj.subject_tag
 				try:
 					if dic["subject: " + subjecttag]:
@@ -1031,7 +1083,9 @@ class GetResult(GenericAPIView):
 							dic["dificulty: " + dificultytag]["incorrect"] += 1
 						else:
 							dic["dificulty: " + dificultytag]["not_attempted"] += 1
-		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic}
+		quesarr=[]
+		quesarr.append(quesdic)
+		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesarr, "analysis": dic,"subjectwise_difiulty":dificultydict}
 		arr.append(result)
 		return Response({"data": result})
 

@@ -819,15 +819,15 @@ class GetResult(GenericAPIView):
 		wrongquestion = 0
 		totalmarks = 0
 		dic = {}
-		quesdic = {}
+		quesdic = []
 		response = q.response.replace("'", '"')
 		res_dict = json.loads(response)
 		for ques in res_dict:
 			totalquestion += 1
 			obj = Question.objects.get(id=str(ques))
 			if obj.question_type == 'Input Type':
-				quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": obj.answer['1'],
-							"your answer": res_dict[ques]}
+				temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": obj.answer['1'],"your answer": res_dict[ques]}
+				quesdic.append(temp_dict)
 			else:
 				if(type(obj.option) is str):
 					temp = obj.option.replace("'",'"')
@@ -836,14 +836,15 @@ class GetResult(GenericAPIView):
 					temp = obj.option
 				if res_dict[ques] != "":
 					try:
-						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
+						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
 					except:
-						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": "option-" + str(obj.option[str(res_dict[ques])])}
+						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": "option-" + str(obj.option[str(res_dict[ques])])}
 				else:
 					try:
-						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
+						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
 					except:
-						quesdic["Question " + str(totalquestion)] = {"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
+						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
+				quesdic.append(temp_dict)
 				if res_dict[ques] != "":
 					attemptedquestion += 1
 					if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
@@ -1594,6 +1595,4 @@ class get_student_report(GenericAPIView):
 			return Response(response, status=status.HTTP_200_OK)
 		except:
 			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
-
-
 

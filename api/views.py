@@ -427,17 +427,14 @@ class QuizCollection(GenericAPIView):
 				quiz_groups = []
 				quizgroups = QuizGroup.objects.all()
 				usergroups = UserGroup.objects.filter(user=userid)
-				print(str(datetime.now()))
 				for qgrp in quizgroups:
 					resp = []
 					quiz_set = set()
-					quiz_list = []
-					for q in qgrp.quiz.all():
-						quiz_list.append(str(q.id))
 					for grp in usergroups:
 						self.queryset = AssignQuiz.objects.filter(group=grp)
 						for i in self.queryset:
-							if (i.quiz_id not in quiz_set) and (str(i.quiz_id) in quiz_list):
+							quiz_instance = Quiz.objects.get(id=i.quiz_id)
+							if (i.quiz_id not in quiz_set) and (quiz_instance.quizgroup == qgrp):
 								quiz_set.add(i.quiz_id)
 								obj = Quiz.objects.get(id=i.quiz_id)
 								serializer = self.serializer_class(obj)
@@ -446,7 +443,8 @@ class QuizCollection(GenericAPIView):
 					else:
 						self.queryset = AssignQuiz.objects.filter(user=userid)
 						for i in self.queryset:
-							if (i.quiz_id not in quiz_set) and (str(i.quiz_id) in quiz_list):
+							quiz_instance = Quiz.objects.get(id=i.quiz_id)
+							if (i.quiz_id not in quiz_set) and (quiz_instance.quizgroup == qgrp):
 								quiz_set.add(i.quiz_id)
 								obj = Quiz.objects.get(id=i.quiz_id)
 								serializer = self.serializer_class(obj)

@@ -13,6 +13,7 @@ from django.utils import timezone
 
 class Quiz(models.Model):
     title = models.CharField(max_length=50)
+    quizgroup = models.ForeignKey('QuizGroup', on_delete=models.CASCADE, blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
@@ -23,7 +24,6 @@ class Quiz(models.Model):
     endtime = models.DateTimeField()
     question = models.ManyToManyField("Question",null=True,blank=True)
     quesorder = models.CharField(max_length=1000000,blank=True,default="[]")
-
 
     def __str__(self):
         return str(self.title)
@@ -38,7 +38,6 @@ class QuizGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=30, null=False)
     description = models.TextField(max_length=200, null=False)
-    quiz = models.ManyToManyField(Quiz)
 
     def __str__(self):
         return str(self.title)

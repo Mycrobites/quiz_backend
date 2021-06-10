@@ -924,6 +924,11 @@ class GetResult(GenericAPIView):
 				else:
 					nonattempted += 1
 					flag = "Not attempted"
+				try:
+					if dificultydict[obj.subject_tag]:
+						pass
+				except:
+					dificultydict[obj.subject_tag]={}
 
 				try:
 					if dificultydict[obj.subject_tag][obj.dificulty_tag]:
@@ -935,7 +940,6 @@ class GetResult(GenericAPIView):
 						else:
 							dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
 				except:
-					dificultydict[obj.subject_tag]={}
 					dificultydict[obj.subject_tag][obj.dificulty_tag]={}
 					dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
 					dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0

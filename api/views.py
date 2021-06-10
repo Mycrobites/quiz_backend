@@ -1622,7 +1622,14 @@ class getScorecard(APIView):
 				avincorrect.append(int(data['incorrectquestion']))
 				avattempted.append(int(data['attempted']))
 				avnotattempted.append(int(data['not_attempted']))
-				save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=quiz_name,score=data['marks_obtained'])
+				try:
+					u=save_result.objects.get(user=userobj,quizid=quizid)
+					u.data=data
+					u.quizname=quiz_name
+					u.score=data['marks_obtained']
+					u.save()
+				except:
+					save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=quiz_name,score=data['marks_obtained'])
 			av_score=sum(avscore)/len(avscore)
 			av_correct=sum(avcorrect)/len(avcorrect)
 			av_incorrect=sum(avincorrect)/len(avincorrect)
@@ -1638,7 +1645,14 @@ class getScorecard(APIView):
 					topperDone = True
 					topper_data = {'Quiz Name': quiz_name,'totalquestion':obj.data['totalquestion'],'correctquestion':obj.data['correctquestion'],'incorrectquestion':obj.data['incorrectquestion'],
 									'attempted':obj.data['attempted'],'notattempted':obj.data['not_attempted'],'marks_obtained':obj.data['marks_obtained']}
-					save_result.objects.create(name="Topper",data=topper_data,quizid=quizid,quizname=quiz_name,score=obj.score,rank='1')
+					try:
+						u=save_result.objects.get(quizid=quizid,name="Topper")
+						u.data=topper_data
+						u.quizname=quiz_name
+						u.score=obj.score
+						u.save()
+					except:
+						save_result.objects.create(name="Topper",data=topper_data,quizid=quizid,quizname=quiz_name,score=obj.score,rank='1')
 			avdata={"Quiz Name": quiz_name ,
 					"totalquestion": data['totalquestion'],
 					"correctquestion": av_correct,
@@ -1646,7 +1660,14 @@ class getScorecard(APIView):
 					"attempted": av_attempted,
 					"not_attempted": av_notattempted,
 					"marks_obtained": av_score}
-			save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=av_score,rank='N/A')
+			try:
+				u=save_result.objects.get(quizid=quizid,name="Average")
+				u.data=avdata
+				u.quizname=quiz_name
+				u.score=av_score
+				u.save()
+			except:
+				save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=av_score,rank='N/A')
 			return HttpResponse("done")	
 
 def check_for_result(request):

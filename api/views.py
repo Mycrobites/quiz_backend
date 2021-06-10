@@ -1120,7 +1120,7 @@ class GetResult(GenericAPIView):
 						dic["dificulty: " + dificultytag]["incorrect"] += 1
 					else:
 						dic["dificulty: " + dificultytag]["not_attempted"] += 1
-		difiarr.append(dificultydict)
+			difiarr.append(dificultydict)
 		result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic,"subjectwise_difficulty":difiarr}
 		arr.append(result)
 		return Response({"data": result})

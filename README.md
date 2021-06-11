@@ -419,100 +419,147 @@ Documentation of our API endpoints starts here
 ### Response
 
     [
-        {   
-            "name":"Group Name 1",
-            "upcoming":[],
-            "active":[],
-            "attempted":[
+        {
+            "name": "Quiz Group 1",
+            "upcoming": [],
+            "active": [
                 {
-                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
-                    "title": "Quiz for testing 2",
-                    "creator": 566,
-                    "starttime": "2020-03-16T00:00:00+05:30",
-                    "endtime": "2021-06-16T05:30:00+05:30",
-                    "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
-                    "creator_username": "administrator"
-                },
-                {
-                    "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
-                    "title": "Quiz for testing 7",
+                    "id": "bb0b25ee-0d21-4f05-a0e4-012d433a12fb",
+                    "quizgroup": "97245269-f690-4e30-9027-a40105fc43c4",
+                    "title": "Quiz for documentation",
                     "creator": 566,
                     "starttime": "2020-03-16T00:00:00+05:30",
                     "endtime": "2021-07-16T05:30:00+05:30",
                     "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
+                    "instructions": "<p><strong>This is instructions field.</strong></p>",
+                    "desc": "<p>This quiz is being created solely for documentation purpose</p>",
                     "creator_username": "administrator"
                 }
             ],
-            "missed":[
+            "attempted": [
                 {
-                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
-                    "title": "Quiz for testing 1",
-                    "creator": 566,
-                    "starttime": "2020-03-16T00:00:00+05:30",
-                    "endtime": "2021-06-16T05:30:00+05:30",
-                    "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
-                    "creator_username": "administrator"
+                    "id": "6a5e18db-e7d9-49fc-b38b-b79ee8e2d19a",
+                    "quizgroup": "97245269-f690-4e30-9027-a40105fc43c4",
+                    "title": "Cognitive Calculus Contest (Senior)",
+                    "creator": 1,
+                    "starttime": "2021-05-12T11:00:00+05:30",
+                    "endtime": "2021-05-14T13:00:00+05:30",
+                    "duration": "01:30:00",
+                    "instructions": "<p>2</p>",
+                    "desc": "<p>Calculus Contest for Senior Category (Participants who are 17 years or older)</p>",
+                    "resultid": "9sdd6e357-526b-43d6-8c6d-asd169e73b35",
+                    "creator_username": "heymatheists"
+                }
+            ],
+            "missed": [
+                {
+                    "id": "f13a7a6b-7e88-4308-805c-556683f5a1e7",
+                    "quizgroup": "97245269-f690-4e30-9027-a40105fc43c4",
+                    "title": "Test Quiz 6 June 2021",
+                    "creator": 574,
+                    "starttime": "2021-06-06T15:05:43+05:30",
+                    "endtime": "2021-06-08T15:05:47+05:30",
+                    "duration": "15:05:45",
+                    "instructions": "<p>Test Quiz 6 June 2021</p>",
+                    "desc": "<p>Test Quiz 6 June 2021</p>",
+                    "creator_username": "shrey"
                 },
                 {
-                    "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
-                    "title": "Quiz for testing 6",
-                    "creator": 566,
-                    "starttime": "2020-03-16T00:00:00+05:30",
-                    "endtime": "2021-07-16T05:30:00+05:30",
-                    "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
-                    "creator_username": "administrator"
+                    "id": "e60be02b-8fb7-4bf5-8b67-d91851b588a9",
+                    "quizgroup": "97245269-f690-4e30-9027-a40105fc43c4",
+                    "title": "Cognitive Math Test (10th)",
+                    "creator": 1,
+                    "starttime": "2021-05-12T11:00:00+05:30",
+                    "endtime": "2021-05-18T11:00:00+05:30",
+                    "duration": "01:00:00",
+                    "instructions": "<p>2</p>",
+                    "desc": "<p>CMT is the selection test for PRMO-RMO program organised by heyMatheists</p>",
+                    "creator_username": "heymatheists"
+                },
+                {
+                    "id": "c1f9c962-992e-4e53-addd-5b7c1b32d1db",
+                    "quizgroup": "97245269-f690-4e30-9027-a40105fc43c4",
+                    "title": "Cognitive Calculus Contest (Junior)",
+                    "creator": 1,
+                    "starttime": "2021-05-12T11:00:00+05:30",
+                    "endtime": "2021-05-16T11:00:00+05:30",
+                    "duration": "01:30:00",
+                    "instructions": "<p>2</p>",
+                    "desc": "<p>Calculus Contest for Junior Category (Participants who are younger than 17 years)</p>",
+                    "creator_username": "heymatheists"
                 }
             ]
         },
-        {   
-            "name":"Group Name 2",
-            "upcoming":[
+        {
+            "name": "Quiz Group 2",
+            "upcoming": [],
+            "active": [],
+            "attempted": [
                 {
-                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
-                    "title": "Quiz for testing 4",
-                    "creator": 566,
-                    "starttime": "2020-03-16T00:00:00+05:30",
-                    "endtime": "2021-06-16T05:30:00+05:30",
-                    "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
-                    "creator_username": "administrator"
+                    "id": "64ec58e7-dd1b-427a-9f4a-a065b5932e99",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Shrey Test Quiz 1",
+                    "creator": 574,
+                    "starttime": "2021-06-04T17:17:32+05:30",
+                    "endtime": "2021-06-05T18:34:11+05:30",
+                    "duration": "01:00:00",
+                    "instructions": "<p>Test Instructions</p>",
+                    "desc": "<p>Test Description</p>",
+                    "resultid": "95f6e357-526b-43d6-8c6d-8ca169e73b35",
+                    "creator_username": "shrey"
+                },
+                {
+                    "id": "510b0c70-79a5-441a-a793-49644c1bc06a",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Cognitive Math Test (9th)",
+                    "creator": 1,
+                    "starttime": "2021-05-01T12:00:00+05:30",
+                    "endtime": "2021-05-16T21:00:00+05:30",
+                    "duration": "01:00:00",
+                    "instructions": "<p>2</p>",
+                    "desc": "<p>CMT is the selection test for PRMO-RMO program organised by heyMatheists.</p>",
+                    "resultid": "95f6e357-526b-43d6-8c6d-asd169e73b35",
+                    "creator_username": "heymatheists"
                 }
             ],
-            "active":[],
-            "attempted":[
+            "missed": [
                 {
-                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
-                    "title": "Quiz for testing 9",
+                    "id": "0a6a8b04-e936-496c-8d00-97fe0ba7347f",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Test Quiz 8 June 2021",
+                    "creator": 574,
+                    "starttime": "2021-06-08T20:36:55+05:30",
+                    "endtime": "2021-06-09T20:34:21+05:30",
+                    "duration": "03:00:00",
+                    "instructions": "<p>Test Quiz 8 June 2021 Instructions</p>",
+                    "desc": "<p>Test Quiz 8 June 2021 Description</p>",
+                    "creator_username": "shrey"
+                },
+                {
+                    "id": "55156ed7-4a3c-483b-8209-258f1ee95eb0",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Class 12 MOT 1",
                     "creator": 566,
-                    "starttime": "2020-03-16T00:00:00+05:30",
-                    "endtime": "2021-06-16T05:30:00+05:30",
-                    "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
+                    "starttime": "2021-05-16T15:00:00+05:30",
+                    "endtime": "2021-05-20T19:10:00+05:30",
+                    "duration": "00:50:00",
+                    "instructions": "<p>2</p>",
+                    "desc": "<p>Physics - Electrostatics (Electric Field and Flux); Chemistry - Solid State and Maths - Inverse Trigonometry</p>",
                     "creator_username": "administrator"
                 },
                 {
-                    "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
-                    "title": "Quiz for testing 10",
-                    "creator": 566,
-                    "starttime": "2020-03-16T00:00:00+05:30",
-                    "endtime": "2021-07-16T05:30:00+05:30",
-                    "duration": "00:45:00",
-                    "instructions":"<b>This is instructions field.</b>",
-                    "desc": "This quiz is being created solely for testing purpose",
-                    "creator_username": "administrator"
+                    "id": "1a070413-94d6-4993-9098-2336ce9a65fa",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Cognitive Math Test (11th)",
+                    "creator": 1,
+                    "starttime": "2021-05-12T11:00:00+05:30",
+                    "endtime": "2021-05-18T11:00:00+05:30",
+                    "duration": "01:00:00",
+                    "instructions": "<p>Test Instructions</p>",
+                    "desc": "<p>CMT is the selection test for PRMO-RMO program organised by heyMatheists.</p>",
+                    "creator_username": "heymatheists"
                 }
-            ],
-            "missed":[]
+            ]
         }
     ]
 

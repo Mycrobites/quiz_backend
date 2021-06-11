@@ -456,18 +456,27 @@ class QuizCollection(GenericAPIView):
 						starttime = datetime.strptime(quizzes[i]["starttime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
 						endtime = datetime.strptime(quizzes[i]["endtime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
 						currenttime = datetime.now().timestamp()
-						print(starttime, "-", currenttime, "-", endtime)
 						if starttime > currenttime:
 							upcoming.append(quizzes[i])
 						elif starttime < currenttime and endtime > currenttime:
 							try:
 								QuizResponse.objects.get(user=userid,quiz=quizzes[i]["id"])
+								try:
+									sr = save_result.objects.get(user__id=userid, quizid = str(quizzes[i]['id']))
+									quizzes[i]["resultid"] = sr.id
+								except:
+									pass
 								attempted.append(quizzes[i])
 							except:
 								active.append(quizzes[i])
 						else:
 							try:
 								QuizResponse.objects.get(user=userid,quiz=quizzes[i]["id"])
+								try:
+									sr = save_result.objects.get(user__id=userid, quizid = str(quizzes[i]['id']))
+									quizzes[i]["resultid"] = sr.id
+								except:
+									pass
 								attempted.append(quizzes[i])
 							except:
 								missed.append(quizzes[i])

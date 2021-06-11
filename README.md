@@ -419,27 +419,100 @@ Documentation of our API endpoints starts here
 ### Response
 
     [
-        {
-            "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
-            "title": "Quiz for testing 3",
-            "creator": 566,
-            "starttime": "2020-03-16T00:00:00+05:30",
-            "endtime": "2021-06-16T05:30:00+05:30",
-            "duration": "00:45:00",
-            "instructions":"<b>This is instructions field.</b>",
-            "desc": "This quiz is being created solely for testing purpose",
-            "creator_username": "administrator"
+        {   
+            "name":"Group Name 1",
+            "upcoming":[],
+            "active":[],
+            "attempted":[
+                {
+                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
+                    "title": "Quiz for testing 2",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-06-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                },
+                {
+                    "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
+                    "title": "Quiz for testing 7",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-07-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                }
+            ],
+            "missed":[
+                {
+                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
+                    "title": "Quiz for testing 1",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-06-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                },
+                {
+                    "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
+                    "title": "Quiz for testing 6",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-07-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                }
+            ]
         },
-        {
-            "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
-            "title": "Quiz for testing 4",
-            "creator": 566,
-            "starttime": "2020-03-16T00:00:00+05:30",
-            "endtime": "2021-07-16T05:30:00+05:30",
-            "duration": "00:45:00",
-            "instructions":"<b>This is instructions field.</b>",
-            "desc": "This quiz is being created solely for testing purpose",
-            "creator_username": "administrator"
+        {   
+            "name":"Group Name 2",
+            "upcoming":[
+                {
+                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
+                    "title": "Quiz for testing 4",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-06-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                }
+            ],
+            "active":[],
+            "attempted":[
+                {
+                    "id": "96dd7e19-a309-4c19-9a85-e857a7b5ccb1",
+                    "title": "Quiz for testing 9",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-06-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                },
+                {
+                    "id": "e58408d8-d1e5-42a7-a6f8-41f78ce88db7",
+                    "title": "Quiz for testing 10",
+                    "creator": 566,
+                    "starttime": "2020-03-16T00:00:00+05:30",
+                    "endtime": "2021-07-16T05:30:00+05:30",
+                    "duration": "00:45:00",
+                    "instructions":"<b>This is instructions field.</b>",
+                    "desc": "This quiz is being created solely for testing purpose",
+                    "creator_username": "administrator"
+                }
+            ],
+            "missed":[]
         }
     ]
 

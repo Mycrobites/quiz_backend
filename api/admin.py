@@ -16,7 +16,7 @@ class QuizAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     model = Question
-    list_display = ["question", "correct_marks", "negative_marks", "get_answer"]
+    list_display = ["question_type","question", "correct_marks", "negative_marks", "get_answer"]
     list_filter = ["quiz__title", "subject_tag", "topic_tag", "subtopic_tag", "dificulty_tag", "skill"]
 
     def get_answer(self, obj):

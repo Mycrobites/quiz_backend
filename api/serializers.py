@@ -3,6 +3,11 @@ from rest_framework import serializers
 import jsonfield
 
 
+class QuizGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizGroup
+        fields = "__all__"
+
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
@@ -18,7 +23,7 @@ class QuizSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        exclude = ['answer']
+        fields = "__all__"
 
 
 class QuizResponseSerializer(serializers.ModelSerializer):

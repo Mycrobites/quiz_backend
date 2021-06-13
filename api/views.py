@@ -36,6 +36,17 @@ class HomeView(GenericAPIView):
 	def get(self, request):
 		return Response("Hey, Welcome to Quiz Platform!")
 
+class QuizGroupCreateView(GenericAPIView):
+	serializer_class = QuizGroupSerializer
+	permission_classes = [IsAuthenticated,IsTeacher]
+	authentication_classes = [JWTAuthentication]
+
+	def post(self, request):
+		data = request.data
+		serializer = self.serializer_class(data=data)
+		serializer.is_valid(raise_exception=True)
+		serializer.save()
+		return Response(serializer.data)
 
 class QuizView(GenericAPIView):
 	serializer_class = QuizSerializer
@@ -60,20 +71,21 @@ class QuizView(GenericAPIView):
 						q_id_set.add(str(i.id))
 						ques_serializer = QuestionSerializer(i)
 						questions.append(ques_serializer.data)
-				count = 0
 				for i in questions:
-					i["options"] = []
 					try:
 						options = i["option"].replace("'",'"')
 						options = json.loads(options)
 					except Exception as e:
 						options = i["option"]
 					temp=[]
-					if(options is not None):
-						for i in options:
-							temp.append(options[i])
-						questions[count]["option"] = temp
-						count+=1
+					if options is None or options == "" or options=={}:
+						i["numberOfInputs"]=len(i["answer"])
+						i["option"] = None
+					else:
+						for j in options:
+							temp.append(options[j])
+						i["option"] = temp
+					i["answer"] = None
 				result['quiz_details'] = serializer.data
 				result['quiz_questions'] = questions
 				result['feedback'] = False
@@ -227,7 +239,7 @@ class QuizCreateResponseView(GenericAPIView):
 			questions = quiz.question
 			marks = 0
 			for i in quiz.question.all():
-				if i.question_type == 'Single Correct':
+				if i.question_type == 'Single Correct' or i.question_type == 'True False' or i.question_type == 'Assertion Reason':
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
@@ -244,7 +256,16 @@ class QuizCreateResponseView(GenericAPIView):
 						else:
 							marks -= i.negative_marks
 				else:
-					marks += 0
+					if res_dict[str(i.id)] == "":
+						marks += 0
+					else:
+						response_answers = []
+						for j in res_dict[str(i.id)].split(","):
+							response_answers.append(i.option[str(j)].strip())
+						if response_answers == set(i.answer.values()):
+							marks += i.correct_marks
+						else:
+							marks -= i.negative_marks
 			quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
 			quizobject.update(marks=marks)
 			response_id = response["id"]
@@ -412,17 +433,31 @@ class QuizCollection(GenericAPIView):
 		try:
 			user = User.objects.get(id=userid)
 			if user.role == "Teacher":
-				self.queryset = Quiz.objects.filter(creator=user)
-				serializer = self.serializer_class(self.queryset, many=True)
-				quizzes = serializer.data
-				for i in range(len(quizzes)):
-					user_id = quizzes[i]['creator']
-					try:
-						user = User.objects.get(id=user_id)
-						quizzes[i]['creator_username'] = user.username
-					except ObjectDoesNotExist:
-						raise ValidationError({"message": "User do not found"})
-				return Response(quizzes)
+				quizgroups = QuizGroup.objects.all()
+				quiz_groups  = []
+				for qgrp in quizgroups:
+					self.queryset = Quiz.objects.filter(creator=user, quizgroup=qgrp)
+					serializer = self.serializer_class(self.queryset, many=True)
+					quizzes = serializer.data
+					upcoming,active,completed = [],[],[]
+					for i in range(len(quizzes)):
+						starttime = datetime.strptime(quizzes[i]["starttime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
+						endtime = datetime.strptime(quizzes[i]["endtime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
+						currenttime = datetime.now().timestamp()
+						if starttime > currenttime:
+							upcoming.append(quizzes[i])
+						elif starttime < currenttime and endtime > currenttime:
+							active.append(quizzes[i])
+						else:
+							completed.append(quizzes[i])
+						user_id = quizzes[i]['creator']
+						try:
+							user = User.objects.get(id=user_id)
+							quizzes[i]['creator_username'] = user.username
+						except ObjectDoesNotExist:
+							raise ValidationError({"message": "User do not found"})
+					quiz_groups.append({'name':qgrp.title,"id":qgrp.id,"upcoming":upcoming,"active":active,"completed":completed})
+				return Response(quiz_groups)
 			else:
 				quiz_groups = []
 				quizgroups = QuizGroup.objects.all()

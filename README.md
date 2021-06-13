@@ -71,6 +71,26 @@ python manage.py runserver
 
 Documentation of our API endpoints starts here
 
+## To create a quiz-group
+
+### Request
+
+`POST http://127.0.0.1:8000/api/create-quiz-group`
+
+    {
+        "title": "Test Group 3",
+        "description": "This is test group 3"
+    }
+
+### Response
+
+    {
+        "id": "1440a8a6-5a47-42b7-bd2a-88d4bbd84b70",
+        "title": "Test Group 3",
+        "description": "This is test group 3"
+    }
+
+
 ## To create a quiz
 
 ### Request
@@ -410,7 +430,71 @@ Documentation of our API endpoints starts here
         "message":"Group has been added to the quiz"
     }
 
-## To get all quizzes
+## To get all quizzes (Teacher)
+
+### Request
+
+`GET http://127.0.0.1:8000/api/get-all-quizzes/<slug:userid>`
+
+### Response
+
+    [
+        {
+            "name": "Quiz Group 1",
+            "id": "97245269-f690-4e30-9027-a40105fc43c4",
+            "upcoming": [],
+            "active": [],
+            "completed": [
+                {
+                    "id": "f13a7a6b-7e88-4308-805c-556683f5a1e7",
+                    "quizgroup": "97245269-f690-4e30-9027-a40105fc43c4",
+                    "title": "Test Quiz 6 June 2021",
+                    "creator": 574,
+                    "starttime": "2021-06-06T15:05:43+05:30",
+                    "endtime": "2021-06-08T15:05:47+05:30",
+                    "duration": "15:05:45",
+                    "instructions": "<p>Test Quiz 6 June 2021</p>",
+                    "desc": "<p>Test Quiz 6 June 2021</p>",
+                    "creator_username": "shrey"
+                }
+            ]
+        },
+        {
+            "name": "Quiz Group 2",
+            "id": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+            "upcoming": [],
+            "active": [],
+            "completed": [
+                {
+                    "id": "64ec58e7-dd1b-427a-9f4a-a065b5932e99",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Shrey Test Quiz 1",
+                    "creator": 574,
+                    "starttime": "2021-06-04T17:17:32+05:30",
+                    "endtime": "2021-06-05T18:34:11+05:30",
+                    "duration": "01:00:00",
+                    "instructions": "<p>Test Instructions</p>",
+                    "desc": "<p>Test Description</p>",
+                    "creator_username": "shrey"
+                },
+                {
+                    "id": "0a6a8b04-e936-496c-8d00-97fe0ba7347f",
+                    "quizgroup": "fcd17c5f-ba52-417d-bfc3-bb61328f3db0",
+                    "title": "Test Quiz 8 June 2021",
+                    "creator": 574,
+                    "starttime": "2021-06-08T20:36:55+05:30",
+                    "endtime": "2021-06-09T20:34:21+05:30",
+                    "duration": "03:00:00",
+                    "instructions": "<p>Test Quiz 8 June 2021 Instructions</p>",
+                    "desc": "<p>Test Quiz 8 June 2021 Description</p>",
+                    "creator_username": "shrey"
+                }
+            ]
+        }
+    ]
+
+
+## To get all quizzes (Student)
 
 ### Request
 

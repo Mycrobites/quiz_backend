@@ -238,34 +238,47 @@ class QuizCreateResponseView(GenericAPIView):
 			quiz = Quiz.objects.get(id=quiz_id)
 			questions = quiz.question
 			marks = 0
-			for i in quiz.question.all():
+			question_ids = []
+			for aq in AddQuestion.objects.filter(quiz=quiz.id):
+				question_ids.append(aq.question_id) 
+			for i in Question.objects.filter(id__in = question_ids):
+				print(i.question_type,"||",i.id, end="||")
 				if i.question_type == 'Single Correct' or i.question_type == 'True False' or i.question_type == 'Assertion Reason':
+					print(1,"-",res_dict[str(i.id)],"||", i.answer, end="||")
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
 						if i.option[str(res_dict[str(i.id)])].strip() == i.answer['1'].strip():
 							marks += i.correct_marks
+							print("correct")
 						else:
 							marks -= i.negative_marks
+							print("incorrect")
 				elif i.question_type == 'Input Type':
+					print(2,"-",res_dict[str(i.id)],"||", i.answer,end="||")
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
-						if res_dict[str(i.id)].strip() == i.answer['1'].strip():
+						if res_dict[str(i.id)].strip().split(',') == list(i.answer.values()):
 							marks += i.correct_marks
+							print("correct")
 						else:
 							marks -= i.negative_marks
+							print("incorrect")
 				else:
+					print(3,"-",res_dict[str(i.id)],"||", i.answer,end="||")
 					if res_dict[str(i.id)] == "":
 						marks += 0
 					else:
-						response_answers = []
+						response_answers = set()
 						for j in res_dict[str(i.id)].split(","):
-							response_answers.append(i.option[str(j)].strip())
+							response_answers.add(i.option[str(j)].strip())
 						if response_answers == set(i.answer.values()):
 							marks += i.correct_marks
+							print("correct")
 						else:
 							marks -= i.negative_marks
+							print("incorrect")
 			quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
 			quizobject.update(marks=marks)
 			response_id = response["id"]
@@ -924,12 +937,14 @@ class GetResult(GenericAPIView):
 		for ques in res_dict:
 			totalquestion += 1
 			obj = Question.objects.get(id=str(ques))
+
+			# Input Type Question
 			if obj.question_type == 'Input Type':
-				temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": obj.answer['1'],"your answer": res_dict[ques]}
+				temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": res_dict[ques].strip()}
 				quesdic.append(temp_dict)
 				if res_dict[ques] != "":
 					attemptedquestion += 1
-					if (str(obj.answer['1']) == str(res_dict[ques])):
+					if (list(obj.answer.values()) == res_dict[ques].strip().split(",")):
 						correctquestion += 1
 						totalmarks += int(obj.correct_marks)
 						flag = "True"
@@ -965,6 +980,52 @@ class GetResult(GenericAPIView):
 					else:
 						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
 
+			# Multiple Answer Correct
+			elif obj.question_type == 'Multiple Correct':
+				response_answers = set()
+				for j in res_dict[str(obj.id)].split(","):
+						response_answers.add(obj.option[str(j)].strip())
+				temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
+				quesdic.append(temp_dict)
+				if res_dict[ques] != "":
+					attemptedquestion += 1					
+					if (set(obj.answer.values()) == response_answers):
+						correctquestion += 1
+						totalmarks += int(obj.correct_marks)
+						flag = "True"
+					else:
+						wrongquestion += 1
+						totalmarks -= int(obj.negative_marks)
+						flag = "False"
+				else:
+					nonattempted += 1
+					flag = "Not attempted"
+
+				# Difficulty Dictionary
+				try:
+					if dificultydict[obj.subject_tag][obj.dificulty_tag]:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
+						if flag=="True":
+							dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+						elif flag=="False":
+							dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+						else:
+							dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+				except:
+					dificultydict[obj.subject_tag]={}
+					dificultydict[obj.subject_tag][obj.dificulty_tag]={}
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
+					if flag=="True":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+					elif flag=="False":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+					else:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+
+			# Single Correct, True or False, Assertion Reason Type Questions
 			else:
 				if(type(obj.option) is str):
 					temp = obj.option.replace("'",'"')
@@ -975,12 +1036,12 @@ class GetResult(GenericAPIView):
 					try:
 						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
 					except:
-						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": "option-" + str(obj.option[str(res_dict[ques])])}
+						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": str(obj.option[str(res_dict[ques])])}
 				else:
 					try:
 						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
 					except:
-						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": "option-" + str(obj.answer['1']),"your answer": ""}
+						temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": ""}
 				quesdic.append(temp_dict)
 				if res_dict[ques] != "":
 					attemptedquestion += 1
@@ -1672,74 +1733,74 @@ class getScorecard(APIView):
 	permission_classes = [AllowAny]
 
 	def get(self, request,quizid):
-			quiz_name = ""
-			avscore=[]
-			avcorrect=[]
-			avincorrect=[]
-			avattempted=[]
-			avnotattempted=[]
-			topperDone = False
-			users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
-			for user in users:
-				userobj = User.objects.get(id=user)
-				try:
-					data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
-				except:
-					return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
-				if quiz_name == "":
-					quiz_name = data['Quiz Name']
-				avscore.append(int(data['marks_obtained']))
-				avcorrect.append(int(data['correctquestion']))
-				avincorrect.append(int(data['incorrectquestion']))
-				avattempted.append(int(data['attempted']))
-				avnotattempted.append(int(data['not_attempted']))
-				try:
-					u=save_result.objects.get(user=userobj,quizid=quizid)
-					u.data=data
-					u.quizname=quiz_name
-					u.score=data['marks_obtained']
-					u.save()
-				except:
-					save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=quiz_name,score=data['marks_obtained'])
-			av_score=sum(avscore)/len(avscore)
-			av_correct=sum(avcorrect)/len(avcorrect)
-			av_incorrect=sum(avincorrect)/len(avincorrect)
-			av_attempted=sum(avattempted)/len(avattempted)
-			av_notattempted=sum(avnotattempted)/len(avnotattempted)
-			avscore=sorted(avscore, reverse=True)
-			for user in users:
-				userobj = User.objects.get(id=user)
-				obj=save_result.objects.get(quizid=quizid,user=userobj)
-				obj.rank=avscore.index(int(obj.score))+1
-				obj.save()
-				if str(obj.rank)=="1" and not topperDone:
-					topperDone = True
-					topper_data = {'Quiz Name': quiz_name,'totalquestion':obj.data['totalquestion'],'correctquestion':obj.data['correctquestion'],'incorrectquestion':obj.data['incorrectquestion'],
-									'attempted':obj.data['attempted'],'notattempted':obj.data['not_attempted'],'marks_obtained':obj.data['marks_obtained']}
-					try:
-						u=save_result.objects.get(quizid=quizid,name="Topper")
-						u.data=topper_data
-						u.quizname=quiz_name
-						u.score=obj.score
-						u.save()
-					except:
-						save_result.objects.create(name="Topper",data=topper_data,quizid=quizid,quizname=quiz_name,score=obj.score,rank='1')
-			avdata={"Quiz Name": quiz_name ,
-					"totalquestion": data['totalquestion'],
-					"correctquestion": av_correct,
-					"incorrectquestion": av_incorrect,
-					"attempted": av_attempted,
-					"not_attempted": av_notattempted,
-					"marks_obtained": av_score}
+		quiz_name = ""
+		avscore=[]
+		avcorrect=[]
+		avincorrect=[]
+		avattempted=[]
+		avnotattempted=[]
+		topperDone = False
+		users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
+		for user in users:
+			userobj = User.objects.get(id=user)
 			try:
-				u=save_result.objects.get(quizid=quizid,name="Average")
-				u.data=avdata
+				data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
+			except:
+				return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
+			if quiz_name == "":
+				quiz_name = data['Quiz Name']
+			avscore.append(int(data['marks_obtained']))
+			avcorrect.append(int(data['correctquestion']))
+			avincorrect.append(int(data['incorrectquestion']))
+			avattempted.append(int(data['attempted']))
+			avnotattempted.append(int(data['not_attempted']))
+			try:
+				u=save_result.objects.get(user=userobj,quizid=quizid)
+				u.data=data
 				u.quizname=quiz_name
-				u.score=av_score
+				u.score=data['marks_obtained']
 				u.save()
 			except:
-				save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=av_score,rank='N/A')
-			return HttpResponse("done")	
+				save_result.objects.create(user=userobj,data=data,quizid=quizid,quizname=quiz_name,score=data['marks_obtained'])
+		av_score=sum(avscore)/len(avscore)
+		av_correct=sum(avcorrect)/len(avcorrect)
+		av_incorrect=sum(avincorrect)/len(avincorrect)
+		av_attempted=sum(avattempted)/len(avattempted)
+		av_notattempted=sum(avnotattempted)/len(avnotattempted)
+		avscore=sorted(avscore, reverse=True)
+		for user in users:
+			userobj = User.objects.get(id=user)
+			obj=save_result.objects.get(quizid=quizid,user=userobj)
+			obj.rank=avscore.index(int(obj.score))+1
+			obj.save()
+			if str(obj.rank)=="1" and not topperDone:
+				topperDone = True
+				topper_data = {'Quiz Name': quiz_name,'totalquestion':obj.data['totalquestion'],'correctquestion':obj.data['correctquestion'],'incorrectquestion':obj.data['incorrectquestion'],
+								'attempted':obj.data['attempted'],'notattempted':obj.data['not_attempted'],'marks_obtained':obj.data['marks_obtained']}
+				try:
+					u=save_result.objects.get(quizid=quizid,name="Topper")
+					u.data=topper_data
+					u.quizname=quiz_name
+					u.score=obj.score
+					u.save()
+				except:
+					save_result.objects.create(name="Topper",data=topper_data,quizid=quizid,quizname=quiz_name,score=obj.score,rank='1')
+		avdata={"Quiz Name": quiz_name ,
+				"totalquestion": data['totalquestion'],
+				"correctquestion": av_correct,
+				"incorrectquestion": av_incorrect,
+				"attempted": av_attempted,
+				"not_attempted": av_notattempted,
+				"marks_obtained": av_score}
+		try:
+			u=save_result.objects.get(quizid=quizid,name="Average")
+			u.data=avdata
+			u.quizname=quiz_name
+			u.score=av_score
+			u.save()
+		except:
+			save_result.objects.create(name="Average",data=avdata,quizid=quizid,quizname=data['Quiz Name'],score=av_score,rank='N/A')
+		return HttpResponse("done")	
 
 def check_for_result(request):
 	quiz=Quiz.objects.all()

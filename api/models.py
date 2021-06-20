@@ -1,3 +1,4 @@
+# from typing_extensions import Required
 from djongo import models
 from authentication.models import User, UserGroup
 import uuid
@@ -14,7 +15,7 @@ from django.utils import timezone
 class Quiz(models.Model):
     title = models.CharField(max_length=50)
     quizgroup = models.ForeignKey('QuizGroup', on_delete=models.CASCADE, blank=True, null=True)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     time = models.DateTimeField(auto_now_add=True, blank=True)
     instructions = RichTextUploadingField()
@@ -78,7 +79,6 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question[:250]
-
 
 class AssignQuiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

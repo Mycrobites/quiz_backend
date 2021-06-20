@@ -67,6 +67,7 @@ class UserAccountManager(BaseUserManager):
         return user
 
 class User(AbstractBaseUser):
+    id = models.AutoField(primary_key=True)
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     first_name = models.CharField(max_length=100, default="first_name")
     last_name = models.CharField(max_length=100, default="last_name")
@@ -101,14 +102,11 @@ class UserGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=20)
     description = models.TextField(max_length=100, blank=True)
-    user = models.ManyToManyField(User, through='GroupMembership', through_fields=('group','user'))
+    user = models.ManyToManyField(User)
 
     def __str__(self):
         return self.name
 
-class GroupMembership(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
 
 class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)

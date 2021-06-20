@@ -36,8 +36,10 @@ urlpatterns = [
     path('checkForResult',views.check_for_result,name="check_for_result"),
     path('getstudentresult/<str:userid>', get_student_result.as_view()),
     path('getstudentreport/<str:id>', get_student_report.as_view()),
-    path('sahi/<str:id>', views.datasahi,name="ad")
-    # question/<str:id>/delete
+    path('sahi/<str:id>', views.datasahi,name="ad"),
+    path('assignQuiz/<str:id>/delete', views.DelAssignQuiz),
+    path('userGroup/<str:id>/delete', views.DelUserGroup),
+    path('user/<str:id>/delete', views.DelUser),
 #     """
 #     Quiz --> Question
 # Assign Quiz--> USERGroup--> User"""

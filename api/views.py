@@ -1856,3 +1856,31 @@ def datasahi(request,id):
 	# for i in q:
 	# 	Question.objects.create(question_type=i.question_type,passage=i.passage,question=i.question,correct_marks=i.correct_marks,negative_marks=i.negative_marks,option=i.option,answer=i.answer,text=i.text,subject_tag=i.subject_tag,topic_tag=i.topic_tag,subtopic_tag=i.subtopic_tag,dificulty_tag=i.dificulty_tag,skill=i.skill)
 	return HttpResponse("hogya")
+
+def DelAssignQuiz(request, id):
+	aq = AssignQuiz.objects.get(id=id)
+	aq.group.clear()
+	aq.user.clear()
+	aq.delete()
+	return HttpResponse("Done")
+
+def DelUserGroup(request, id):
+	ug = UserGroup.objects.get(id=id)
+	aq = AssignQuiz.objects.filter(group = ug)
+	for i in aq:
+		i.group.remove(ug)
+	ug.delete()
+	return HttpResponse("Done")
+
+def DelUser(request, id):
+	u = User.objects.get(id=id)
+	aq = AssignQuiz.objects.filter(user = u)
+	for i in aq:
+		i.user.remove(u)
+	ug = UserGroup.objects.filter(user=u)
+	for i in ug:
+		i.user.remove(u)
+	u.delete()
+	return HttpResponse("Done")
+	
+

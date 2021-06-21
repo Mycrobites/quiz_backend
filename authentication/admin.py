@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as GroupAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from authentication.models import User, UserFromFile, UserGroup, GroupMembership
+from authentication.models import User, UserFromFile, UserGroup
 
 
 # Register your models here.
@@ -70,12 +70,12 @@ class UserGroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     ordering = ('-id','name')
 
-class GroupMembershipAdmin(admin.ModelAdmin):
-    list_display = ('user', 'group')
-    ordering = ('id','group')
+# class GroupMembershipAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'group')
+#     ordering = ('id','group')
 
 admin.site.register(User, UserAdmin)
-admin.site.unregister(Group)
+# admin.site.unregister(Group)
 admin.site.register(UserFromFile)
 admin.site.register(UserGroup, UserGroupAdmin)
-admin.site.register(GroupMembership, GroupMembershipAdmin)
+# admin.site.register(GroupMembership, GroupMembershipAdmin)

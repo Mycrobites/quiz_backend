@@ -1845,3 +1845,47 @@ class get_student_report(GenericAPIView):
 		except:
 			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
 
+def DelQuestion(request,id):
+	q=Question.objects.get(id=id)
+	quiz=Quiz.objects.filter(question=q)
+	for i in quiz:
+		print(i)
+		i.question.remove(q)
+	q.delete()
+	return HttpResponse("hogya")
+
+	
+def DelQuiz(request, id):
+	quiz = Quiz.objects.get(id=id)
+	quiz.question.clear()
+	quiz.delete()
+	return HttpResponse("Done")
+
+
+def DelAssignQuiz(request, id):
+	aq = AssignQuiz.objects.get(id=id)
+	aq.group.clear()
+	aq.user.clear()
+	aq.delete()
+	return HttpResponse("Done")
+
+def DelUserGroup(request, id):
+	ug = UserGroup.objects.get(id=id)
+	aq = AssignQuiz.objects.filter(group = ug)
+	for i in aq:
+		i.group.remove(ug)
+	ug.delete()
+	return HttpResponse("Done")
+
+def DelUser(request, id):
+	u = User.objects.get(id=id)
+	aq = AssignQuiz.objects.filter(user = u)
+	for i in aq:
+		i.user.remove(u)
+	ug = UserGroup.objects.filter(user=u)
+	for i in ug:
+		i.user.remove(u)
+	u.delete()
+	return HttpResponse("Done")
+	
+

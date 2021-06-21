@@ -1046,3 +1046,29 @@ Documentation of our API endpoints starts here
     }
 ### Response
 Your request is in process.You will be notified via email within 24 hours. If not please contact admin.
+
+
+### Delete Question
+### Request
+
+    `GET https://api.progressiveminds.in/api/question/<str:id>/delete`
+
+### Delete Quiz
+### Request
+
+    `GET https://api.progressiveminds.in/api/quiz/<str:id>/delete`
+
+### Delete AssignQuiz
+### Request
+
+    `GET https://api.progressiveminds.in/api/assignQuiz/<str:id>/delete`
+
+### Delete UserGroup
+### Request
+
+    `GET https://api.progressiveminds.in/api/userGroup/<str:id>/delete`
+
+### Delete User
+### Request
+
+    `GET https://api.progressiveminds.in/api/user/<str:id>/delete`

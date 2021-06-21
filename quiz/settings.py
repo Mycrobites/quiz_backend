@@ -78,6 +78,7 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 
 
 if env('ENV')=="production":
+    print("yha")
     DATABASES = {
         "default": {
             "ENGINE": "djongo",

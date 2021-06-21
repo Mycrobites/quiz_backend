@@ -1072,3 +1072,8 @@ Your request is in process.You will be notified via email within 24 hours. If no
 ### Request
 
     `GET https://api.progressiveminds.in/api/user/<str:id>/delete`
+
+### Delete QuizGroup
+### Request
+
+    `GET https://api.progressiveminds.in/api/quizGroup/<str:id>/delete`

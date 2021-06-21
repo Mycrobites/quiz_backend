@@ -38,6 +38,7 @@ urlpatterns = [
     path('getstudentreport/<str:id>', get_student_report.as_view()),
     path('question/<str:id>/delete', views.DelQuestion,name="delquestion"),
     path('quiz/<str:id>/delete', views.DelQuiz,name="delquiz"),
+    path('quizGroup/<str:id>/delete', views.DelQuizGroup,name="delquizgroup"),
     path('assignQuiz/<str:id>/delete', views.DelAssignQuiz),
     path('userGroup/<str:id>/delete', views.DelUserGroup),
     path('user/<str:id>/delete', views.DelUser),

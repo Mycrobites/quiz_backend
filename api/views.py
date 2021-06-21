@@ -1861,6 +1861,15 @@ def DelQuiz(request, id):
 	quiz.delete()
 	return HttpResponse("Done")
 
+def DelQuizGroup(request, id):
+	qg = QuizGroup.objects.get(id=id)
+	quiz=Quiz.objects.filter(quizgroup=qg)
+	for i in quiz:
+		i.quizgroup=None
+		i.save()
+	qg.delete()
+	return HttpResponse("Done")
+
 
 def DelAssignQuiz(request, id):
 	aq = AssignQuiz.objects.get(id=id)

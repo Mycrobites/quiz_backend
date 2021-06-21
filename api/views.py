@@ -1845,17 +1845,22 @@ class get_student_report(GenericAPIView):
 		except:
 			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
 
-def datasahi(request,id):
+def DelQuestion(request,id):
 	q=Question.objects.get(id=id)
 	quiz=Quiz.objects.filter(question=q)
 	for i in quiz:
 		print(i)
 		i.question.remove(q)
-	# quiz.question.remove(q)
 	q.delete()
-	# for i in q:
-	# 	Question.objects.create(question_type=i.question_type,passage=i.passage,question=i.question,correct_marks=i.correct_marks,negative_marks=i.negative_marks,option=i.option,answer=i.answer,text=i.text,subject_tag=i.subject_tag,topic_tag=i.topic_tag,subtopic_tag=i.subtopic_tag,dificulty_tag=i.dificulty_tag,skill=i.skill)
 	return HttpResponse("hogya")
+
+	
+def DelQuiz(request, id):
+	quiz = Quiz.objects.get(id=id)
+	quiz.question.clear()
+	quiz.delete()
+	return HttpResponse("Done")
+
 
 def DelAssignQuiz(request, id):
 	aq = AssignQuiz.objects.get(id=id)

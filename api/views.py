@@ -1845,71 +1845,90 @@ class get_student_report(GenericAPIView):
 		except:
 			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
 
-def DelQuestion(request,id):
-	q=Question.objects.get(id=id)
-	quiz=Quiz.objects.filter(question=q)
-	for i in quiz:
-		print(i)
-		i.question.remove(q)
-	q.delete()
-	return HttpResponse("hogya")
+class DelQuestion(APIView):
+	permission_classes = [IsAuthenticated,IsTeacher]
 
-	
-def DelQuiz(request, id):
-	try : 
-		quiz = Quiz.objects.get(id=id)
-		quiz.question.clear()
-		quiz.delete()
-		return Response({'message':'Quiz Deleted'}, status=status.HTTP_200_OK)
-	except:
-		return Response({'message':'Quiz not found'}, status=status.HTTP_400_BAD_REQUEST)
+	def get(self,request,id):
+		try:
+			q=Question.objects.get(id=id)
+			quiz=Quiz.objects.filter(question=q)
+			for i in quiz:
+				print(i)
+				i.question.remove(q)
+			q.delete()
+			return Response({'message':'Question Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'Quiz not found'}, status=status.HTTP_400_BAD_REQUEST)
 
-def DelQuizGroup(request, id):
-	try:
-		qg = QuizGroup.objects.get(id=id)
-		quiz=Quiz.objects.filter(quizgroup=qg)
-		for i in quiz:
-			i.quizgroup=None
-			i.save()
-		qg.delete()
-		return Response({'message':'Quiz Group Deleted'}, status=status.HTTP_200_OK)
-	except:
-		return Response({'message':'Quiz Group not found'}, status=status.HTTP_400_BAD_REQUEST)
+class DelQuiz(APIView):
+	permission_classes = [IsAuthenticated,IsTeacher]
 
+	def get(self,request,id):
+		try: 
+			quiz = Quiz.objects.get(id=id)
+			quiz.question.clear()
+			quiz.delete()
+			return Response({'message':'Quiz Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'Quiz not found'}, status=status.HTTP_400_BAD_REQUEST)
 
-def DelAssignQuiz(request, id):
-	try:
-		aq = AssignQuiz.objects.get(id=id)
-		aq.group.clear()
-		aq.user.clear()
-		aq.delete()
-		return Response({'message':'AssignQuiz Deleted'}, status=status.HTTP_200_OK)
-	except:
-		return Response({'message':'AssignQuiz not found'}, status=status.HTTP_400_BAD_REQUEST)
+class DelQuizGroup(APIView):
+	permission_classes = [IsAuthenticated,IsTeacher]
 
-def DelUserGroup(request, id):
-	try:
-		ug = UserGroup.objects.get(id=id)
-		aq = AssignQuiz.objects.filter(group = ug)
-		for i in aq:
-			i.group.remove(ug)
-		ug.delete()
-		return Response({'message':'User Group Deleted'}, status=status.HTTP_200_OK)
-	except:
-		return Response({'message':'User Group not found'}, status=status.HTTP_400_BAD_REQUEST)
+	def get(self,request,id):
+		try:
+			qg = QuizGroup.objects.get(id=id)
+			quiz=Quiz.objects.filter(quizgroup=qg)
+			for i in quiz:
+				i.quizgroup=None
+				i.save()
+			qg.delete()
+			return Response({'message':'Quiz Group Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'Quiz Group not found'}, status=status.HTTP_400_BAD_REQUEST)
 
-def DelUser(request, id):
-	try:
-		u = User.objects.get(id=id)
-		aq = AssignQuiz.objects.filter(user = u)
-		for i in aq:
-			i.user.remove(u)
-		ug = UserGroup.objects.filter(user=u)
-		for i in ug:
-			i.user.remove(u)
-		u.delete()
-		return Response({'message':'User Deleted'}, status=status.HTTP_200_OK)
-	except:
-		return Response({'message':'User not found'}, status=status.HTTP_400_BAD_REQUEST)
-		
+class DelAssignQuiz(APIView):
+	permission_classes = [IsAuthenticated,IsTeacher]
+
+	def get(self,request,id):
+		try:
+			aq = AssignQuiz.objects.get(id=id)
+			aq.group.clear()
+			aq.user.clear()
+			aq.delete()
+			return Response({'message':'AssignQuiz Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'AssignQuiz not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+class DelUserGroup(APIView):
+	permission_classes = [IsAuthenticated,IsTeacher]
+
+	def get(self,request,id):
+		try:
+			ug = UserGroup.objects.get(id=id)
+			aq = AssignQuiz.objects.filter(group = ug)
+			for i in aq:
+				i.group.remove(ug)
+			ug.delete()
+			return Response({'message':'User Group Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'User Group not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+class DelUser(APIView):
+	permission_classes = [IsAuthenticated,IsTeacher]
+
+	def get(self,request,id):
+		try:
+			u = User.objects.get(id=id)
+			aq = AssignQuiz.objects.filter(user = u)
+			for i in aq:
+				i.user.remove(u)
+			ug = UserGroup.objects.filter(user=u)
+			for i in ug:
+				i.user.remove(u)
+			u.delete()
+			return Response({'message':'User Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+			
 

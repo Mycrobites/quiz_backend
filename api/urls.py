@@ -37,10 +37,10 @@ urlpatterns = [
     path('getstudentresult/<str:userid>', get_student_result.as_view()),
     path('getstudentreport/<str:id>', get_student_report.as_view()),
     path('question/<str:id>/delete', views.DelQuestion,name="delquestion"),
-    path('quiz/<str:id>/delete', views.DelQuiz,name="delquiz"),
-    path('quizGroup/<str:id>/delete', views.DelQuizGroup,name="delquizgroup"),
-    path('assignQuiz/<str:id>/delete', views.DelAssignQuiz),
-    path('userGroup/<str:id>/delete', views.DelUserGroup),
-    path('user/<str:id>/delete', views.DelUser),
+    path('quiz/<str:id>/delete', views.DelQuiz.as_view(),name="delquiz"),
+    path('quizGroup/<str:id>/delete', views.DelQuizGroup.as_view(),name="delquizgroup"),
+    path('assignQuiz/<str:id>/delete', views.DelAssignQuiz.as_view(),name="delassignquiz"),
+    path('userGroup/<str:id>/delete', views.DelUserGroup.as_view(),name="delusergroup"),
+    path('user/<str:id>/delete', views.DelUser.as_view(),name="deluser"),
 
 ]

@@ -1856,19 +1856,25 @@ def DelQuestion(request,id):
 
 	
 def DelQuiz(request, id):
-	quiz = Quiz.objects.get(id=id)
-	quiz.question.clear()
-	quiz.delete()
-	return HttpResponse("Done")
+	try : 
+		quiz = Quiz.objects.get(id=id)
+		quiz.question.clear()
+		quiz.delete()
+		return Response({'message':'Quiz Deleted'}, status=status.HTTP_200_OK)
+	except:
+		return Response({'message':'Quiz not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 def DelQuizGroup(request, id):
-	qg = QuizGroup.objects.get(id=id)
-	quiz=Quiz.objects.filter(quizgroup=qg)
-	for i in quiz:
-		i.quizgroup=None
-		i.save()
-	qg.delete()
-	return HttpResponse("Done")
+	try:
+		qg = QuizGroup.objects.get(id=id)
+		quiz=Quiz.objects.filter(quizgroup=qg)
+		for i in quiz:
+			i.quizgroup=None
+			i.save()
+		qg.delete()
+		return Response({'message':'Quiz Group Deleted'}, status=status.HTTP_200_OK)
+	except:
+		return Response({'message':'Quiz Group not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def DelAssignQuiz(request, id):

@@ -1878,29 +1878,38 @@ def DelQuizGroup(request, id):
 
 
 def DelAssignQuiz(request, id):
-	aq = AssignQuiz.objects.get(id=id)
-	aq.group.clear()
-	aq.user.clear()
-	aq.delete()
-	return HttpResponse("Done")
+	try:
+		aq = AssignQuiz.objects.get(id=id)
+		aq.group.clear()
+		aq.user.clear()
+		aq.delete()
+		return Response({'message':'AssignQuiz Deleted'}, status=status.HTTP_200_OK)
+	except:
+		return Response({'message':'AssignQuiz not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 def DelUserGroup(request, id):
-	ug = UserGroup.objects.get(id=id)
-	aq = AssignQuiz.objects.filter(group = ug)
-	for i in aq:
-		i.group.remove(ug)
-	ug.delete()
-	return HttpResponse("Done")
+	try:
+		ug = UserGroup.objects.get(id=id)
+		aq = AssignQuiz.objects.filter(group = ug)
+		for i in aq:
+			i.group.remove(ug)
+		ug.delete()
+		return Response({'message':'User Group Deleted'}, status=status.HTTP_200_OK)
+	except:
+		return Response({'message':'User Group not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 def DelUser(request, id):
-	u = User.objects.get(id=id)
-	aq = AssignQuiz.objects.filter(user = u)
-	for i in aq:
-		i.user.remove(u)
-	ug = UserGroup.objects.filter(user=u)
-	for i in ug:
-		i.user.remove(u)
-	u.delete()
-	return HttpResponse("Done")
-	
+	try:
+		u = User.objects.get(id=id)
+		aq = AssignQuiz.objects.filter(user = u)
+		for i in aq:
+			i.user.remove(u)
+		ug = UserGroup.objects.filter(user=u)
+		for i in ug:
+			i.user.remove(u)
+		u.delete()
+		return Response({'message':'User Deleted'}, status=status.HTTP_200_OK)
+	except:
+		return Response({'message':'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+		
 

@@ -1849,13 +1849,16 @@ class DelQuestion(APIView):
 	permission_classes = [IsAuthenticated,IsTeacher]
 
 	def get(self,request,id):
-		q=Question.objects.get(id=id)
-		quiz=Quiz.objects.filter(question=q)
-		for i in quiz:
-			print(i)
-			i.question.remove(q)
-		q.delete()
-		return HttpResponse("hogya")
+		try:
+			q=Question.objects.get(id=id)
+			quiz=Quiz.objects.filter(question=q)
+			for i in quiz:
+				print(i)
+				i.question.remove(q)
+			q.delete()
+			return Response({'message':'Question Deleted'}, status=status.HTTP_200_OK)
+		except:
+			return Response({'message':'Quiz not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 class DelQuiz(APIView):
 	permission_classes = [IsAuthenticated,IsTeacher]

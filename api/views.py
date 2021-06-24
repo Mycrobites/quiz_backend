@@ -112,7 +112,18 @@ class QuizCreateView(GenericAPIView):
 		serializer = self.serializer_class(data=data)
 		serializer.is_valid(raise_exception=True)
 		serializer.save()
-		return Response(serializer.data)
+		gid = data["Quizgroup"]
+		ser = serializer.data
+		try:
+			gr = QuizGroup.objects.get(id=gid)
+			id = ser["id"]
+			quiz = Quiz.objects.get(id=id)
+			quiz.quizgroup = gid
+			quiz.save()
+			ser["QuizGroup"] = gr
+		except:
+			return Response({'message':'No quiz group with the given id'},status=status.HTTP_400_BAD_REQUEST)
+		return Response(ser)
 
 
 class QuizEditView(GenericAPIView):

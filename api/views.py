@@ -118,7 +118,7 @@ class QuizCreateView(GenericAPIView):
 			gr = QuizGroup.objects.get(id=gid)
 			id = ser["id"]
 			quiz = Quiz.objects.get(id=id)
-			quiz.quizgroup = gid
+			quiz.quizgroup_id = gid
 			quiz.save()
 			ser["QuizGroup"] = gr
 		except:

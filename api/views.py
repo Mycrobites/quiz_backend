@@ -120,7 +120,6 @@ class QuizCreateView(GenericAPIView):
 			quiz = Quiz.objects.get(id=id)
 			quiz.quizgroup_id = gid
 			quiz.save()
-			ser["QuizGroup"] = gr
 		except:
 			return Response({'data':ser,'message':'No quiz group with the given id'},status=status.HTTP_400_BAD_REQUEST)
 		return Response(ser)

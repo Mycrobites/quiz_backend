@@ -58,19 +58,16 @@ class QuizView(GenericAPIView):
 			quiz = Quiz.objects.get(id=quiz_id)
 			if quiz.is_active(timezone.now()) or request.user.role=="Teacher":
 				serializer = self.serializer_class(quiz)
-				quiz_questions = quiz.question.distinct()
-				q_id_set = set()
 				questions = []
 				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
 				for i in quest:
-					q_id_set.add(str(i.question.id))
+					try:
+						Question.objects.get(id=i.question.id)
+					except:
+						continue
 					ques_serializer = QuestionSerializer(i.question)
 					questions.append(ques_serializer.data)
-				for i in quiz_questions:
-					if str(i.id) not in q_id_set:
-						q_id_set.add(str(i.id))
-						ques_serializer = QuestionSerializer(i)
-						questions.append(ques_serializer.data)
+			
 				for i in questions:
 					try:
 						options = i["option"].replace("'",'"')
@@ -1387,7 +1384,7 @@ class DeleteQuestionFromQuiz(GenericAPIView):
 class AddQuestionToQuiz(APIView):
 
 	serializer_class = QuizResponseSerializer
-	permission_classes = [IsAuthenticated,IsTeacher]
+	permission_classes = [AllowAny]
 	authentication_classes = [JWTAuthentication]
 
 	def post(self, request):
@@ -1395,14 +1392,20 @@ class AddQuestionToQuiz(APIView):
 			quest_ids = request.data['quest_id']
 			error_ids = []
 			i = 0
+			quiz = Quiz.objects.get(id=request.data['quiz_id'])
 			for q in quest_ids:
 				try:
+					Question.objects.get(id=str(q))
+				except:
+					continue
+				try:
+					k=AddQuestion.objects.get(quiz_id=request.data['quiz_id'],question_id=str(q))
+				except:
 					AddQuestion.objects.create(quiz_id=request.data['quiz_id'],question_id=str(q))
+					quiz.question.add(str(q))
+					quiz.save()
 					i = i +1
-				except Exception:
-					error_ids.append(q)
-					#return Response({"message": f"{q}, not valid"}, status=400)
-			print("Error Question IDs ",error_ids)
+				
 			return Response({"message": f"{i} Questions added successfully"}, status=200)
 		except Exception:
 			return Response({"message": "something went wrong"}, status=400)

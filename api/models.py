@@ -24,7 +24,6 @@ class Quiz(models.Model):
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
     question = models.ManyToManyField("Question",null=True,blank=True)
-    quesorder = models.CharField(max_length=1000000,blank=True,default="[]")
 
     def __str__(self):
         return str(self.title)

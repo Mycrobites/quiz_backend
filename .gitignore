@@ -9,3 +9,4 @@ scheduler.py
 scheduler_result.py
 backup/
 migrations/
+media/

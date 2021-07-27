@@ -15,7 +15,7 @@ SECRET_KEY = env("PROJECT_SECRET")
 
 
 DEBUG = env("ENV")!="production"
-
+#DEBUG = True
 ALLOWED_HOSTS = env("HOST").split(",")
 
 
@@ -172,7 +172,7 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-if env("HOST")!="production":
+if env("ENV")!="production":
     STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 else:
     STATIC_ROOT = os.path.join(BASE_DIR,"static")

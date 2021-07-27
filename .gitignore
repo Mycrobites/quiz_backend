@@ -5,7 +5,6 @@
 .env
 venv/
 *.exe
-media/
 scheduler.py
 scheduler_result.py
 backup/

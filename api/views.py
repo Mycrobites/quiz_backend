@@ -26,7 +26,7 @@ from django.shortcuts import render, HttpResponse, redirect,Http404
 from rest_framework.decorators import api_view
 import requests
 from django.core.mail import EmailMessage
-from datetime import datetime,timedelta
+
 # Create your views here.
 
 
@@ -1309,15 +1309,24 @@ class CreateExcelForScore(APIView):
                                 data['attempted'], data['not_attempted'], data['marks_obtained']]
                     writer_object.writerow(new_result)
 
-                    for quest, resp in data['responses'].items():
-                        new_result_question = [sno, user, quest,resp["question"], resp['correct answer'], resp['your answer']]
-                        writer_object_question.writerow(new_result_question)
 
-                    for tag, resp in data['analysis'].items():
-                        new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],
-                                        resp['incorrect_or_not_attempted']]
-                        writer_object_tag.writerow(new_result_tag)
+                    # print(data['analysis'])
 
+                    # print(data['responses'].items())
+
+					# question analysis
+                    for data in data['responses']:
+                        	new_result_question = [sno, user, data['question_number'], data['question'], data['correct answer'], data['your answer']]
+                        	writer_object_question.writerow(new_result_question)
+
+					# tag analysis
+                    # for key in data['analysis']:
+                    #     	print(key)
+                        	# new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect']+resp['not_attempted']]
+                        	# print(new_result_tag)
+                        	# writer_object_tag.writerow(new_result_tag)
+
+  
                     sno += 1
 
 

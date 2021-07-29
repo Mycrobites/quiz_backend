@@ -1343,10 +1343,10 @@ class CreateExcelForScore(APIView):
             response = HttpResponse(content=content, content_type='application/ms-excel')
             response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
             q=Quiz.objects.get(id=quizid)
-            email = EmailMessage('Result For Quiz '+q.title, 'Your Excel sheet is ready.', 'info.svastik@gmail.com',
+            emailmessage = EmailMessage('Result For Quiz '+q.title, 'Your Excel sheet is ready.', 'skrkmk212@gmail.com',
                 [email])
-            email.attach('Result.xlsx',content,'application/ms-excel')
-            email.send(fail_silently=False)
+            emailmessage.attach('Result.xlsx',content,'application/ms-excel')
+            emailmessage.send(fail_silently=False)
             run_excel_model.delete()
             is_request=run_excel_task.objects.all()
             return HttpResponse("Done")
@@ -1754,7 +1754,8 @@ class getScorecard(APIView):
 		for user in users:
 			userobj = User.objects.get(id=user)
 			try:
-				data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
+				print(f'http://127.0.0.1:8000/api/getresult/{userobj.username}/{quizid}')
+				data = requests.get(f'http://127.0.0.1:8000/api/getresult/{userobj.username}/{quizid}').json()['data']
 			except:
 				return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
 			if quiz_name == "":

@@ -35,7 +35,7 @@ urlpatterns = [
     path('FeedbackQs/<slug:question_id>/patch',feedbackQuestionsapi().as_view()),
     path('checkForResult',views.check_for_result,name="check_for_result"),
     path('getstudentresult/<str:userid>', get_student_result.as_view()),
-    path('getstudentreport/<str:id>', get_student_report.as_view()),
+    path('getstudentreport/<str:username>/<str:quizid>', get_student_report.as_view()),
     path('question/<str:id>/delete', views.DelQuestion.as_view(),name="delquestion"),
     path('quiz/<str:id>/delete', views.DelQuiz.as_view(),name="delquiz"),
     path('quizGroup/<str:id>/delete', views.DelQuizGroup.as_view(),name="delquizgroup"),

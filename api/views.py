@@ -1844,9 +1844,8 @@ class get_student_report(GenericAPIView):
 	def get(self,request,username,quizid):
 		try:
 			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{username}/{quizid}').json()['data']
-			quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('marks')
+			quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('-marks')
 			topper = quizzz.first()
-			print(topper)
 			topper = QuizResponseSerializer(topper)
 			# re=save_result.objects.get(id=id)
 			# data = re.data
@@ -1860,7 +1859,6 @@ class get_student_report(GenericAPIView):
 				"data" : data,
 				"topper": topper.data
 			}
-			print(result)
 			return Response(result, status=status.HTTP_200_OK)
 		except:
 			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)

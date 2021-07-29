@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.http import HttpResponse, response
 import json
 from django.contrib.auth.decorators import login_required
-import datetime
+from datetime import datetime
 import regex as re
 from django.shortcuts import render
 import pandas as pd

@@ -925,13 +925,13 @@ class GetResult(GenericAPIView):
 			error = "user does not exist"
 			return Response({"message": error})
 		try:
-			quizes = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
+			quizes = QuizResponse.objects.filter(quiz_id=quizid,user=user.id)[0]
 		except:
 			error = "The user has not attempted this quiz"
 			return Response({"message": error})
 		q = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
 		arr = []
-		quizobj = Quiz.objects.get(title=q.quiz)
+		quizobj = Quiz.objects.filter(title=q.quiz)[0]
 		totalquestion = 0
 		attemptedquestion = 0
 		nonattempted = 0
@@ -1301,30 +1301,21 @@ class CreateExcelForScore(APIView):
             for user in users:
                 try:
                     user = User.objects.get(id=user).username
-                    print(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}')
-                    data = requests.get(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}').json()['data']
+                    print(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}')
+                    data = requests.get(f'http://127.0.0.1:8000/api/getresult/{user}/{quizid}').json()['data']
                     ## basic analysis
                     new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
                                 data['incorrectquestion'],
                                 data['attempted'], data['not_attempted'], data['marks_obtained']]
                     writer_object.writerow(new_result)
 
-
-                    # print(data['analysis'])
-
-                    # print(data['responses'].items())
-
 					# question analysis
-                    for data in data['responses']:
-                        	new_result_question = [sno, user, data['question_number'], data['question'], data['correct answer'], data['your answer']]
-                        	writer_object_question.writerow(new_result_question)
-
-					# tag analysis
-                    # for key in data['analysis']:
-                    #     	print(key)
-                        	# new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect']+resp['not_attempted']]
-                        	# print(new_result_tag)
-                        	# writer_object_tag.writerow(new_result_tag)
+                    for datas in data['responses']:
+                        new_result_question = [sno, user, datas['question_number'], datas['question'], datas['correct answer'], datas['your answer']]
+                        writer_object_question.writerow(new_result_question)
+                    for tag, resp in data['analysis'].items():
+                        new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect']+resp['not_attempted']]
+                        writer_object_tag.writerow(new_result_tag)
 
   
                     sno += 1

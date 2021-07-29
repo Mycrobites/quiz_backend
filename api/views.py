@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView,ListCreateAPIView
 from rest_framework.views import APIView
 from .permissions import *
+from django.db.models import Avg
 from rest_framework.permissions import *
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
@@ -1842,27 +1843,39 @@ class get_student_report(GenericAPIView):
 	authentication_classes = [JWTAuthentication]
 
 	def get(self,request,username,quizid):
-		try:
 			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{username}/{quizid}').json()['data']
 			quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('-marks')
+			quiz_average = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('marks'))['marks__avg']
 			topper = quizzz.first()
-			topper = QuizResponseSerializer(topper)
-			# re=save_result.objects.get(id=id)
-			# data = re.data
-			# data['rank'] = re.rank
-			# response={'data': data}
-			# topper=save_result.objects.get(quizid=re.quizid,name="Topper")
-			# response["topper"]=topper.data
-			# topper=save_result.objects.get(quizid=re.quizid,name="Average")
-			# response["average"]=topper.data
+			toLocaleUpperCase = QuizResponseSerializer(topper)
+			topper_data = requests.get(f'https://api.progressiveminds.in/api/getresult/{topper.user}/{quizid}').json()['data']
+			topper_data = {
+				'Quiz Name': topper_data['Quiz Name'],
+				'totalquestion':topper_data['totalquestion'],
+				'correctquestion':topper_data['correctquestion'],
+				'incorrectquestion':topper_data['incorrectquestion'],
+				'attempted':topper_data['attempted'],
+				'notattempted':topper_data['not_attempted'],
+				'marks_obtained':topper_data['marks_obtained']
+			}
+			avdata={"Quiz Name": topper_data['Quiz Name'] ,
+				"totalquestion": topper_data['totalquestion'],
+				# "correctquestion": av_correct,
+				# "incorrectquestion": av_incorrect,
+				# "attempted": av_attempted,
+				# "not_attempted": av_notattempted,
+				"marks_obtained": quiz_average}
+			count = 0
+			for quiz_user in quizzz:
+				count = count +1
+				if quiz_user.user.username == username :
+					data["rank"] = count
 			result = {
 				"data" : data,
-				"topper": topper.data
+				"topper": topper_data,
+				"average": avdata
 			}
 			return Response(result, status=status.HTTP_200_OK)
-		except:
-			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
-
 class DelQuestion(APIView):
 	permission_classes = [IsAuthenticated,IsTeacher]
 

@@ -1754,8 +1754,7 @@ class getScorecard(APIView):
 		for user in users:
 			userobj = User.objects.get(id=user)
 			try:
-				print(f'http://127.0.0.1:8000/api/getresult/{userobj.username}/{quizid}')
-				data = requests.get(f'http://127.0.0.1:8000/api/getresult/{userobj.username}/{quizid}').json()['data']
+				data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
 			except:
 				return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
 			if quiz_name == "":
@@ -1842,17 +1841,27 @@ class get_student_report(GenericAPIView):
 	permission_classes = [AllowAny]
 	authentication_classes = [JWTAuthentication]
 
-	def get(self,request,id):
+	def get(self,request,username,quizid):
 		try:
-			re=save_result.objects.get(id=id)
-			data = re.data
-			data['rank'] = re.rank
-			response={'data': data}
-			topper=save_result.objects.get(quizid=re.quizid,name="Topper")
-			response["topper"]=topper.data
-			topper=save_result.objects.get(quizid=re.quizid,name="Average")
-			response["average"]=topper.data
-			return Response(response, status=status.HTTP_200_OK)
+			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{username}/{quizid}').json()['data']
+			quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('marks')
+			topper = quizzz.first()
+			print(topper)
+			topper = QuizResponseSerializer(topper)
+			# re=save_result.objects.get(id=id)
+			# data = re.data
+			# data['rank'] = re.rank
+			# response={'data': data}
+			# topper=save_result.objects.get(quizid=re.quizid,name="Topper")
+			# response["topper"]=topper.data
+			# topper=save_result.objects.get(quizid=re.quizid,name="Average")
+			# response["average"]=topper.data
+			result = {
+				"data" : data,
+				"topper": topper.data
+			}
+			print(result)
+			return Response(result, status=status.HTTP_200_OK)
 		except:
 			return Response({'message':"No data found"},status=status.HTTP_404_NOT_FOUND)
 

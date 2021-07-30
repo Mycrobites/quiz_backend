@@ -20,7 +20,9 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd /opt/quiz_backend 
+            git stash
+            git fetch
             git pull 
             pip3 install -r requirements.txt
-            systemctl restart gunicorn
+            systemctl stop quizbk.service
             systemctl restart nginx

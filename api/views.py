@@ -540,29 +540,11 @@ class CheckQuizAssigned(GenericAPIView):
             if(quiz.is_active(timezone.now())):
                 try:
                     user = User.objects.get(id=data['user'])
-                    grps = UserGroup.objects.filter(user=user)
-                    for grp in grps:
-                        try:
-                            assign_quiz = AssignQuiz.objects.get(quiz=quiz, group=grp.id)
-                            try:
-                                quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                                return Response({"message": "You have already attempted the test"},
-                                                status=status.HTTP_400_BAD_REQUEST)
-                            except:
-                                return Response({"message": "Success"}, status=status.HTTP_200_OK)
-                        except:
-                            pass
-                    else:
-                        try:
-                            assign_quiz = AssignQuiz.objects.get(quiz=quiz, user=user)
-                            try:
-                                quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
-                                return Response({"message": "You have already attempted the test"},
-                                                status=status.HTTP_400_BAD_REQUEST)
-                            except:
-                                return Response({"message": "Success"}, status=status.HTTP_200_OK)
-                        except ObjectDoesNotExist:
-                            return Response({"message": "You can't attempt the quiz"}, status=status.HTTP_400_BAD_REQUEST)
+                    try:
+                        quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
+                        return Response({"message": "You have already attempted the test"},status=status.HTTP_400_BAD_REQUEST)
+                    except:
+                        return Response({"message": "Success"}, status=status.HTTP_200_OK)
                 except:
                     return Response({"message": "User not found with the given id"}, status=status.HTTP_404_NOT_FOUND)
             else:
@@ -1715,7 +1697,37 @@ def importQuestion(request):
 					obj = Question.objects.create(option=str(options),text=i[8],question=i[0],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
 					obj.save()
 	return HttpResponse("nonne")
-
+def getaverage(quizid):
+	avscore=[]
+	avcorrect=[]
+	avincorrect=[]
+	avattempted=[]
+	avnotattempted=[]
+	users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
+	for user in users:
+		userobj = User.objects.get(id=user)
+		try:
+			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
+		except:
+			return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
+		avscore.append(int(data['marks_obtained']))
+		avcorrect.append(int(data['correctquestion']))
+		avincorrect.append(int(data['incorrectquestion']))
+		avattempted.append(int(data['attempted']))
+		avnotattempted.append(int(data['not_attempted']))
+	av_score=sum(avscore)/len(avscore)
+	av_correct=sum(avcorrect)/len(avcorrect)
+	av_incorrect=sum(avincorrect)/len(avincorrect)
+	av_attempted=sum(avattempted)/len(avattempted)
+	av_notattempted=sum(avnotattempted)/len(avnotattempted)
+	avdata={"Quiz Name": "abc" ,
+				"totalquestion": data['totalquestion'],
+				"correctquestion": av_correct,
+				"incorrectquestion": av_incorrect,
+				"attempted": av_attempted,
+				"not_attempted": av_notattempted,
+				"marks_obtained": av_score}
+	return avdata
 class getScorecard(APIView):
 	permission_classes = [AllowAny]
 
@@ -1816,7 +1828,6 @@ class get_student_result(GenericAPIView):
 		
 class get_student_report(GenericAPIView):
 	permission_classes = [AllowAny]
-	authentication_classes = [JWTAuthentication]
 
 	def get(self,request,username,quizid):
 			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{username}/{quizid}').json()['data']
@@ -1834,13 +1845,7 @@ class get_student_report(GenericAPIView):
 				'notattempted':topper_data['not_attempted'],
 				'marks_obtained':topper_data['marks_obtained']
 			}
-			avdata={"Quiz Name": topper_data['Quiz Name'] ,
-				"totalquestion": topper_data['totalquestion'],
-				# "correctquestion": av_correct,
-				# "incorrectquestion": av_incorrect,
-				# "attempted": av_attempted,
-				# "not_attempted": av_notattempted,
-				"marks_obtained": quiz_average}
+			avdata = getaverage(quizid)
 			count = 0
 			for quiz_user in quizzz:
 				count = count +1

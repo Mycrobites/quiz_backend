@@ -484,70 +484,46 @@ class QuizCollection(GenericAPIView):
 				return Response(quiz_groups)
 			else:
 				quiz_groups = []
-				quizgroups = QuizGroup.objects.all()
 				usergroups = UserGroup.objects.filter(user=userid)
-				for qgrp in quizgroups:
-					resp = []
-					quiz_set = set()
-					for grp in usergroups:
-						self.queryset = AssignQuiz.objects.filter(group=grp)
-						for i in self.queryset:
-							quiz_instance = Quiz.objects.get(id=i.quiz_id)
-							if (i.quiz_id not in quiz_set) and (quiz_instance.quizgroup == qgrp):
-								quiz_set.add(i.quiz_id)
-								obj = Quiz.objects.get(id=i.quiz_id)
-								serializer = self.serializer_class(obj)
-								if serializer.data not in resp:
-									resp.append(serializer.data)
-					else:
-						self.queryset = AssignQuiz.objects.filter(user=userid)
-						for i in self.queryset:
-							quiz_instance = Quiz.objects.get(id=i.quiz_id)
-							if (i.quiz_id not in quiz_set) and (quiz_instance.quizgroup == qgrp):
-								quiz_set.add(i.quiz_id)
-								obj = Quiz.objects.get(id=i.quiz_id)
-								serializer = self.serializer_class(obj)
-								if serializer.data not in resp:
-									resp.append(serializer.data)
-					quizzes = resp
+				assign_quiz_group = AssignQuizGroup.objects.filter(user_group__in = usergroups).values_list('quiz_group', flat=True)
+				assign_quiz_group = [str(o) for o in assign_quiz_group]
+				quizgroups = QuizGroup.objects.filter(id__in=assign_quiz_group)
+				for group in quizgroups:
+					quizzes = Quiz.objects.filter(quizgroup = group)
 					upcoming,active,attempted,missed = [],[],[],[]
-					for i in range(len(quizzes)):
-						starttime = datetime.strptime(quizzes[i]["starttime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
-						endtime = datetime.strptime(quizzes[i]["endtime"],"%Y-%m-%dT%H:%M:%S%z").timestamp()
+					for quiz in quizzes:
+						starttime = quiz.starttime.timestamp()
+						endtime = quiz.endtime.timestamp()
 						currenttime = datetime.now().timestamp()
 						if starttime > currenttime:
-							upcoming.append(quizzes[i])
+							upcoming.append(QuizSerializer(quiz).data)
 						elif starttime < currenttime and endtime > currenttime:
 							try:
-								QuizResponse.objects.get(user=userid,quiz=quizzes[i]["id"])
+								QuizResponse.objects.get(user=userid,quiz=quiz.id)
 								try:
-									sr = save_result.objects.get(user__id=userid, quizid = str(quizzes[i]['id']))
-									quizzes[i]["resultid"] = sr.id
+									sr = save_result.objects.get(user__id=userid, quizid = str(quiz.id))
 								except:
 									pass
-								attempted.append(quizzes[i])
+								attempted.append(QuizSerializer(quiz).data)
 							except:
-								active.append(quizzes[i])
+								active.append(QuizSerializer(quiz).data)
 						else:
 							try:
-								QuizResponse.objects.get(user=userid,quiz=quizzes[i]["id"])
+								QuizResponse.objects.get(user=userid,quiz=quiz.id)
 								try:
-									sr = save_result.objects.get(user__id=userid, quizid = str(quizzes[i]['id']))
-									quizzes[i]["resultid"] = sr.id
+									sr = save_result.objects.get(user__id=userid, quizid = str(quiz.id))
 								except:
 									pass
-								attempted.append(quizzes[i])
+								attempted.append(QuizSerializer(quiz).data)
 							except:
-								missed.append(quizzes[i])
-						creator_id = quizzes[i]['creator']
+								missed.append(QuizSerializer(quiz).data)
+						creator_id = quiz.creator.id
 						try:
 							user = User.objects.get(id=creator_id)
-							quizzes[i]['creator_username'] = user.username
 						except ObjectDoesNotExist:
 							raise ValidationError({"message": "User do not found"})
-					
-					group = {'name':qgrp.title,"upcoming":upcoming,"active":active,"attempted":attempted,"missed":missed}
-					quiz_groups.append(group)
+					groups = {'name':group.title,"upcoming":upcoming,"active":active,"attempted":attempted,"missed":missed}
+					quiz_groups.append(groups)
 				return Response(quiz_groups)
 		except ObjectDoesNotExist:
 			return Response({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)

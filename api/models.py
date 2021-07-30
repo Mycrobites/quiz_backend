@@ -80,14 +80,11 @@ class Question(models.Model):
     def __str__(self):
         return self.question[:250]
 
-class AssignQuiz(models.Model):
+class AssignQuizGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
-    group = models.ManyToManyField(UserGroup, blank=True)
-    user = models.ManyToManyField(User, blank=True)
-        
-    def __str__(self):
-        return str(self.quiz)
+    quiz_group = models.ManyToManyField(QuizGroup)
+    user_group = models.ManyToManyField(UserGroup, blank=True)
+    
 
 
 class QuizResponse(models.Model):

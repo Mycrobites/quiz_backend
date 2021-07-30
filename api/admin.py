@@ -34,19 +34,12 @@ class QuestionAdmin(admin.ModelAdmin):
 class AssignChangeForm(forms.ModelForm):
 
     class Meta:
-        model= AssignQuiz
-        fields = ('quiz','group','user')
+        model= AssignQuizGroup
+        fields = ('quiz_group','user_group')
 
 class AssignAdmin(admin.ModelAdmin):
     form = AssignChangeForm
-    model = AssignQuiz
-    list_display = ["get_quiz"]
-    list_filter = ["quiz__title"]
-
-    def get_quiz(self, obj):
-        return obj.quiz.title
-
-    get_quiz.short_description = "Quiz"
+    model = AssignQuizGroup
 
 
 class ResponseAdmin(admin.ModelAdmin):
@@ -84,7 +77,7 @@ class SaveResultAdmin(admin.ModelAdmin):
 
 admin.site.register(Quiz, QuizAdmin)
 admin.site.register(QuizGroup)
-admin.site.register(AssignQuiz, AssignAdmin)
+admin.site.register(AssignQuizGroup, AssignAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(QuizResponse, ResponseAdmin)
 admin.site.register(FeedBackForm, FeedbackAdmin)

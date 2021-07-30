@@ -34,7 +34,7 @@ class QuizResponseSerializer(serializers.ModelSerializer):
 
 class AssignQuizSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AssignQuiz
+        model = AssignQuizGroup
         fields = "__all__"
 
 

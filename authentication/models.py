@@ -102,7 +102,7 @@ class UserGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=20)
     description = models.TextField(max_length=100, blank=True)
-    user = models.ManyToManyField(User)
+    user = models.ManyToManyField(User, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -112,10 +112,12 @@ class UserFromFile(models.Model):
     id = models.AutoField(primary_key=True)
     userdata = models.FileField(upload_to="userdata", max_length=1000)
     filename = models.CharField(max_length=100, default="output.csv", blank=True)
-    group = models.ManyToManyField(UserGroup)
+    group_name = models.CharField(max_length=50, null=True, blank=True)
+    group = models.ManyToManyField(UserGroup, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super(UserFromFile, self).save(*args, **kwargs)
+        user_group = UserGroup.objects.create(name=self.group_name)
         data = pd.read_csv(self.userdata)
         data.fillna("NA", inplace=True)
         for i in range(data.shape[0]):
@@ -133,8 +135,7 @@ class UserFromFile(models.Model):
                 u = User.objects.create_user(email=email, username=username, first_name=first_name,
                 last_name=last_name, password=random_password)
                 u.save()
-                for grp in self.group.all():
-                    GroupMembership.objects.create(user=u,group=grp)
+                user_group.user.add(u)
                 data.loc[i, 'Username'] = username
                 data.loc[i, 'Password'] = random_password
         self.filename = "media/users/" + "generated_user_details" + str(get_random_string(length=5)) + ".csv"

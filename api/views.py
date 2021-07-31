@@ -1273,7 +1273,7 @@ class CreateExcelForScore(APIView):
                         new_result_question = [sno, user, datas['question_number'], datas['question'], datas['correct answer'], datas['your answer']]
                         writer_object_question.writerow(new_result_question)
                     for tag, resp in data['analysis'].items():
-                        new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect']+resp['not_attempted']]
+                        new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect'],resp['not_attempted']]
                         writer_object_tag.writerow(new_result_tag)
 
   

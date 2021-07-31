@@ -15,7 +15,7 @@ SECRET_KEY = env("PROJECT_SECRET")
 
 
 DEBUG = env("ENV")!="production"
-# DEBUG = True
+#DEBUG = True
 ALLOWED_HOSTS = env("HOST").split(",")
 
 

@@ -93,6 +93,7 @@ class QuizResponse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     response = jsonfield.JSONField(blank=True)
     marks = models.IntegerField(default=0)
+    time_taken = models.TimeField(default=0, null=True)
 
     def __str__(self):
         return f"{self.user}'s response on {self.quiz}"

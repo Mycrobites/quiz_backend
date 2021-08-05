@@ -1708,36 +1708,36 @@ def importQuestion(request):
 					obj.save()
 	return HttpResponse("nonne")
 def getaverage(quizid):
-	avscore=[]
-	avcorrect=[]
-	avincorrect=[]
-	avattempted=[]
-	avnotattempted=[]
-	users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
-	for user in users:
-		userobj = User.objects.get(id=user)
-		try:
+	try:
+		avscore=[]
+		avcorrect=[]
+		avincorrect=[]
+		avattempted=[]
+		avnotattempted=[]
+		users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
+		for user in users:
+			userobj = User.objects.get(id=user)
 			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
-		except:
-			return Response({"message":"No Response found"}, status=status.HTTP_404_NOT_FOUND)
-		avscore.append(int(data['marks_obtained']))
-		avcorrect.append(int(data['correctquestion']))
-		avincorrect.append(int(data['incorrectquestion']))
-		avattempted.append(int(data['attempted']))
-		avnotattempted.append(int(data['not_attempted']))
-	av_score=sum(avscore)/len(avscore)
-	av_correct=sum(avcorrect)/len(avcorrect)
-	av_incorrect=sum(avincorrect)/len(avincorrect)
-	av_attempted=sum(avattempted)/len(avattempted)
-	av_notattempted=sum(avnotattempted)/len(avnotattempted)
-	avdata={"Quiz Name": "abc" ,
-				"totalquestion": data['totalquestion'],
-				"correctquestion": av_correct,
-				"incorrectquestion": av_incorrect,
-				"attempted": av_attempted,
-				"not_attempted": av_notattempted,
-				"marks_obtained": av_score}
-	return avdata
+			avscore.append(int(data['marks_obtained']))
+			avcorrect.append(int(data['correctquestion']))
+			avincorrect.append(int(data['incorrectquestion']))
+			avattempted.append(int(data['attempted']))
+			avnotattempted.append(int(data['not_attempted']))
+		av_score=sum(avscore)/len(avscore)
+		av_correct=sum(avcorrect)/len(avcorrect)
+		av_incorrect=sum(avincorrect)/len(avincorrect)
+		av_attempted=sum(avattempted)/len(avattempted)
+		av_notattempted=sum(avnotattempted)/len(avnotattempted)
+		avdata={"Quiz Name": "abc" ,
+					"totalquestion": data['totalquestion'],
+					"correctquestion": av_correct,
+					"incorrectquestion": av_incorrect,
+					"attempted": av_attempted,
+					"not_attempted": av_notattempted,
+					"marks_obtained": av_score}
+		return avdata
+	except:
+		return {}
 class getScorecard(APIView):
 	permission_classes = [AllowAny]
 
@@ -1855,7 +1855,10 @@ class get_student_report(GenericAPIView):
 				'notattempted':topper_data['not_attempted'],
 				'marks_obtained':topper_data['marks_obtained']
 			}
-			avdata = getaverage(quizid)
+			try:
+				avdata = getaverage(quizid)
+			except:
+				avdata = {}
 			count = 0
 			for quiz_user in quizzz:
 				count = count +1

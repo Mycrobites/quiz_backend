@@ -232,6 +232,14 @@ class QuizCreateResponseView(GenericAPIView):
 		data = request.data
 		user_id = request.data['user']
 		quiz_id = request.data['quiz']
+		time_taken = request.data['time_taken']/1000
+		seconds=(time_taken/1000)%60
+		seconds = int(seconds)
+		minutes=(time_taken/(1000*60))%60
+		minutes = int(minutes)
+		hours=(time_taken/(1000*60*60))%24
+		time_taken = "%d:%02d:%02d" % (hours, minutes, seconds)
+		request.data['time_taken'] = time_taken
 		try:
 			QuizResponse.objects.get(quiz=quiz_id, user=user_id)
 			return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_200_OK)
@@ -292,6 +300,8 @@ class QuizCreateResponseView(GenericAPIView):
 							print("incorrect")
 			quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
 			quizobject.update(marks=marks)
+			
+			quizobject.update(time_taken)
 			response_id = response["id"]
 			quiz_response = QuizResponse.objects.get(id=response_id)
 			serializer = self.serializer_class(quiz_response)

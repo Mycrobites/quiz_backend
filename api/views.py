@@ -2178,11 +2178,11 @@ class get_student_report(GenericAPIView):
 		quiz_average_not_attempted = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('not_attempted'))['not_attempted__avg']
 		average_data = {
 			'totalquestion':user_data['totalquestion'],
-			'correctquestion':quiz_average_correct,
-			'incorrectquestion':quiz_average_incorrect,
-			'attempted':quiz_average_attempted,
-			'notattempted':quiz_average_not_attempted,
-			'marks_obtained':quiz_average_marks
+			'correctquestion':round(quiz_average_correct,2),
+			'incorrectquestion':round(quiz_average_incorrect,2),
+			'attempted':round(quiz_average_attempted,2),
+			'notattempted':round(quiz_average_not_attempted,2),
+			'marks_obtained':round(quiz_average_marks,2)
 		}
 		count = 0
 		for quiz_user in quizzz:

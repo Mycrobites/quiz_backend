@@ -2280,6 +2280,7 @@ class DelUser(APIView):
 			
 
 class updateQuizResponsesResult(GenericAPIView):
+	permission_classes = [AllowAny]
 	def get(self, request, username,quiz_id):
 		try:
 			user = User.objects.get(username=username)

@@ -92,8 +92,22 @@ class QuizResponse(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     response = jsonfield.JSONField(blank=True)
-    marks = models.IntegerField(default=0)
+    marks_obtained = models.IntegerField(default=0)
     time_taken = models.TimeField(default=0, null=True)
+    attempted = models.PositiveIntegerField(default=0, null=True, blank=True)
+    not_attempted = models.PositiveIntegerField(default=0,null=True, blank=True)
+    correctquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
+    incorrectquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
+    date_time = models.DateTimeField(blank=True, null=True, default=datetime.now())
+    responses = jsonfield.JSONField(blank=True, default={})
+    analysis = jsonfield.JSONField(blank=True, default={})
+    subjectwise_difficulty = jsonfield.JSONField(blank=True, default={})
+
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.date_time = timezone.now()
+        return super(QuizResponse, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.user}'s response on {self.quiz}"

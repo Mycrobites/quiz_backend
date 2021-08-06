@@ -27,6 +27,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class QuizResponseSerializer(serializers.ModelSerializer):
+    date_time = serializers.CharField(read_only=True)
+    response = serializers.CharField(write_only=True)
     class Meta:
         model = QuizResponse
         fields = "__all__"

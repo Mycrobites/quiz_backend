@@ -221,8 +221,359 @@ class QuizQuestionEditView(GenericAPIView):
 			return Response({"message": "Question deleted successfully"})
 		except ObjectDoesNotExist:
 			raise ValidationError({"message": "Question not found with the given id"})
+def quiz_result(userid,quizid):
+	result = {}
+	try:
+		user = User.objects.get(id=userid)
+	except:
+		print("user does not exist")
+		return {}
+	try:
+		quizes = QuizResponse.objects.filter(quiz_id=quizid,user=user.id)[0]
+	except:
+		error = "The user has not attempted this quiz"
+		print(error)
+		return {}
+	q = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
+	arr = []
+	quizobj = Quiz.objects.filter(title=q.quiz)[0]
+	totalquestion = 0
+	attemptedquestion = 0
+	nonattempted = 0
+	correctquestion = 0
+	wrongquestion = 0
+	totalmarks = 0
+	dic = {}
+	quesdic = []
+	difiarr=[]
+	dificultydict={}
+	response = q.response.replace("'", '"')
+	res_dict = json.loads(response)
+	for ques in res_dict:
+		totalquestion += 1
+		obj = Question.objects.get(id=str(ques))
 
+		# Input Type Question
+		if obj.question_type == 'Input Type':
+			temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": res_dict[ques].strip()}
+			quesdic.append(temp_dict)
+			if res_dict[ques] != "":
+				attemptedquestion += 1
+				if (list(obj.answer.values()) == res_dict[ques].strip().split(",")):
+					correctquestion += 1
+					totalmarks += int(obj.correct_marks)
+					flag = "True"
+				else:
+					wrongquestion += 1
+					totalmarks -= int(obj.negative_marks)
+					flag = "False"
+			else:
+				nonattempted += 1
+				flag = "Not attempted"
 
+			# Difficulty Dictionary
+			try:
+				if dificultydict[obj.subject_tag][obj.dificulty_tag]:
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
+					if flag=="True":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+					elif flag=="False":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+					else:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+			except:
+				dificultydict[obj.subject_tag]={}
+				dificultydict[obj.subject_tag][obj.dificulty_tag]={}
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
+				if flag=="True":
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+				elif flag=="False":
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+				else:
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+
+		# Multiple Answer Correct
+		elif obj.question_type == 'Multiple Correct':
+			response_answers = set()
+			for j in res_dict[str(obj.id)].split(","):
+					response_answers.add(obj.option[str(j)].strip())
+			temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
+			quesdic.append(temp_dict)
+			if res_dict[ques] != "":
+				attemptedquestion += 1					
+				if (set(obj.answer.values()) == response_answers):
+					correctquestion += 1
+					totalmarks += int(obj.correct_marks)
+					flag = "True"
+				else:
+					wrongquestion += 1
+					totalmarks -= int(obj.negative_marks)
+					flag = "False"
+			else:
+				nonattempted += 1
+				flag = "Not attempted"
+
+			# Difficulty Dictionary
+			try:
+				if dificultydict[obj.subject_tag][obj.dificulty_tag]:
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
+					if flag=="True":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+					elif flag=="False":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+					else:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+			except:
+				dificultydict[obj.subject_tag]={}
+				dificultydict[obj.subject_tag][obj.dificulty_tag]={}
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
+				if flag=="True":
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+				elif flag=="False":
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+				else:
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+
+		# Single Correct, True or False, Assertion Reason Type Questions
+		else:
+			if(type(obj.option) is str):
+				temp = obj.option.replace("'",'"')
+				temp = json.loads(temp)
+			else:
+				temp = obj.option
+			if res_dict[ques] != "":
+				try:
+					temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
+				except:
+					temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": str(obj.option[str(res_dict[ques])])}
+			else:
+				try:
+					temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
+				except:
+					temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": ""}
+			quesdic.append(temp_dict)
+			if res_dict[ques] != "":
+				attemptedquestion += 1
+				if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
+					correctquestion += 1
+					totalmarks += int(obj.correct_marks)
+					flag = "True"
+				else:
+					wrongquestion += 1
+					totalmarks -= int(obj.negative_marks)
+					flag = "False"
+			else:
+				nonattempted += 1
+				flag = "Not attempted"
+			try:
+				if dificultydict[obj.subject_tag]:
+					pass
+			except:
+				dificultydict[obj.subject_tag]={}
+
+			try:
+				if dificultydict[obj.subject_tag][obj.dificulty_tag]:
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
+					if flag=="True":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+					elif flag=="False":
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+					else:
+						dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+			except:
+				dificultydict[obj.subject_tag][obj.dificulty_tag]={}
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
+				dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
+				if flag=="True":
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
+				elif flag=="False":
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
+				else:
+					dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+		subjecttag = obj.subject_tag
+		try:
+			if dic["subject: " + subjecttag]:
+				pass
+		except:
+			dic["subject: " + subjecttag] = {}
+		try:
+			if dic["subject: " + subjecttag]["total_questions"]:
+				pass
+		except:
+			dic["subject: " + subjecttag]["total_questions"] = 0
+		try:
+			if dic["subject: " + subjecttag]["correct_questions"]:
+				pass
+		except:
+			dic["subject: " + subjecttag]["correct_questions"] = 0
+		try:
+			if dic["subject: " + subjecttag]["incorrect"]:
+				pass
+		except:
+			dic["subject: " + subjecttag]["incorrect"] = 0
+		try:
+			if dic["subject: " + subjecttag]["not_attempted"] :
+				pass
+		except:
+			dic["subject: " + subjecttag]["not_attempted"] = 0
+		
+		
+		if subjecttag is not None and subjecttag.strip() != "":
+			dic["subject: " + subjecttag]["total_questions"] += 1
+			if flag == "True":
+				dic["subject: " + subjecttag]["correct_questions"] += 1
+			elif flag == "False":
+				dic["subject: " + subjecttag]["incorrect"] += 1
+			else:
+				dic["subject: " + subjecttag]["not_attempted"] += 1
+		topictag = obj.subtopic_tag
+		try:
+			if dic["topic: " + topictag]:
+				pass
+		except:
+			dic["topic: " + topictag] = {}
+		try:
+			if dic["topic: " + topictag]["total_questions"]:
+				pass
+		except:
+			dic["topic: " + topictag]["total_questions"] = 0
+		try:
+			if dic["topic: " + topictag]["correct_questions"]:
+				pass
+		except:
+			dic["topic: " + topictag]["correct_questions"] = 0
+		try:
+			if dic["topic: " + topictag]["incorrect"]:
+				pass
+		except:
+			dic["topic: " + topictag]["incorrect"] = 0
+		try:
+			if dic["topic: " + topictag]["not_attempted"] :
+				pass
+		except:
+			dic["topic: " + topictag]["not_attempted"] = 0
+		if topictag is not None and topictag.strip() != "":
+				dic["topic: " + topictag]["total_questions"] += 1
+				if flag == "True":
+					dic["topic: " + topictag]["correct_questions"] += 1
+				elif flag=="False":
+					dic["topic: " + topictag]["incorrect"] += 1
+				else:
+					dic["topic: " + topictag]["not_attempted"] += 1
+		subtopictag = obj.topic_tag
+		try:
+			if dic["subtopic: " + subtopictag]:
+				pass
+		except:
+			dic["subtopic: " + subtopictag] = {}
+		try:
+			if dic["subtopic: " + subtopictag]["total_questions"]:
+				pass
+		except:
+			dic["subtopic: " + subtopictag]["total_questions"] = 0
+		try:
+			if dic["subtopic: " + subtopictag]["correct_questions"]:
+				pass
+		except:
+			dic["subtopic: " + subtopictag]["correct_questions"] = 0
+		try:
+			if dic["subtopic: " + subtopictag]["incorrect"]:
+				pass
+		except:
+			dic["subtopic: " + subtopictag]["incorrect"] = 0
+		try:
+			if dic["subtopic: " + subtopictag]["not_attempted"] :
+				pass
+		except:
+			dic["subtopic: " + subtopictag]["not_attempted"] = 0
+		if subtopictag is not None and subtopictag.strip() != "":
+				dic["subtopic: " + subtopictag]["total_questions"] += 1
+				if flag == "True":
+					dic["subtopic: " + subtopictag]["correct_questions"] += 1
+				elif flag=="False":
+					dic["subtopic: " + subtopictag]["incorrect"] += 1
+				else:
+					dic["subtopic: " + subtopictag]["not_attempted"] += 1
+
+		skilltag = obj.skill
+		try:
+			if dic["skill: " + skilltag]:
+				pass
+		except:
+			dic["skill: " + skilltag] = {}
+		try:
+			if dic["skill: " + skilltag]["total_questions"]:
+				pass
+		except:
+			dic["skill: " + skilltag]["total_questions"] = 0
+		try:
+			if dic["skill: " + skilltag]["correct_questions"]:
+				pass
+		except:
+			dic["skill: " + skilltag]["correct_questions"] = 0
+		try:
+			if dic["skill: " + skilltag]["incorrect"]:
+				pass
+		except:
+			dic["skill: " + skilltag]["incorrect"] = 0
+		try:
+			if dic["skill: " + skilltag]["not_attempted"] :
+				pass
+		except:
+			dic["skill: " + skilltag]["not_attempted"] = 0
+		if skilltag is not None and skilltag.strip() != "":
+				dic["skill: " + skilltag]["total_questions"] += 1
+				if flag == "True":
+					dic["skill: " + skilltag]["correct_questions"] += 1
+				elif flag=="False":
+					dic["skill: " + skilltag]["incorrect"] += 1
+				else:
+					dic["skill: " + skilltag]["not_attempted"] += 1
+		dificultytag = obj.dificulty_tag
+		try:
+			if dic["dificulty: " + dificultytag]:
+				pass
+		except:
+			dic["dificulty: " + dificultytag] = {}
+		try:
+			if dic["dificulty: " + dificultytag]["total_questions"]:
+				pass
+		except:
+			dic["dificulty: " + dificultytag]["total_questions"] = 0
+		try:
+			if dic["dificulty: " + dificultytag]["correct_questions"]:
+				pass
+		except:
+			dic["dificulty: " + dificultytag]["correct_questions"] = 0
+		try:
+			if dic["dificulty: " + dificultytag]["incorrect"]:
+				pass
+		except:
+			dic["dificulty: " + dificultytag]["incorrect"] = 0
+		try:
+			if dic["dificulty: " + dificultytag]["not_attempted"] :
+				pass
+		except:
+			dic["dificulty: " + dificultytag]["not_attempted"] = 0
+		if  dificultytag is not None and dificultytag.strip() != "":
+				dic["dificulty: " + dificultytag]["total_questions"] += 1
+				if flag == "True":
+					dic["dificulty: " + dificultytag]["correct_questions"] += 1
+				elif flag=="False":
+					dic["dificulty: " + dificultytag]["incorrect"] += 1
+				else:
+					dic["dificulty: " + dificultytag]["not_attempted"] += 1
+	difiarr.append(dificultydict)
+	result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic,"subjectwise_difficulty":difiarr}
+	return result
 class QuizCreateResponseView(GenericAPIView):
 	serializer_class = QuizResponseSerializer
 	permission_classes = [IsAuthenticated]
@@ -232,7 +583,7 @@ class QuizCreateResponseView(GenericAPIView):
 		data = request.data
 		user_id = request.data['user']
 		quiz_id = request.data['quiz']
-		time_taken = request.data['time_taken']/1000
+		time_taken = request.data['time_taken']
 		seconds=(time_taken/1000)%60
 		seconds = int(seconds)
 		minutes=(time_taken/(1000*60))%60
@@ -250,74 +601,15 @@ class QuizCreateResponseView(GenericAPIView):
 				resp[response[i]['key']] = response[i]['answer']
 			data['response'] = str(resp)
 			serializer = self.serializer_class(data=data)
-			serializer.is_valid(raise_exception=True)
-			serializer.save()
-			response = serializer.data
-			res_dict = json.loads(response['response'].replace("'", '"'))
+			if serializer.is_valid(raise_exception=True):
+				serializ = serializer.save()
+			else:
+				return Response(serializer.errors)
 			quiz = Quiz.objects.get(id=quiz_id)
-			questions = quiz.question
-			marks = 0
-			question_ids = []
-			for aq in AddQuestion.objects.filter(quiz=quiz.id):
-				question_ids.append(aq.question_id) 
-			for i in Question.objects.filter(id__in = question_ids):
-				print(i.question_type,"||",i.id, end="||")
-				if i.question_type == 'Single Correct' or i.question_type == 'True False' or i.question_type == 'Assertion Reason':
-					print(1,"-",res_dict[str(i.id)],"||", i.answer, end="||")
-					if res_dict[str(i.id)] == "":
-						marks += 0
-					else:
-						if i.option[str(res_dict[str(i.id)])].strip() == i.answer['1'].strip():
-							marks += i.correct_marks
-							print("correct")
-						else:
-							marks -= i.negative_marks
-							print("incorrect")
-				elif i.question_type == 'Input Type':
-					print(2,"-",res_dict[str(i.id)],"||", i.answer,end="||")
-					if res_dict[str(i.id)] == "":
-						marks += 0
-					else:
-						if res_dict[str(i.id)].strip().split(',') == list(i.answer.values()):
-							marks += i.correct_marks
-							print("correct")
-						else:
-							marks -= i.negative_marks
-							print("incorrect")
-				else:
-					print(3,"-",res_dict[str(i.id)],"||", i.answer,end="||")
-					if res_dict[str(i.id)] == "":
-						marks += 0
-					else:
-						response_answers = set()
-						for j in res_dict[str(i.id)].split(","):
-							response_answers.add(i.option[str(j)].strip())
-						if response_answers == set(i.answer.values()):
-							marks += i.correct_marks
-							print("correct")
-						else:
-							marks -= i.negative_marks
-							print("incorrect")
-			quizobject = QuizResponse.objects.filter(quiz=quiz_id, user=user_id)
-			quizobject.update(marks=marks)
-			# time_taken = quiz.duration - time_taken
-			# quizobject.update(time_taken=time_taken)
-			response_id = response["id"]
-			quiz_response = QuizResponse.objects.get(id=response_id)
-			serializer = self.serializer_class(quiz_response)
-			response = serializer.data
-			for i in range(len(response['response'])):
-				try:
-					responses = response['response'].replace("'", '"')
-					response['response'] = json.loads(responses)
-					responses = []
-					for res in response['response']:
-						responses.append({'key': res, 'answer': response['response'][res]})
-					response['response'] = responses
-				except:
-					if response['response'] == "":
-						response['response'] = []
-			return Response(response)
+			quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
+			dic = quiz_result(user_id,quiz_id)
+			quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
+			return Response({"message":"Your result has been successfully submitted"})
 
 
 class QuizGetResponseView(GenericAPIView):
@@ -1249,8 +1541,9 @@ class CreateExcelForScore(APIView):
             run_excel_model=is_request[0]
             quizid=run_excel_model.quizid
             email=run_excel_model.email_send
-            users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
-
+            quiz_responses = QuizResponse.objects.filter(quiz_id=quizid)
+            quiz_responses = QuizResponseSerializer(quiz_responses, many=True)
+            quiz_responses = quiz_responses.data
             f_object = open('media/result_response/output_result.csv', 'w')
             writer_object = writer(f_object)
             writer_object.writerow(
@@ -1264,29 +1557,23 @@ class CreateExcelForScore(APIView):
             f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
             writer_object_tag = writer(f_object_tag)
             writer_object_tag.writerow(
-                ['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect Or Not Attempted'])
+                ['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect' ,'Not Attempted'])
 
             sno = 1
-            for user in users:
+            for quiz_response in quiz_responses:
                 try:
-                    user = User.objects.get(id=user).username
-                    print(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}')
-                    data = requests.get(f'https://api.progressiveminds.in/api/getresult/{user}/{quizid}').json()['data']
-                    ## basic analysis
-                    new_result = [sno, user, data['Quiz Name'], data['totalquestion'], data['correctquestion'],
-                                data['incorrectquestion'],
-                                data['attempted'], data['not_attempted'], data['marks_obtained']]
+                    new_result = [sno, quiz_response['user'], quiz_response['quiz'], quiz_response['correctquestion']+quiz_response['incorrectquestion'], quiz_response['correctquestion'],
+                                quiz_response['incorrectquestion'],
+                                quiz_response['attempted'], quiz_response['not_attempted'], quiz_response['marks_obtained']]
                     writer_object.writerow(new_result)
 
 					# question analysis
-                    for datas in data['responses']:
-                        new_result_question = [sno, user, datas['question_number'], datas['question'], datas['correct answer'], datas['your answer']]
+                    for datas in quiz_response['responses']:
+                        new_result_question = [sno, quiz_response['user'], datas['question_number'], datas['question'], datas['correct answer'], datas['your answer']]
                         writer_object_question.writerow(new_result_question)
-                    for tag, resp in data['analysis'].items():
-                        new_result_tag = [sno, user, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect'],resp['not_attempted']]
+                    for tag, resp in quiz_response['analysis'].items():
+                        new_result_tag = [sno, quiz_response['user'], tag, resp['total_questions'], resp['correct_questions'],resp['incorrect'],resp['not_attempted']]
                         writer_object_tag.writerow(new_result_tag)
-
-  
                     sno += 1
 
 
@@ -1322,16 +1609,68 @@ class CreateExcelForScore(APIView):
         return HttpResponse("No Task")
 
 class RunExcelCreateView(GenericAPIView):
-    serializer_class = RunExcelTaskSerializer
-    permission_classes = [AllowAny]
-    # authentication_classes = [JWTAuthentication]
-    permission_classes = [AllowAny]
-    def post(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HttpResponse("Your request is in process.You will be notified via email within 24 hours. If not please contact admin.")
+	serializer_class = RunExcelTaskSerializer
+	permission_classes = [AllowAny]
+	def post(self, request):
+		data = request.data
+		quizid=data['quizid']
+		email=data['email_send']
+		quiz_responses = QuizResponse.objects.filter(quiz_id=quizid)
+		f_object = open('media/result_response/output_result.csv', 'w')
+		writer_object = writer(f_object)
+		writer_object.writerow(
+			['S No', 'User', 'Quiz Name', 'Total Question', 'Correct', 'Incorrect', 'Attempted', 'Not Attempted',
+			'Marks'])
+
+		f_object_question = open('media/result_response/output_result_question.csv', 'w')
+		writer_object_question = writer(f_object_question)
+		writer_object_question.writerow(['S No', 'User', 'Question No',"Question", 'Correct Answer', 'User Answer'])
+
+		f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
+		writer_object_tag = writer(f_object_tag)
+		writer_object_tag.writerow(
+			['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect' ,'Not Attempted'])
+
+		sno = 1
+		for quiz_response in quiz_responses:
+			try:
+				new_result = [sno, quiz_response.user.username, quiz_response.quiz.title, quiz_response.correctquestion+quiz_response.incorrectquestion, quiz_response.correctquestion,
+							quiz_response.incorrectquestion,
+							quiz_response.attempted, quiz_response.not_attempted, quiz_response.marks_obtained]
+				writer_object.writerow(new_result)
+
+				# question analysis
+				for datas in quiz_response.responses:
+					new_result_question = [sno, quiz_response.user.username, datas['question_number'], datas['question'], datas['correct answer'], datas['your answer']]
+					writer_object_question.writerow(new_result_question)
+				for tag, resp in quiz_response.analysis.items():
+					new_result_tag = [sno, quiz_response.user.username, tag, resp['total_questions'], resp['correct_questions'],resp['incorrect'],resp['not_attempted']]
+					writer_object_tag.writerow(new_result_tag)
+				sno += 1
+			except Exception as e:
+				print(e)
+				print('kx to gadbad hai')
+		f_object.close()
+		f_object_question.close()
+		f_object_tag.close()
+		df1 = pd.read_csv('media/result_response/output_result_question.csv')
+		df2 = pd.read_csv('media/result_response/output_result_tag.csv')
+		df3 = pd.read_csv('media/result_response/output_result.csv')
+		with pd.ExcelWriter('media/result_response/Result.xlsx') as Main:
+			df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
+			df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
+			df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
+		print('******** bas khatam *********')
+		with open("media/result_response/Result.xlsx", "rb") as excel:
+			content = excel.read()
+		response = HttpResponse(content=content, content_type='application/ms-excel')
+		response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
+		q=Quiz.objects.get(id=quizid)
+		emailmessage = EmailMessage('Result For Quiz '+q.title, 'Your Excel sheet is ready.', 'skrkmk212@gmail.com',
+			[email])
+		emailmessage.attach('Result.xlsx',content,'application/ms-excel')
+		emailmessage.send(fail_silently=False)
+		return HttpResponse("Done")
     
 
 class DeleteQuestionFromQuiz(GenericAPIView):
@@ -1707,37 +2046,6 @@ def importQuestion(request):
 					obj = Question.objects.create(option=str(options),text=i[8],question=i[0],correct_marks=int(i[1]),negative_marks=int(i[2]),subject_tag=i[3],topic_tag=i[4],subtopic_tag=i[5],dificulty_tag=i[6],skill=i[7])
 					obj.save()
 	return HttpResponse("nonne")
-def getaverage(quizid):
-	try:
-		avscore=[]
-		avcorrect=[]
-		avincorrect=[]
-		avattempted=[]
-		avnotattempted=[]
-		users = QuizResponse.objects.filter(quiz_id=quizid).values_list('user', flat=True)
-		for user in users:
-			userobj = User.objects.get(id=user)
-			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{userobj.username}/{quizid}').json()['data']
-			avscore.append(int(data['marks_obtained']))
-			avcorrect.append(int(data['correctquestion']))
-			avincorrect.append(int(data['incorrectquestion']))
-			avattempted.append(int(data['attempted']))
-			avnotattempted.append(int(data['not_attempted']))
-		av_score=sum(avscore)/len(avscore)
-		av_correct=sum(avcorrect)/len(avcorrect)
-		av_incorrect=sum(avincorrect)/len(avincorrect)
-		av_attempted=sum(avattempted)/len(avattempted)
-		av_notattempted=sum(avnotattempted)/len(avnotattempted)
-		avdata={"Quiz Name": "abc" ,
-					"totalquestion": data['totalquestion'],
-					"correctquestion": av_correct,
-					"incorrectquestion": av_incorrect,
-					"attempted": av_attempted,
-					"not_attempted": av_notattempted,
-					"marks_obtained": av_score}
-		return avdata
-	except:
-		return {}
 class getScorecard(APIView):
 	permission_classes = [AllowAny]
 
@@ -1840,36 +2148,50 @@ class get_student_report(GenericAPIView):
 	permission_classes = [AllowAny]
 
 	def get(self,request,username,quizid):
-			data = requests.get(f'https://api.progressiveminds.in/api/getresult/{username}/{quizid}').json()['data']
-			quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('-marks')
-			quiz_average = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('marks'))['marks__avg']
-			topper = quizzz.first()
-			toLocaleUpperCase = QuizResponseSerializer(topper)
-			topper_data = requests.get(f'https://api.progressiveminds.in/api/getresult/{topper.user}/{quizid}').json()['data']
-			topper_data = {
-				'Quiz Name': topper_data['Quiz Name'],
-				'totalquestion':topper_data['totalquestion'],
-				'correctquestion':topper_data['correctquestion'],
-				'incorrectquestion':topper_data['incorrectquestion'],
-				'attempted':topper_data['attempted'],
-				'notattempted':topper_data['not_attempted'],
-				'marks_obtained':topper_data['marks_obtained']
-			}
-			try:
-				avdata = getaverage(quizid)
-			except:
-				avdata = {}
-			count = 0
-			for quiz_user in quizzz:
-				count = count +1
-				if quiz_user.user.username == username :
-					data["rank"] = count
-			result = {
-				"data" : data,
-				"topper": topper_data,
-				"average": avdata
-			}
-			return Response(result, status=status.HTTP_200_OK)
+		try:
+			user = User.objects.get(username=username)
+		except:
+			return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+		quiz_response = QuizResponse.objects.filter(quiz=quizid, user=user)[0]
+		user_data = QuizResponseSerializer(quiz_response)
+		user_data = user_data.data
+		user_data['totalquestion'] = user_data['correctquestion'] + user_data['incorrectquestion']
+		quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('-marks_obtained')
+		topper = quizzz.first()
+		topper_data = QuizResponseSerializer(topper)
+		topper_data = topper_data.data
+		topper_data = {
+			'totalquestion':topper_data['correctquestion']+topper_data['incorrectquestion'],
+			'correctquestion':topper_data['correctquestion'],
+			'incorrectquestion':topper_data['incorrectquestion'],
+			'attempted':topper_data['attempted'],
+			'notattempted':topper_data['not_attempted'],
+			'marks_obtained':topper_data['marks_obtained']
+		}
+		quiz_average_marks = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('marks_obtained'))['marks_obtained__avg']
+		quiz_average_correct = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('correctquestion'))['correctquestion__avg']
+		quiz_average_incorrect = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('incorrectquestion'))['incorrectquestion__avg']
+		quiz_average_attempted = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('attempted'))['attempted__avg']
+		quiz_average_not_attempted = QuizResponse.objects.filter(quiz=quizid).aggregate(Avg('not_attempted'))['not_attempted__avg']
+		average_data = {
+			'totalquestion':user_data['totalquestion'],
+			'correctquestion':quiz_average_correct,
+			'incorrectquestion':quiz_average_incorrect,
+			'attempted':quiz_average_attempted,
+			'notattempted':quiz_average_not_attempted,
+			'marks_obtained':quiz_average_marks
+		}
+		count = 0
+		for quiz_user in quizzz:
+			count = count +1
+			if quiz_user.user.username == username :
+				user_data["rank"] = count
+		result = {
+			"data" : user_data,
+			"topper": topper_data,
+			"average":average_data
+		}
+		return Response(result, status=status.HTTP_200_OK)
 class DelQuestion(APIView):
 	permission_classes = [IsAuthenticated,IsTeacher]
 

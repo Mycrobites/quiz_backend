@@ -44,7 +44,7 @@ class AssignAdmin(admin.ModelAdmin):
 
 class ResponseAdmin(admin.ModelAdmin):
     model = QuizResponse
-    list_display = ["get_user", "get_quiz", "marks"]
+    list_display = ["get_user", "get_quiz", "marks_obtained"]
     list_filter = ["quiz__title", "user"]
 
     def get_user(self, obj):

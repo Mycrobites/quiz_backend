@@ -2291,7 +2291,7 @@ class updateQuizResponsesResult(GenericAPIView):
 		except:
 			return Response({'message':'Quiz does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 		try:
-			quiz_response = QuizResponse.objects.get(quiz=quiz_id, user=user_id)
+			quiz_response = QuizResponse.objects.get(quiz=quiz, user=user)
 		except:
 			return Response({'message':'User has not attempted quiz'}, status=status.HTTP_400_BAD_REQUEST)
 		dic = quiz_result(user.id,quiz_id)

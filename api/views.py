@@ -2279,3 +2279,20 @@ class DelUser(APIView):
 			return Response({'message':'User not found'}, status=status.HTTP_400_BAD_REQUEST)
 			
 
+class updateQuizResponsesResult(GenericAPIView):
+	def get(self, request, username,quiz_id):
+		try:
+			user = User.objects.get(username=username)
+		except:
+			return Response({'message':'user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+		try:
+			quiz = Quiz.objects.get(id=quiz_id)
+		except:
+			return Response({'message':'Quiz does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+		try:
+			quiz_response = QuizResponse.objects.get(quiz=quiz_id, user=user_id)
+		except:
+			return Response({'message':'User has not attempted quiz'}, status=status.HTTP_400_BAD_REQUEST)
+		dic = quiz_result(user.id,quiz_id)
+		quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
+		return Response({"message":"updated successfully"})

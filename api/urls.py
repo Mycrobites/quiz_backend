@@ -42,5 +42,5 @@ urlpatterns = [
     path('assignQuiz/<str:id>/delete', views.DelAssignQuiz.as_view(),name="delassignquiz"),
     path('userGroup/<str:id>/delete', views.DelUserGroup.as_view(),name="delusergroup"),
     path('user/<str:id>/delete', views.DelUser.as_view(),name="deluser"),
-
+    path('update-quiz-responses-result/<str:username>/<str:quiz_id>', views.updateQuizResponsesResult.as_view())
 ]

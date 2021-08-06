@@ -2294,5 +2294,5 @@ class updateQuizResponsesResult(GenericAPIView):
 		except:
 			return Response({'message':'User has not attempted quiz'}, status=status.HTTP_400_BAD_REQUEST)
 		dic = quiz_result(user.id,quiz_id)
-		quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
+		quiz_response.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
 		return Response({"message":"updated successfully"})

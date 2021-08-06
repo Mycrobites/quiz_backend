@@ -2155,6 +2155,9 @@ class get_student_report(GenericAPIView):
 		quiz_response = QuizResponse.objects.filter(quiz=quizid, user=user)[0]
 		user_data = QuizResponseSerializer(quiz_response)
 		user_data = user_data.data
+		user_data['responses'] = quiz_response.responses
+		user_data['analysis'] = quiz_response.analysis
+		user_data['subjectwise_difficulty'] = quiz_response.subjectwise_difficulty
 		user_data['totalquestion'] = user_data['correctquestion'] + user_data['incorrectquestion']
 		quizzz = QuizResponse.objects.filter(quiz=quizid).order_by('-marks_obtained')
 		topper = quizzz.first()

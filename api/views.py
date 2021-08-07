@@ -226,13 +226,11 @@ def quiz_result(userid,quizid):
 	try:
 		user = User.objects.get(id=userid)
 	except:
-		print("user does not exist")
 		return {}
 	try:
 		quizes = QuizResponse.objects.filter(quiz_id=quizid,user=user.id)[0]
 	except:
 		error = "The user has not attempted this quiz"
-		print(error)
 		return {}
 	q = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
 	arr = []
@@ -302,7 +300,7 @@ def quiz_result(userid,quizid):
 					response_answers.add(obj.option[str(j)].strip())
 			temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
 			quesdic.append(temp_dict)
-			if res_dict[ques] != "":
+			if res_dict[ques] != '':
 				attemptedquestion += 1					
 				if (set(obj.answer.values()) == response_answers):
 					correctquestion += 1
@@ -606,6 +604,7 @@ class QuizCreateResponseView(GenericAPIView):
 			else:
 				return Response(serializer.errors)
 			quiz = Quiz.objects.get(id=quiz_id)
+			print(quiz.duration-request.data['time_taken'])
 			quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
 			dic = quiz_result(user_id,quiz_id)
 			quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])

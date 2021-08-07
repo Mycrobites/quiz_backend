@@ -296,7 +296,9 @@ def quiz_result(userid,quizid):
 		# Multiple Answer Correct
 		elif obj.question_type == 'Multiple Correct':
 			response_answers = set()
+
 			for j in res_dict[str(obj.id)].split(","):
+				if j != '':
 					response_answers.add(obj.option[str(j)].strip())
 			temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
 			quesdic.append(temp_dict)

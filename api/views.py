@@ -606,7 +606,6 @@ class QuizCreateResponseView(GenericAPIView):
 			else:
 				return Response(serializer.errors)
 			quiz = Quiz.objects.get(id=quiz_id)
-			print(quiz.duration-request.data['time_taken'])
 			quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
 			dic = quiz_result(user_id,quiz_id)
 			quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])

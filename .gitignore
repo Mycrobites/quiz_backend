@@ -10,3 +10,4 @@ scheduler_result.py
 backup/
 migrations/
 media/
+quizenv/

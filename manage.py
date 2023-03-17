@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/quizenv python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

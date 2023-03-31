@@ -28,7 +28,6 @@ from rest_framework.decorators import api_view
 import requests
 from django.core.mail import EmailMessage
 
-# Create your views here.
 
 
 class HomeView(GenericAPIView):

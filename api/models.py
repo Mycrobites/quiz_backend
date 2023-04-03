@@ -99,9 +99,9 @@ class QuizResponse(models.Model):
     correctquestion = models.PositiveIntegerField(default=0, blank=True)
     incorrectquestion = models.PositiveIntegerField(default=0, blank=True)
     date_time = models.DateTimeField(blank=True, null=True, default=datetime.now())
-    responses = jsonfield.JSONField(blank=True, default={})
-    analysis = jsonfield.JSONField(blank=True, default={})
-    subjectwise_difficulty = jsonfield.JSONField(blank=True, default={})
+    responses = jsonfield.JSONField(default=0, default={})
+    analysis = jsonfield.JSONField(default=0, default={})
+    subjectwise_difficulty = jsonfield.JSONField(default=0, default={})
 
 
     def save(self, *args, **kwargs):

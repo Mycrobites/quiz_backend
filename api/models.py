@@ -94,14 +94,21 @@ class QuizResponse(models.Model):
     response = jsonfield.JSONField(blank=True)
     marks_obtained = models.IntegerField(default=0)
     time_taken = models.TimeField(default=0, null=True)
+<<<<<<< HEAD
     attempted = models.PositiveIntegerField(default=0, blank=True)
     not_attempted = models.PositiveIntegerField(default=0, blank=True)
     correctquestion = models.PositiveIntegerField(default=0, blank=True)
     incorrectquestion = models.PositiveIntegerField(default=0, blank=True)
+=======
+    attempted = models.PositiveIntegerField(default=0, null=False)
+    not_attempted = models.PositiveIntegerField(default=0, null=False)
+    correctquestion = models.PositiveIntegerField(default=0, null=False)
+    incorrectquestion = models.PositiveIntegerField(default=0, null=False)
+>>>>>>> 0a9a345e2f55fe2e22828aafd7e4fb5e1e187ab4
     date_time = models.DateTimeField(blank=True, null=True, default=datetime.now())
-    responses = jsonfield.JSONField(blank=True, default={})
-    analysis = jsonfield.JSONField(blank=True, default={})
-    subjectwise_difficulty = jsonfield.JSONField(blank=True, default={})
+    responses = jsonfield.JSONField(blank=True, default=dict)
+    analysis = jsonfield.JSONField(blank=True, default=dict)
+    subjectwise_difficulty = jsonfield.JSONField(blank=True, default=dict)
 
 
     def save(self, *args, **kwargs):

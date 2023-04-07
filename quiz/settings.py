@@ -14,8 +14,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = env("PROJECT_SECRET")
 
 
-# DEBUG = env("ENV")!="production"
-DEBUG = True
+DEBUG = env("ENV")!="production"
+#DEBUG = True
 ALLOWED_HOSTS = env("HOST").split(",")
 
 
@@ -77,7 +77,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'quiz.wsgi.application'
 
 
-if env('ENV')=="production":
+if env('DB_USER', default=None):
     print("yha")
     DATABASES = {
         "default": {

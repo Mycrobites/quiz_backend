@@ -102,7 +102,7 @@ class UserGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=20)
     description = models.TextField(max_length=100, blank=True)
-    user = models.ManyToManyField(User, null=True, blank=True)
+    user = models.ManyToManyField(User, blank=True)
 
     def __str__(self):
         return self.name
@@ -113,7 +113,7 @@ class UserFromFile(models.Model):
     userdata = models.FileField(upload_to="userdata", max_length=1000)
     filename = models.CharField(max_length=100, default="output.csv", blank=True)
     group_name = models.CharField(max_length=50, null=True, blank=True)
-    group = models.ManyToManyField(UserGroup, null=True, blank=True)
+    group = models.ManyToManyField(UserGroup,blank=True)
 
     def save(self, *args, **kwargs):
         super(UserFromFile, self).save(*args, **kwargs)

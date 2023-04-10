@@ -23,7 +23,7 @@ class Quiz(models.Model):
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
-    question = models.ManyToManyField("Question",null=True,blank=True)
+    question = models.ManyToManyField("Question",blank=True)
     quesorder = models.CharField(max_length=1000000,blank=True,default="[]")
 
     def __str__(self):
@@ -51,7 +51,7 @@ class AddQuestion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE)
     question = models.ForeignKey("Question", on_delete=models.CASCADE)
-    createdOn = models.DateTimeField(default=timezone.now())
+    createdOn = models.DateTimeField(default=timezone.now)
 
 question_type_Choices = (
     ("Multiple Correct","Multiple Correct"),

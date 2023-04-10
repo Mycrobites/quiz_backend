@@ -98,12 +98,10 @@ class QuizResponse(models.Model):
     not_attempted = models.PositiveIntegerField(default=0,null=True, blank=True)
     correctquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
     incorrectquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
-=======
     attempted = models.PositiveIntegerField(default=0, null=False)
     not_attempted = models.PositiveIntegerField(default=0, null=False)
     correctquestion = models.PositiveIntegerField(default=0, null=False)
     incorrectquestion = models.PositiveIntegerField(default=0, null=False)
->>>>>>> c7bc0f143ef5915ce37b62eeea9ed5d29f89598d
     date_time = models.DateTimeField(blank=True, null=True, default=datetime.now())
     responses = jsonfield.JSONField(blank=True, default=dict)
     analysis = jsonfield.JSONField(blank=True, default=dict)

@@ -732,7 +732,7 @@ class AssignGroup(GenericAPIView):
         try:
             data = request.data
             try:
-                aq = AssignQuiz.objects.get(quiz_id=data["quiz"])
+                aq = AssignQuizGroup.objects.get(quiz_id=data["quiz"])
                 if data["group"] in aq.group.all():
                     return Response({"Group already added"})
                 else:
@@ -2255,7 +2255,7 @@ class DelUserGroup(APIView):
 	def get(self,request,id):
 		try:
 			ug = UserGroup.objects.get(id=id)
-			aq = AssignQuiz.objects.filter(group = ug)
+			aq = AssignQuizGroup.objects.filter(group = ug)
 			for i in aq:
 				i.group.remove(ug)
 			ug.delete()

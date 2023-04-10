@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.crypto import get_random_string
 import pandas as pd
 import uuid
+from uuid import uuid4
 
 
 # Create your models here.
@@ -67,7 +68,7 @@ class UserAccountManager(BaseUserManager):
         return user
 
 class User(AbstractBaseUser):
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True,default=uuid4,editable=False)
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     first_name = models.CharField(max_length=100, default="first_name")
     last_name = models.CharField(max_length=100, default="last_name")

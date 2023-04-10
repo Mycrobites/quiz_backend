@@ -87,6 +87,23 @@ class AssignQuizGroup(models.Model):
     
 
 
+#class QuizResponse(models.Model):
+#    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+#    user = models.ForeignKey(User, on_delete=models.CASCADE)
+#    response = jsonfield.JSONField(blank=True)
+#    marks_obtained = models.IntegerField(default=0)
+#    time_taken = models.TimeField(default=0, null=True)
+#    attempted = models.PositiveIntegerField(default=0, null=True, blank=True)
+#    not_attempted = models.PositiveIntegerField(default=0,null=True, blank=True)
+#    correctquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
+#    incorrectquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
+#    date_time = models.DateTimeField(blank=True, null=True, default=datetime.now())
+#    responses = jsonfield.JSONField(blank=True, default=dict)
+#    analysis = jsonfield.JSONField(blank=True, default=dict)
+#    subjectwise_difficulty = jsonfield.JSONField(blank=True, default=dict)
+
+
 class QuizResponse(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
@@ -95,18 +112,13 @@ class QuizResponse(models.Model):
     marks_obtained = models.IntegerField(default=0)
     time_taken = models.TimeField(default=0, null=True)
     attempted = models.PositiveIntegerField(default=0, null=True, blank=True)
-    not_attempted = models.PositiveIntegerField(default=0,null=True, blank=True)
+    not_attempted = models.PositiveIntegerField(default=0, null=True, blank=True)
     correctquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
     incorrectquestion = models.PositiveIntegerField(default=0, null=True, blank=True)
-    attempted = models.PositiveIntegerField(default=0, null=False)
-    not_attempted = models.PositiveIntegerField(default=0, null=False)
-    correctquestion = models.PositiveIntegerField(default=0, null=False)
-    incorrectquestion = models.PositiveIntegerField(default=0, null=False)
     date_time = models.DateTimeField(blank=True, null=True, default=datetime.now())
     responses = jsonfield.JSONField(blank=True, default=dict)
     analysis = jsonfield.JSONField(blank=True, default=dict)
     subjectwise_difficulty = jsonfield.JSONField(blank=True, default=dict)
-
 
     def save(self, *args, **kwargs):
         if not self.id:

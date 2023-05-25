@@ -15,7 +15,6 @@ SECRET_KEY = env("PROJECT_SECRET")
 
 
 DEBUG = env("ENV")!="production"
-#DEBUG = True
 ALLOWED_HOSTS = env("HOST").split(",")
 
 
@@ -182,8 +181,8 @@ MEDIA_ROOT = env("MEDIA_ROOT", default="/var/www/api.quiz/media")
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
-CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
-CKEDITOR_BASEPATH = "/var/www/api.quiz/static/ckeditor/"
+#CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
+CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR,"backup")}

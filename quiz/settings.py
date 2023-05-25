@@ -178,8 +178,8 @@ else:
     STATIC_ROOT = os.path.join(BASE_DIR,"static")
 
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = env("MEDIA_URL", default="/media/")
+MEDIA_ROOT = env("MEDIA_ROOT", default="/var/www/api.quiz/media")
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"

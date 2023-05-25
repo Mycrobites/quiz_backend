@@ -14,6 +14,6 @@ pidfile = "quiz.pid"
 bind = "unix:/var/www/sockets/quiz.gunicorn.sock"
 max_requests = 1000
 accesslog = "quiz.access.log"
-#errorlog = "quiz.error.log"
+errorlog = "quiz.error.log"
 worker_class = 'gevent'
 workers = cpu_count()

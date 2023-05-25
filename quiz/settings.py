@@ -171,11 +171,10 @@ USE_TZ = True
 
 
 
-STATIC_URL = '/static/'
-if env("ENV")!="production":
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-else:
-    STATIC_ROOT = os.path.join(BASE_DIR,"static")
+STATIC_URL = env("STATIC_URL", default="/static/")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+STATIC_ROOT = env("STATIC_ROOT", default="/var/www/api.quiz/static")
 
 
 MEDIA_URL = env("MEDIA_URL", default="/media/")
@@ -184,6 +183,7 @@ MEDIA_ROOT = env("MEDIA_ROOT", default="/var/www/api.quiz/media")
 CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
+CKEDITOR_BASEPATH = "/var/www/api.quiz/static/ckeditor/"
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR,"backup")}

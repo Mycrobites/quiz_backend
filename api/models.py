@@ -23,7 +23,7 @@ class Quiz(models.Model):
     starttime = models.DateTimeField(null=True, blank=True)
     duration = models.TimeField(null=True, blank=True)
     endtime = models.DateTimeField()
-    question = models.ManyToManyField("Question",blank=True)
+    question = models.ManyToManyField("Question",blank=True, through="QuizQuestion", default=[])
     quesorder = models.CharField(max_length=1000000,blank=True,default="[]")
 
     def __str__(self):
@@ -34,6 +34,8 @@ class Quiz(models.Model):
             return True
         else:
             return False
+
+
 
 class QuizGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -180,3 +182,8 @@ class save_result(models.Model):
     score=models.CharField(max_length=5,null=False)
     rank=models.CharField(max_length=5,null=True)
     data = jsonfield.JSONField(blank=True)
+
+class QuizQuestion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question = models.ForeignKey(Question,on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz,on_delete=models.CASCADE)

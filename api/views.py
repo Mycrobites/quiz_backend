@@ -56,12 +56,15 @@ class QuizView(GenericAPIView):
 		result = {}
 		try:
 			quiz = Quiz.objects.get(id=quiz_id)
+			print(quiz, "yoo")
 			if quiz.is_active(timezone.now()) or request.user.role=="Teacher":
+				print("yes")
 				serializer = self.serializer_class(quiz)
 				quiz_questions = quiz.question.distinct()
 				q_id_set = set()
 				questions = []
 				quest = AddQuestion.objects.filter(quiz_id=quiz.id).order_by("createdOn")
+				print('who', quest)
 				for i in quest:
 					q_id_set.add(str(i.question.id))
 					ques_serializer = QuestionSerializer(i.question)
@@ -71,21 +74,27 @@ class QuizView(GenericAPIView):
 						q_id_set.add(str(i.id))
 						ques_serializer = QuestionSerializer(i)
 						questions.append(ques_serializer.data)
+				print('qq', questions)
 				for i in questions:
 					try:
 						options = i["option"].replace("'",'"')
 						options = json.loads(options)
 					except Exception as e:
 						options = i["option"]
+					print('op', options)
 					temp=[]
 					if options is None or options == "" or options=={}:
 						i["numberOfInputs"]=len(i["answer"])
 						i["option"] = None
+					elif type(options) not in [list, dict]:
+						i['option'] = options
 					else:
 						for j in options:
 							temp.append(options[j])
 						i["option"] = temp
 					i["answer"] = None
+					print("i", i)
+				print(result, 'result')
 				result['quiz_details'] = serializer.data
 				result['quiz_questions'] = questions
 				result['feedback'] = False

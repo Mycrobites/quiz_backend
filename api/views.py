@@ -195,7 +195,7 @@ class QuizQuestionCreateView(GenericAPIView):
             return Response(question)
         except Exception as e:
             print(e)
-            return Response({}, status=500)
+            return Response({error: str(e)}, status=500)
 
 class QuizQuestionEditView(GenericAPIView):
     serializer_class = QuestionSerializer

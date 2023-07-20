@@ -110,7 +110,7 @@ class QuizResponse(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    response = models.JSONField(blank=True, null=True)
+    response = models.TextField(blank=True, null=True)
     marks_obtained = models.IntegerField(default=0)
     time_taken = models.TimeField(default=timezone.timedelta, null=True)
     attempted = models.PositiveIntegerField(default=0, null=True, blank=True)

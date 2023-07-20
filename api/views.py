@@ -22,6 +22,7 @@ import regex as re
 from django.shortcuts import render
 import pandas as pd
 from csv import writer
+from traceback import print_exc
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, HttpResponse, redirect,Http404
 from rest_framework.decorators import api_view
@@ -195,7 +196,7 @@ class QuizQuestionCreateView(GenericAPIView):
             return Response(question)
         except Exception as e:
             print(e)
-            return Response({error: str(e)}, status=500)
+            return Response({"error": str(e)}, status=500)
 
 class QuizQuestionEditView(GenericAPIView):
     serializer_class = QuestionSerializer
@@ -596,37 +597,43 @@ class QuizCreateResponseView(GenericAPIView):
     authentication_classes = [JWTAuthentication]
 
     def post(self, request):
-        data = request.data
-        user_id = request.data['user']
-        quiz_id = request.data['quiz']
-        time_taken = request.data['time_taken']
-        seconds=(time_taken/1000)%60
-        seconds = int(seconds)
-        minutes=(time_taken/(1000*60))%60
-        minutes = int(minutes)
-        hours=(time_taken/(1000*60*60))%24
-        time_taken = "%d:%02d:%02d" % (hours, minutes, seconds)
-        request.data['time_taken'] = time_taken
         try:
-            QuizResponse.objects.get(quiz=quiz_id, user=user_id)
-            return Response({"message": "You have already attempted the quiz"}, status=status.HTTP_200_OK)
-        except ObjectDoesNotExist:
-            response = data['response']
-            resp = {}
-            for i in range(len(response)):
-                resp[response[i]['key']] = response[i]['answer']
-            data['response'] = str(resp)
-            serializer = self.serializer_class(data=data)
-            if serializer.is_valid(raise_exception=True):
-                serializ = serializer.save()
-            else:
-                return Response(serializer.errors)
+            data = request.data
+            print(data)
+            user_id = request.data['user']
+            quiz_id = request.data['quiz']
+            time_taken = request.data['time_taken']
+            seconds=(time_taken/1000)%60
+            seconds = int(seconds)
+            minutes=(time_taken/(1000*60))%60
+            minutes = int(minutes)
+            hours=(time_taken/(1000*60*60))%24
+            time_taken = "%d:%02d:%02d" % (hours, minutes, seconds)
+            request.data['time_taken'] = time_taken
+            message = "Your result has been successfully submitted"
+            try:
+                QuizResponse.objects.get(quiz=quiz_id, user=user_id)
+                message = "You have already attempted the quiz"
+            except ObjectDoesNotExist:
+                response = data['response']
+                resp = {}
+                for i in range(len(response)):
+                    resp[response[i]['key']] = response[i]['answer']
+                data['response'] = str(resp)
+                serializer = self.serializer_class(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors)
             quiz = Quiz.objects.get(id=quiz_id)
             quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
             dic = quiz_result(user_id,quiz_id)
-            quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
-            return Response({"message":"Your result has been successfully submitted"})
-
+            print(dic)
+            quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correct_question=dic['correctquestion'],incorrect_question=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
+            return Response({"message":message})
+        except Exception as e:
+            print(e)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class QuizGetResponseView(GenericAPIView):
     serializer_class = QuizResponseSerializer

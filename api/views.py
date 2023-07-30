@@ -169,13 +169,14 @@ class QuizQuestionCreateView(GenericAPIView):
         try:
             data = request.data
             options = data.get('option')
-            if not options:
-                return Response({}, status=400)
             option = {}
-            if type(options) in [list,dict]:
-                for i in range(len(options)):
-                    option[str(options[i]['key'])] = options[i]['option']
-                data['option'] = str(option)
+            if options:
+                if type(options) in [list,dict]:
+                    for i in range(len(options)):
+                        option[str(options[i]['key'])] = options[i]['option']
+                    data['option'] = str(option)
+                else:
+                    data['option'] = option
             else:
                 data['option'] = option
             serializer = self.serializer_class(data=data)

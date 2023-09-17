@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.http import HttpResponse, response
 import json
 from django.contrib.auth.decorators import login_required
-from datetime import datetime
+from datetime import datetime, timedelta
 import regex as re
 from django.shortcuts import render
 import pandas as pd
@@ -266,8 +266,12 @@ def quiz_result(userid,quizid):
     response = q.response.replace("'", '"')
     res_dict = json.loads(response)
     for ques in res_dict:
+        print('ad', ques)
         totalquestion += 1
         obj = Question.objects.get(id=str(ques))
+        print(type(str(obj.option)), type(obj.option) is str)
+        print('obj', obj,obj.question_type, obj.option, res_dict[ques], obj.answer)
+        # print('obj2', obj,obj.question_type, obj.option, res_dict[ques], obj.answer, obj.answer['1'], obj.option[str(obj.answer['1'])])
 
         # Input Type Question
         if obj.question_type == 'Input Type':
@@ -314,11 +318,19 @@ def quiz_result(userid,quizid):
         # Multiple Answer Correct
         elif obj.question_type == 'Multiple Correct':
             response_answers = set()
-
-            for j in res_dict[str(obj.id)].split(","):
-                if j != '':
-                    response_answers.add(obj.option[str(j)].strip())
-            temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
+            print('rd', res_dict, obj.id)
+            try: 
+                temp = json.loads(json.dumps(obj.option))
+            except:
+                import traceback; traceback.print_exc()
+                print(temp)
+                for j in res_dict[str(obj.id)].split(","):
+                    print('j', j)
+                    if j != '' and temp.get(str(j), None):
+                        response_answers.add(temp[str(j)].strip())
+                print('response_answers', list(response_answers))
+                temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
+            print("mctd", temp_dict)
             quesdic.append(temp_dict)
             if res_dict[ques] != '':
                 attemptedquestion += 1					
@@ -365,20 +377,25 @@ def quiz_result(userid,quizid):
                 temp = json.loads(temp)
             else:
                 temp = obj.option
+            print('tmp', temp, str(res_dict[ques]))
             if res_dict[ques] != "":
                 try:
-                    temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
-                except:
+                    temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[obj.answer[str(res_dict[ques])]]}
+                except Exception as e:
+                    import traceback; traceback.print_exc();
                     temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": str(obj.option[str(res_dict[ques])])}
             else:
                 try:
                     temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
-                except:
+                except Exception as e:
+                    import traceback; traceback.print_exc();
                     temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": ""}
+            print('temp_dict', temp_dict)
             quesdic.append(temp_dict)
+            print('quesdic', quesdic)
             if res_dict[ques] != "":
                 attemptedquestion += 1
-                if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
+                if (str(obj.answer['1']) == str(obj.answer[res_dict[ques]])) or (str(temp[obj.answer[str(res_dict[ques])]]) == str(obj.answer['1'])):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
                     flag = "True"
@@ -629,7 +646,7 @@ class QuizCreateResponseView(GenericAPIView):
             quiz = Quiz.objects.get(id=quiz_id)
             quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
             dic = quiz_result(user_id,quiz_id)
-            print(dic)
+            print('yoo',dic)
             quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correct_question=dic['correctquestion'],incorrect_question=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
             return Response({"message":message})
         except Exception as e:
@@ -730,7 +747,7 @@ class AssignStudent(GenericAPIView):
         try:
             data = request.data
             try:
-                aq = AssignQuiz.objects.get(quiz_id=data["quiz"])
+                aq = AssignQuizGroup.objects.get(quiz_group=data["quiz_group"])
                 for u in aq.user.all():
                     if data["user"] == str(u.id):
                         return Response({"Student already added"})
@@ -757,7 +774,7 @@ class AssignGroup(GenericAPIView):
         try:
             data = request.data
             try:
-                aq = AssignQuizGroup.objects.get(quiz_id=data["quiz"])
+                aq = AssignQuizGroup.objects.get(quiz_group=data["quiz_group"])
                 if data["group"] in aq.group.all():
                     return Response({"Group already added"})
                 else:
@@ -1209,351 +1226,7 @@ class GetResult(GenericAPIView):
         except:
             error = "user does not exist"
             return Response({"message": error})
-        try:
-            quizes = QuizResponse.objects.filter(quiz_id=quizid,user=user.id)[0]
-        except:
-            error = "The user has not attempted this quiz"
-            return Response({"message": error})
-        q = QuizResponse.objects.get(quiz_id=quizid,user=user.id)
-        arr = []
-        quizobj = Quiz.objects.filter(title=q.quiz)[0]
-        totalquestion = 0
-        attemptedquestion = 0
-        nonattempted = 0
-        correctquestion = 0
-        wrongquestion = 0
-        totalmarks = 0
-        dic = {}
-        quesdic = []
-        difiarr=[]
-        dificultydict={}
-        response = q.response.replace("'", '"')
-        res_dict = json.loads(response)
-        for ques in res_dict:
-            totalquestion += 1
-            obj = Question.objects.get(id=str(ques))
-
-            # Input Type Question
-            if obj.question_type == 'Input Type':
-                temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": res_dict[ques].strip()}
-                quesdic.append(temp_dict)
-                if res_dict[ques] != "":
-                    attemptedquestion += 1
-                    if (list(obj.answer.values()) == res_dict[ques].strip().split(",")):
-                        correctquestion += 1
-                        totalmarks += int(obj.correct_marks)
-                        flag = "True"
-                    else:
-                        wrongquestion += 1
-                        totalmarks -= int(obj.negative_marks)
-                        flag = "False"
-                else:
-                    nonattempted += 1
-                    flag = "Not attempted"
-
-                # Difficulty Dictionary
-                try:
-                    if dificultydict[obj.subject_tag][obj.dificulty_tag]:
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
-                        if flag=="True":
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
-                        elif flag=="False":
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
-                        else:
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-                except:
-                    dificultydict[obj.subject_tag]={}
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]={}
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
-                    if flag=="True":
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
-                    elif flag=="False":
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
-                    else:
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-
-            # Multiple Answer Correct
-            elif obj.question_type == 'Multiple Correct':
-                response_answers = set()
-                for j in res_dict[str(obj.id)].split(","):
-                        response_answers.add(obj.option[str(j)].strip())
-                temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": ",".join(list(obj.answer.values())),"your answer": ",".join(response_answers)}
-                quesdic.append(temp_dict)
-                if res_dict[ques] != "":
-                    attemptedquestion += 1					
-                    if (set(obj.answer.values()) == response_answers):
-                        correctquestion += 1
-                        totalmarks += int(obj.correct_marks)
-                        flag = "True"
-                    else:
-                        wrongquestion += 1
-                        totalmarks -= int(obj.negative_marks)
-                        flag = "False"
-                else:
-                    nonattempted += 1
-                    flag = "Not attempted"
-
-                # Difficulty Dictionary
-                try:
-                    if dificultydict[obj.subject_tag][obj.dificulty_tag]:
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
-                        if flag=="True":
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
-                        elif flag=="False":
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
-                        else:
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-                except:
-                    dificultydict[obj.subject_tag]={}
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]={}
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
-                    if flag=="True":
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
-                    elif flag=="False":
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
-                    else:
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-
-            # Single Correct, True or False, Assertion Reason Type Questions
-            else:
-                if(type(obj.option) is str):
-                    temp = obj.option.replace("'",'"')
-                    temp = json.loads(temp)
-                else:
-                    temp = obj.option
-                if res_dict[ques] != "":
-                    try:
-                        temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": temp[str(obj.answer['1'])],"your answer":temp[str(res_dict[ques])]}
-                    except:
-                        temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": str(obj.option[str(res_dict[ques])])}
-                else:
-                    try:
-                        temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer":  temp[str(obj.answer['1'])],"your answer": ""}
-                    except:
-                        temp_dict = {"question_number":totalquestion,"question":obj.question,"correct answer": str(obj.answer['1']),"your answer": ""}
-                quesdic.append(temp_dict)
-                if res_dict[ques] != "":
-                    attemptedquestion += 1
-                    if (str(obj.answer['1']) == str(res_dict[ques])) or (str(temp[str(res_dict[ques])]) == str(obj.answer['1'])):
-                        correctquestion += 1
-                        totalmarks += int(obj.correct_marks)
-                        flag = "True"
-                    else:
-                        wrongquestion += 1
-                        totalmarks -= int(obj.negative_marks)
-                        flag = "False"
-                else:
-                    nonattempted += 1
-                    flag = "Not attempted"
-                try:
-                    if dificultydict[obj.subject_tag]:
-                        pass
-                except:
-                    dificultydict[obj.subject_tag]={}
-
-                try:
-                    if dificultydict[obj.subject_tag][obj.dificulty_tag]:
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]+=1
-                        if flag=="True":
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
-                        elif flag=="False":
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
-                        else:
-                            dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-                except:
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]={}
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["total_questions"]=1
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]=0
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]=0
-                    dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]=0
-                    if flag=="True":
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["correct"]+=1
-                    elif flag=="False":
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
-                    else:
-                        dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
-            subjecttag = obj.subject_tag
-            try:
-                if dic["subject: " + subjecttag]:
-                    pass
-            except:
-                dic["subject: " + subjecttag] = {}
-            try:
-                if dic["subject: " + subjecttag]["total_questions"]:
-                    pass
-            except:
-                dic["subject: " + subjecttag]["total_questions"] = 0
-            try:
-                if dic["subject: " + subjecttag]["correct_questions"]:
-                    pass
-            except:
-                dic["subject: " + subjecttag]["correct_questions"] = 0
-            try:
-                if dic["subject: " + subjecttag]["incorrect"]:
-                    pass
-            except:
-                dic["subject: " + subjecttag]["incorrect"] = 0
-            try:
-                if dic["subject: " + subjecttag]["not_attempted"] :
-                    pass
-            except:
-                dic["subject: " + subjecttag]["not_attempted"] = 0
-            
-            
-            if subjecttag is not None and subjecttag.strip() != "":
-                dic["subject: " + subjecttag]["total_questions"] += 1
-                if flag == "True":
-                    dic["subject: " + subjecttag]["correct_questions"] += 1
-                elif flag == "False":
-                    dic["subject: " + subjecttag]["incorrect"] += 1
-                else:
-                    dic["subject: " + subjecttag]["not_attempted"] += 1
-            topictag = obj.subtopic_tag
-            try:
-                if dic["topic: " + topictag]:
-                    pass
-            except:
-                dic["topic: " + topictag] = {}
-            try:
-                if dic["topic: " + topictag]["total_questions"]:
-                    pass
-            except:
-                dic["topic: " + topictag]["total_questions"] = 0
-            try:
-                if dic["topic: " + topictag]["correct_questions"]:
-                    pass
-            except:
-                dic["topic: " + topictag]["correct_questions"] = 0
-            try:
-                if dic["topic: " + topictag]["incorrect"]:
-                    pass
-            except:
-                dic["topic: " + topictag]["incorrect"] = 0
-            try:
-                if dic["topic: " + topictag]["not_attempted"] :
-                    pass
-            except:
-                dic["topic: " + topictag]["not_attempted"] = 0
-            if topictag is not None and topictag.strip() != "":
-                    dic["topic: " + topictag]["total_questions"] += 1
-                    if flag == "True":
-                        dic["topic: " + topictag]["correct_questions"] += 1
-                    elif flag=="False":
-                        dic["topic: " + topictag]["incorrect"] += 1
-                    else:
-                        dic["topic: " + topictag]["not_attempted"] += 1
-            subtopictag = obj.topic_tag
-            try:
-                if dic["subtopic: " + subtopictag]:
-                    pass
-            except:
-                dic["subtopic: " + subtopictag] = {}
-            try:
-                if dic["subtopic: " + subtopictag]["total_questions"]:
-                    pass
-            except:
-                dic["subtopic: " + subtopictag]["total_questions"] = 0
-            try:
-                if dic["subtopic: " + subtopictag]["correct_questions"]:
-                    pass
-            except:
-                dic["subtopic: " + subtopictag]["correct_questions"] = 0
-            try:
-                if dic["subtopic: " + subtopictag]["incorrect"]:
-                    pass
-            except:
-                dic["subtopic: " + subtopictag]["incorrect"] = 0
-            try:
-                if dic["subtopic: " + subtopictag]["not_attempted"] :
-                    pass
-            except:
-                dic["subtopic: " + subtopictag]["not_attempted"] = 0
-            if subtopictag is not None and subtopictag.strip() != "":
-                    dic["subtopic: " + subtopictag]["total_questions"] += 1
-                    if flag == "True":
-                        dic["subtopic: " + subtopictag]["correct_questions"] += 1
-                    elif flag=="False":
-                        dic["subtopic: " + subtopictag]["incorrect"] += 1
-                    else:
-                        dic["subtopic: " + subtopictag]["not_attempted"] += 1
-
-            skilltag = obj.skill
-            try:
-                if dic["skill: " + skilltag]:
-                    pass
-            except:
-                dic["skill: " + skilltag] = {}
-            try:
-                if dic["skill: " + skilltag]["total_questions"]:
-                    pass
-            except:
-                dic["skill: " + skilltag]["total_questions"] = 0
-            try:
-                if dic["skill: " + skilltag]["correct_questions"]:
-                    pass
-            except:
-                dic["skill: " + skilltag]["correct_questions"] = 0
-            try:
-                if dic["skill: " + skilltag]["incorrect"]:
-                    pass
-            except:
-                dic["skill: " + skilltag]["incorrect"] = 0
-            try:
-                if dic["skill: " + skilltag]["not_attempted"] :
-                    pass
-            except:
-                dic["skill: " + skilltag]["not_attempted"] = 0
-            if skilltag is not None and skilltag.strip() != "":
-                    dic["skill: " + skilltag]["total_questions"] += 1
-                    if flag == "True":
-                        dic["skill: " + skilltag]["correct_questions"] += 1
-                    elif flag=="False":
-                        dic["skill: " + skilltag]["incorrect"] += 1
-                    else:
-                        dic["skill: " + skilltag]["not_attempted"] += 1
-            dificultytag = obj.dificulty_tag
-            try:
-                if dic["dificulty: " + dificultytag]:
-                    pass
-            except:
-                dic["dificulty: " + dificultytag] = {}
-            try:
-                if dic["dificulty: " + dificultytag]["total_questions"]:
-                    pass
-            except:
-                dic["dificulty: " + dificultytag]["total_questions"] = 0
-            try:
-                if dic["dificulty: " + dificultytag]["correct_questions"]:
-                    pass
-            except:
-                dic["dificulty: " + dificultytag]["correct_questions"] = 0
-            try:
-                if dic["dificulty: " + dificultytag]["incorrect"]:
-                    pass
-            except:
-                dic["dificulty: " + dificultytag]["incorrect"] = 0
-            try:
-                if dic["dificulty: " + dificultytag]["not_attempted"] :
-                    pass
-            except:
-                dic["dificulty: " + dificultytag]["not_attempted"] = 0
-            if  dificultytag is not None and dificultytag.strip() != "":
-                    dic["dificulty: " + dificultytag]["total_questions"] += 1
-                    if flag == "True":
-                        dic["dificulty: " + dificultytag]["correct_questions"] += 1
-                    elif flag=="False":
-                        dic["dificulty: " + dificultytag]["incorrect"] += 1
-                    else:
-                        dic["dificulty: " + dificultytag]["not_attempted"] += 1
-        difiarr.append(dificultydict)
-        result = {"Quiz Name": quizobj.title + " by " + str(quizobj.creator), "totalquestion": totalquestion,"correctquestion": correctquestion, "incorrectquestion": wrongquestion,"attempted": attemptedquestion, "not_attempted": nonattempted, "marks_obtained": totalmarks,"responses": quesdic, "analysis": dic,"subjectwise_difficulty":difiarr}
-        arr.append(result)
+        result = quiz_result(user.id, quizid)
         return Response({"data": result})
 
 class CreateExcelForScore(APIView):
@@ -2280,7 +1953,7 @@ class DelAssignQuiz(APIView):
 
     def get(self,request,id):
         try:
-            aq = AssignQuiz.objects.get(id=id)
+            aq = AssignQuizGroup.objects.get(id=id)
             aq.group.clear()
             aq.user.clear()
             aq.delete()
@@ -2308,9 +1981,6 @@ class DelUser(APIView):
     def get(self,request,id):
         try:
             u = User.objects.get(id=id)
-            aq = AssignQuiz.objects.filter(user = u)
-            for i in aq:
-                i.user.remove(u)
             ug = UserGroup.objects.filter(user=u)
             for i in ug:
                 i.user.remove(u)

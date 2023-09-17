@@ -65,7 +65,7 @@ question_type_Choices = (
 
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    question_type=models.CharField(choices=question_type_Choices, blank=True, default="", max_length=100)
+    question_type=models.CharField(choices=question_type_Choices, max_length=100)
     passage= RichTextUploadingField(null=True,blank=True)#to be used for assertion/and reason type
     question = RichTextUploadingField()
     correct_marks = models.PositiveSmallIntegerField()

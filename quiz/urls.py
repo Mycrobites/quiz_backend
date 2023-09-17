@@ -19,12 +19,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from api.views import HomeView
 from api.views import *
+from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view()),
     path('api/', include('api.urls')),
     path('api/auth/', include('authentication.api.urls')),
+    path('docs/', include_docs_urls(title='My API title')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('questionbank',getBank,name="bank"),
     path("addquestion",bank),

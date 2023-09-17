@@ -645,9 +645,9 @@ class QuizCreateResponseView(GenericAPIView):
                     return Response(serializer.errors)
             quiz = Quiz.objects.get(id=quiz_id)
             quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
-            dic = quiz_result(user_id,quiz_id)
-            print('yoo',dic)
-            quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correct_question=dic['correctquestion'],incorrect_question=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
+#            dic = quiz_result(user_id,quiz_id)
+ #           print('yoo',dic)
+  #          quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correct_question=dic['correctquestion'],incorrect_question=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
             return Response({"message":message})
         except Exception as e:
             print(e)

@@ -9,19 +9,31 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'first_name', 'last_name', 'password', ]
+        fields = ['email', 'username', 'first_name', 'last_name', 'password', 'role']
 
     def validate(self, attrs):
         username = attrs.get('username', '')
         password = attrs.get('password', '')
+        role = attrs.get('role', 'Student')
         if not username.isalnum():
             raise serializers.ValidationError('The username should only consists of alphanumeric characters')
         if len(password) < 6:
             raise serializers.ValidationError('Make sure your password is at least 6 letters')
+        if role not in ['Student', 'Teacher']:
+            raise serializers.ValidationError("Role should be either Student or Teacher")
         return attrs
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(
+            username=validated_data["username"], 
+            email=validated_data["email"], 
+            password=validated_data["password"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"]
+        )
+        user.role = validated_data["role"]
+        user.save()
+        return user
 
 
 class LoginSerializer(serializers.ModelSerializer):

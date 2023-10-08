@@ -1,4 +1,4 @@
-from django.views.generic.base import TemplateResponseMixin
+# from django.views.generic.base import TemplateResponseMixin
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView,ListCreateAPIView
@@ -18,17 +18,20 @@ from django.http import HttpResponse, response
 import json
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
-import regex as re
+# import regex as re
 from django.shortcuts import render
 import pandas as pd
 from csv import writer
-from traceback import print_exc
+# from traceback import print_exc
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, HttpResponse, redirect,Http404
-from rest_framework.decorators import api_view
+# from rest_framework.decorators import api_view
 import requests
 from django.core.mail import EmailMessage
+import os
 
+RESULT_PATH = "media/result_response/"
+os.makedirs(RESULT_PATH, exist_ok=True)
 
 
 class HomeView(GenericAPIView):
@@ -266,11 +269,24 @@ def quiz_result(userid,quizid):
     response = q.response.replace("'", '"')
     res_dict = json.loads(response)
     for ques in res_dict:
-        print('ad', ques)
+        # print('ad', ques)
         totalquestion += 1
         obj = Question.objects.get(id=str(ques))
-        print(type(str(obj.option)), type(obj.option) is str)
-        print('obj', obj,obj.question_type, obj.option, res_dict[ques], obj.answer)
+        report = {
+            "Question Id": obj.id,
+            "Attempted": res_dict[ques] is not None,
+            "User Response": res_dict[ques],
+            "Correct Response": obj.answer,
+            "Marks Obtained": 0, # To be filled later
+            "Subject" : obj.subject_tag,
+            "topic" : obj.topic_tag,
+            "subtopic" : obj.subtopic_tag,
+            "skill" : obj.skill,
+            "difficulty":  obj.dificulty_tag,
+        }
+
+        # print(type(str(obj.option)), type(obj.option) is str)
+        # print('obj', obj,obj.question_type, obj.option, res_dict[ques], obj.answer)
         # print('obj2', obj,obj.question_type, obj.option, res_dict[ques], obj.answer, obj.answer['1'], obj.option[str(obj.answer['1'])])
 
         # Input Type Question
@@ -282,10 +298,12 @@ def quiz_result(userid,quizid):
                 if (list(obj.answer.values()) == res_dict[ques].strip().split(",")):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
+                    report["Marks Obtained"] = int(obj.correct_marks)
                     flag = "True"
                 else:
                     wrongquestion += 1
                     totalmarks -= int(obj.negative_marks)
+                    report["Marks Obtained"] = -int(obj.negative_marks)
                     flag = "False"
             else:
                 nonattempted += 1
@@ -337,10 +355,12 @@ def quiz_result(userid,quizid):
                 if (set(obj.answer.values()) == response_answers):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
+                    report["Marks Obtained"] = int(obj.correct_marks)
                     flag = "True"
                 else:
                     wrongquestion += 1
                     totalmarks -= int(obj.negative_marks)
+                    report["Marks Obtained"] = -int(obj.negative_marks)
                     flag = "False"
             else:
                 nonattempted += 1
@@ -398,10 +418,12 @@ def quiz_result(userid,quizid):
                 if (str(obj.answer['1']) == str(obj.answer[res_dict[ques]])) or (str(temp[obj.answer[str(res_dict[ques])]]) == str(obj.answer['1'])):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
+                    report["Marks Obtained"] = int(obj.correct_marks)
                     flag = "True"
                 else:
                     wrongquestion += 1
                     totalmarks -= int(obj.negative_marks)
+                    report["Marks Obtained"] = -int(obj.negative_marks)
                     flag = "False"
             else:
                 nonattempted += 1
@@ -433,6 +455,8 @@ def quiz_result(userid,quizid):
                     dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
                 else:
                     dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+        quesdic[-1]["report"] = report
+
         subjecttag = obj.subject_tag
         try:
             if dic["subject: " + subjecttag]:
@@ -645,9 +669,9 @@ class QuizCreateResponseView(GenericAPIView):
                     return Response(serializer.errors)
             quiz = Quiz.objects.get(id=quiz_id)
             quizobject = QuizResponse.objects.filter(quiz=quiz, user=user_id)
-#            dic = quiz_result(user_id,quiz_id)
- #           print('yoo',dic)
-  #          quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correct_question=dic['correctquestion'],incorrect_question=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
+            dic = quiz_result(user_id,quiz_id)
+            print('yoo',dic)
+            quizobject.update(attempted=dic['attempted'],not_attempted=dic['not_attempted'],correctquestion=dic['correctquestion'],incorrectquestion=dic['incorrectquestion'],marks_obtained=dic['marks_obtained'],analysis=dic['analysis'],responses=dic['responses'],subjectwise_difficulty=dic['subjectwise_difficulty'])
             return Response({"message":message})
         except Exception as e:
             print(e)
@@ -1241,17 +1265,17 @@ class CreateExcelForScore(APIView):
             quiz_responses = QuizResponse.objects.filter(quiz_id=quizid)
             quiz_responses = QuizResponseSerializer(quiz_responses, many=True)
             quiz_responses = quiz_responses.data
-            f_object = open('media/result_response/output_result.csv', 'w')
+            f_object = open(RESULT_PATH+'output_result.csv', 'w')
             writer_object = writer(f_object)
             writer_object.writerow(
                 ['S No', 'User', 'Quiz Name', 'Total Question', 'Correct', 'Incorrect', 'Attempted', 'Not Attempted',
                 'Marks'])
 
-            f_object_question = open('media/result_response/output_result_question.csv', 'w')
+            f_object_question = open(RESULT_PATH+'output_result_question.csv', 'w')
             writer_object_question = writer(f_object_question)
             writer_object_question.writerow(['S No', 'User', 'Question No',"Question", 'Correct Answer', 'User Answer'])
 
-            f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
+            f_object_tag = open(RESULT_PATH+'output_result_tag.csv', 'w')
             writer_object_tag = writer(f_object_tag)
             writer_object_tag.writerow(
                 ['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect' ,'Not Attempted'])
@@ -1282,16 +1306,16 @@ class CreateExcelForScore(APIView):
             f_object_question.close()
             f_object_tag.close()
             
-            df1 = pd.read_csv('media/result_response/output_result_question.csv')
-            df2 = pd.read_csv('media/result_response/output_result_tag.csv')
-            df3 = pd.read_csv('media/result_response/output_result.csv')
+            df1 = pd.read_csv(RESULT_PATH+'output_result_question.csv')
+            df2 = pd.read_csv(RESULT_PATH+'output_result_tag.csv')
+            df3 = pd.read_csv(RESULT_PATH+'output_result.csv')
 
-            with pd.ExcelWriter('media/result_response/Result.xlsx') as Main:
+            with pd.ExcelWriter(RESULT_PATH+'Result.xlsx') as Main:
                 df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
                 df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
                 df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
             print('******** bas khatam *********')
-            with open("media/result_response/Result.xlsx", "rb") as excel:
+            with open(RESULT_PATH+"Result.xlsx", "rb") as excel:
                 content = excel.read()
             response = HttpResponse(content=content, content_type='application/ms-excel')
             response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
@@ -1313,17 +1337,17 @@ class RunExcelCreateView(GenericAPIView):
         quizid=data['quizid']
         email=data['email_send']
         quiz_responses = QuizResponse.objects.filter(quiz_id=quizid)
-        f_object = open('media/result_response/output_result.csv', 'w')
+        f_object = open(RESULT_PATH+'output_result.csv', 'w')
         writer_object = writer(f_object)
         writer_object.writerow(
             ['S No', 'User', 'Quiz Name', 'Total Question', 'Correct', 'Incorrect', 'Attempted', 'Not Attempted',
             'Marks'])
 
-        f_object_question = open('media/result_response/output_result_question.csv', 'w')
+        f_object_question = open(RESULT_PATH+'output_result_question.csv', 'w')
         writer_object_question = writer(f_object_question)
         writer_object_question.writerow(['S No', 'User', 'Question No',"Question", 'Correct Answer', 'User Answer'])
 
-        f_object_tag = open('media/result_response/output_result_tag.csv', 'w')
+        f_object_tag = open(RESULT_PATH+'output_result_tag.csv', 'w')
         writer_object_tag = writer(f_object_tag)
         writer_object_tag.writerow(
             ['S No', 'User', 'Analysis On', 'Total Question', 'Correct', 'Incorrect' ,'Not Attempted'])
@@ -1350,15 +1374,15 @@ class RunExcelCreateView(GenericAPIView):
         f_object.close()
         f_object_question.close()
         f_object_tag.close()
-        df1 = pd.read_csv('media/result_response/output_result_question.csv')
-        df2 = pd.read_csv('media/result_response/output_result_tag.csv')
-        df3 = pd.read_csv('media/result_response/output_result.csv')
-        with pd.ExcelWriter('media/result_response/Result.xlsx') as Main:
+        df1 = pd.read_csv(RESULT_PATH+'output_result_question.csv')
+        df2 = pd.read_csv(RESULT_PATH+'output_result_tag.csv')
+        df3 = pd.read_csv(RESULT_PATH+'output_result.csv')
+        with pd.ExcelWriter(RESULT_PATH+'Result.xlsx') as Main:
             df3.to_excel(Main, sheet_name='Basic_Analysis', index=False)
             df1.to_excel(Main, sheet_name='Question_Analysis', index=False)
             df2.to_excel(Main, sheet_name='Tag_Analysis', index=False)
         print('******** bas khatam *********')
-        with open("media/result_response/Result.xlsx", "rb") as excel:
+        with open(RESULT_PATH+"Result.xlsx", "rb") as excel:
             content = excel.read()
         response = HttpResponse(content=content, content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename="Result.xlsx"'
@@ -1863,7 +1887,9 @@ class get_student_report(GenericAPIView):
             user = User.objects.get(username=username)
         except:
             return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        quiz_response = QuizResponse.objects.filter(quiz=quizid, user=user)[0]
+        quiz_response = QuizResponse.objects.filter(quiz=quizid, user=user).first()
+        if quiz_response is None:
+            return Response({"message": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
         user_data = QuizResponseSerializer(quiz_response)
         user_data = user_data.data
         user_data['responses'] = quiz_response.responses

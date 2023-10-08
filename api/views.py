@@ -269,11 +269,24 @@ def quiz_result(userid,quizid):
     response = q.response.replace("'", '"')
     res_dict = json.loads(response)
     for ques in res_dict:
-        print('ad', ques)
+        # print('ad', ques)
         totalquestion += 1
         obj = Question.objects.get(id=str(ques))
-        print(type(str(obj.option)), type(obj.option) is str)
-        print('obj', obj,obj.question_type, obj.option, res_dict[ques], obj.answer)
+        report = {
+            "Question Id": obj.id,
+            "Attempted": res_dict[ques] is not None,
+            "User Response": res_dict[ques],
+            "Correct Response": obj.answer,
+            "Marks Obtained": 0, # To be filled later
+            "Subject" : obj.subject_tag,
+            "topic" : obj.topic_tag,
+            "subtopic" : obj.subtopic_tag,
+            "skill" : obj.skill,
+            "difficulty":  obj.dificulty_tag,
+        }
+
+        # print(type(str(obj.option)), type(obj.option) is str)
+        # print('obj', obj,obj.question_type, obj.option, res_dict[ques], obj.answer)
         # print('obj2', obj,obj.question_type, obj.option, res_dict[ques], obj.answer, obj.answer['1'], obj.option[str(obj.answer['1'])])
 
         # Input Type Question
@@ -285,10 +298,12 @@ def quiz_result(userid,quizid):
                 if (list(obj.answer.values()) == res_dict[ques].strip().split(",")):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
+                    report["Marks Obtained"] = int(obj.correct_marks)
                     flag = "True"
                 else:
                     wrongquestion += 1
                     totalmarks -= int(obj.negative_marks)
+                    report["Marks Obtained"] = -int(obj.negative_marks)
                     flag = "False"
             else:
                 nonattempted += 1
@@ -340,10 +355,12 @@ def quiz_result(userid,quizid):
                 if (set(obj.answer.values()) == response_answers):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
+                    report["Marks Obtained"] = int(obj.correct_marks)
                     flag = "True"
                 else:
                     wrongquestion += 1
                     totalmarks -= int(obj.negative_marks)
+                    report["Marks Obtained"] = -int(obj.negative_marks)
                     flag = "False"
             else:
                 nonattempted += 1
@@ -401,10 +418,12 @@ def quiz_result(userid,quizid):
                 if (str(obj.answer['1']) == str(obj.answer[res_dict[ques]])) or (str(temp[obj.answer[str(res_dict[ques])]]) == str(obj.answer['1'])):
                     correctquestion += 1
                     totalmarks += int(obj.correct_marks)
+                    report["Marks Obtained"] = int(obj.correct_marks)
                     flag = "True"
                 else:
                     wrongquestion += 1
                     totalmarks -= int(obj.negative_marks)
+                    report["Marks Obtained"] = -int(obj.negative_marks)
                     flag = "False"
             else:
                 nonattempted += 1
@@ -436,6 +455,8 @@ def quiz_result(userid,quizid):
                     dificultydict[obj.subject_tag][obj.dificulty_tag]["incorrect"]+=1
                 else:
                     dificultydict[obj.subject_tag][obj.dificulty_tag]["not_attempted"]+=1
+        quesdic[-1]["report"] = report
+
         subjecttag = obj.subject_tag
         try:
             if dic["subject: " + subjecttag]:
@@ -1866,7 +1887,9 @@ class get_student_report(GenericAPIView):
             user = User.objects.get(username=username)
         except:
             return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        quiz_response = QuizResponse.objects.filter(quiz=quizid, user=user)[0]
+        quiz_response = QuizResponse.objects.filter(quiz=quizid, user=user).first()
+        if quiz_response is None:
+            return Response({"message": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
         user_data = QuizResponseSerializer(quiz_response)
         user_data = user_data.data
         user_data['responses'] = quiz_response.responses
